@@ -15,7 +15,6 @@ modified version of [this](https://github.com/nickvl/aop-logging).
 ```java  
 @Configuration  
 @EnableAspectJAutoProxy(proxyTargetClass = true)  
-@Slf4j  
 public class AopLogConfiguration {  
   
     private static final boolean SKIP_NULL_FIELDS = true;  
