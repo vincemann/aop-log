@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 /**
  * Tests {@link InvocationDescriptor} with log annotated methods and class.
  */
-@Log(level = Severity.INFO)
+@Log
 @LogException
 public class InvocationDescriptorClassTestCase {
 
@@ -68,6 +68,7 @@ public class InvocationDescriptorClassTestCase {
     @LogException(value = {}, trace = @LogException.Exc(Exception.class))
     public void testGetExceptionAnnotationByMethodPriority() throws Exception {
         InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
+        //read from class annotation
         assertSame(Severity.DEBUG, descriptor.getSeverity());
         LogException exceptionAnnotation = descriptor.getExceptionAnnotation();
         assertEquals(0, exceptionAnnotation.value().length);

@@ -56,8 +56,8 @@ public class InvocationDescriptorTestCase {
     @Log(/*logPoint=LogPoint.IN*/)
     public void testGetBeforeSeverity() throws Exception {
         InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
-//        assertSame(Severity.DEBUG, descriptor.getBeforeSeverity());
-        assertNull(descriptor.getSeverity());
+        assertSame(Severity.DEBUG, descriptor.getSeverity());
+//        assertNull(descriptor.getSeverity());
         assertNull(descriptor.getExceptionAnnotation());
     }
 

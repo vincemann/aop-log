@@ -31,17 +31,16 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <!--            <version>${version.spring}</version>-->
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <!--            <version>${version.spring}</version>-->
+
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <!--            <version>${version.spring}</version>-->
+
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -52,7 +51,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <!--            <version>${version.spring}</version>-->
+
         </dependency>
 
         <dependency>

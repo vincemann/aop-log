@@ -1,5 +1,6 @@
 package com.github.vincemann.aoplog;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
@@ -21,32 +22,36 @@ public class HierarchicalAnnotationParser implements AnnotationParser {
 
     @Override
     public <A extends Annotation> A fromMethod(Method method, Class<A> type) {
-        return AnnotationUtils.findAnnotation(method,type);
+        return AnnotationUtils.findAnnotation(method, type);
     }
 
     @Override
-    public <A extends Annotation> ClassAnnotationInfo<A> fromClass(Class<?> clazz, Class<A> type) {
-        A annotation = AnnotationUtils.findAnnotation(clazz, type);
-        if (annotation==null){
-            return null;
-        }
-        Class<?> annotationDeclaringClass = AnnotationUtils.findAnnotationDeclaringClass(type, clazz);
-        Assert.notNull(annotationDeclaringClass);
-        return ClassAnnotationInfo.<A>builder()
-                .annotation(annotation)
-                .targetClass(annotationDeclaringClass)
-                .build();
+    public <A extends Annotation> A fromClass(Class<?> clazz, Class<A> type) {
+        return AnnotationUtils.findAnnotation(clazz, type);
+//        if (annotation==null){
+//            return null;
+//        }
+//        //does not work in all cases
+////        Class<?> annotationDeclaringClass = AnnotationUtils.findAnnotationDeclaringClass(type, clazz);
+////        Assert.notNull(annotationDeclaringClass);
+//        return annotation;
     }
 
     @Override
     public <A extends Annotation> AnnotationInfo<A> fromMethodOrClass(Method method, Class<A> type) {
         A fromMethod = fromMethod(method, type);
-        if (fromMethod==null){
-            ClassAnnotationInfo<A> fromClass = fromClass(method.getDeclaringClass(), type);
-            return fromClass==null ? null
-                    : new AnnotationInfo<>(fromClass);
-        }else {
-            return AnnotationInfo.<A>Builder().annotation(fromMethod).classLevel(false).build();
+        if (fromMethod == null) {
+            A fromClass = fromClass(method.getDeclaringClass(), type);
+            return fromClass == null ? null
+                    : AnnotationInfo.<A>builder()
+                        .classLevel(true)
+                        .annotation(fromClass)
+                        .build();
+        } else {
+            return AnnotationInfo.<A>builder()
+                    .annotation(fromMethod)
+                    .classLevel(false)
+                    .build();
         }
     }
 

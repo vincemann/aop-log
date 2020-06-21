@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 public class AnnotationLoggerBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
     private static final String INTERNAL_AOPLOGGER_NAME = "net.ng.xspring.core.log.aop.internal.aoplogger.name";
-    private static final String CONFIG = "com.gihub.vincemann.springrapid.log.nickvl/config";
+    private static final String CONFIG = "com.gihub.vincemann.aoplog/config";
     private static final String TO_STRING = "to-string";
     private static final String REFLECTION_TO_STRING = "reflection-to-string";
 

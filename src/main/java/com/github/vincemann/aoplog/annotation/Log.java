@@ -18,6 +18,11 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD,ElementType.TYPE})
 public @interface Log {
 
+    /**
+     * Only works when Annotation is on class.
+     */
+    LogConfig config() default @LogConfig;
+
     @AliasFor("level")
     Severity value() default Severity.DEBUG;
 

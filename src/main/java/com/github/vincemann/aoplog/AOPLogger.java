@@ -6,6 +6,7 @@ import com.github.vincemann.aoplog.annotation.LogException;
 import com.github.vincemann.aoplog.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 @Aspect
+@NoArgsConstructor
 public class AOPLogger implements InitializingBean {
 
     // private static final Log LOGGER = LogFactory.getLog(AOPLogger.class);
@@ -189,7 +191,7 @@ public class AOPLogger implements InitializingBean {
             return null;
         }
         if (loggingInfo.isClassLevel()){
-            return loggingInfo.getTargetClass().getDeclaredAnnotation(LogConfig.class);
+            return loggingInfo.getAnnotation().config();
         }else {
             return null;
         }
