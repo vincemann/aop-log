@@ -41,7 +41,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     private static final String[] X_PARAM_NAMES = new String[]{"xFirst", "xSecond"};
     private static final Object[] PARAM_VALUE = new Object[]{"@1", "@2"};
     @Autowired
-    private AOPLogger aspect;
+    private ProxyAwareAopLogger aspect;
 
     @Resource(name = "generalBaz")
     private BazService bazService;

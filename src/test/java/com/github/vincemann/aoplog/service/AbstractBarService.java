@@ -7,8 +7,8 @@ package com.github.vincemann.aoplog.service;
 
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.annotation.Log;
-import com.github.vincemann.aoplog.annotation.Lp;
+import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.Lp;
 
 /**
  * Base implementation of {@link BarService}.

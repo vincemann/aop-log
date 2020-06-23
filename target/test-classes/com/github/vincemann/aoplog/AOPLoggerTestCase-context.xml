@@ -13,6 +13,6 @@
 
     <aop:aspectj-autoproxy/>
 
-    <bean class="com.github.vincemann.aoplog.AOPLogger"/>
+    <bean class="com.github.vincemann.aoplog.ProxyAwareAopLogger"/>
 
 </beans>

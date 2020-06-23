@@ -5,9 +5,8 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.annotation.Log;
-import com.github.vincemann.aoplog.annotation.LogException;
-import com.github.vincemann.aoplog.annotation.*;
+import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogException;
 import org.springframework.lang.Nullable;
 
 /**
@@ -36,21 +35,20 @@ final class InvocationDescriptor {
      * Builder.
      */
     public static final class Builder {
-        private AnnotationInfo<Log> loggingInfo;
+        private AnnotationInfo<Log> logInfo;
         private AnnotationInfo<LogException> logExceptionInfo;
         private Severity severity;
         private Severity classSeverity;
 
-        public Builder(@Nullable AnnotationInfo<Log> loggingInfo, @Nullable AnnotationInfo<LogException> logExceptionInfo) {
-            this.loggingInfo = loggingInfo;
+        public Builder(@Nullable AnnotationInfo<Log> logInfo, @Nullable AnnotationInfo<LogException> logExceptionInfo) {
+            this.logInfo = logInfo;
             this.logExceptionInfo = logExceptionInfo;
         }
 
         public InvocationDescriptor build() {
             LogException logException = logExceptionInfo== null ? null : logExceptionInfo.getAnnotation();
-            if (loggingInfo!=null){
-                Log annotation = loggingInfo.getAnnotation();
-                setSeverity(annotation.level(),!loggingInfo.isClassLevel());
+            if (logInfo !=null){
+                setSeverity(logInfo.getAnnotation().level(),!logInfo.isClassLevel());
             }
 
             if (severity!=null) {

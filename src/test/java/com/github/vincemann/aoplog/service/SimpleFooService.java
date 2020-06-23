@@ -6,10 +6,9 @@
 package com.github.vincemann.aoplog.service;
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.annotation.Log;
-import com.github.vincemann.aoplog.annotation.LogException;
-import com.github.vincemann.aoplog.annotation.Lp;
-import com.github.vincemann.aoplog.annotation.*;
+import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogException;
+import com.github.vincemann.aoplog.api.Lp;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

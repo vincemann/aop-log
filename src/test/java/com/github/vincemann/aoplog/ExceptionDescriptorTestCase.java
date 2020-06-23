@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.annotation.LogException;
+import com.github.vincemann.aoplog.api.LogException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;

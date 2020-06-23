@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog.service;
 
-import com.github.vincemann.aoplog.annotation.Lp;
+import com.github.vincemann.aoplog.api.Lp;
 
 import java.io.IOException;
 

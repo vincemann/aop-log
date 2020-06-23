@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.annotation.Lp;
+import com.github.vincemann.aoplog.api.Lp;
 import org.junit.Test;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 

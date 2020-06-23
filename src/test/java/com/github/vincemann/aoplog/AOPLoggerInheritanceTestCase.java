@@ -34,7 +34,7 @@ public class AOPLoggerInheritanceTestCase {
     private static final String[] E_PARAM_NAMES = new String[]{"eFirst", "eSecond"};
     private static final Object[] PARAM_VALUE = new Object[]{"@1", "@2"};
     @Autowired
-    private AOPLogger aspect;
+    private ProxyAwareAopLogger aspect;
 
     @Autowired
     private BarService barService;

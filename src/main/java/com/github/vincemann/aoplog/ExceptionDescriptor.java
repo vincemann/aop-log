@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.annotation.LogException;
+import com.github.vincemann.aoplog.api.LogException;
 
 import java.util.Collection;
 import java.util.HashMap;

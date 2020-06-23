@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class AOPLoggerTestCase {
 
     @Autowired
-    private AOPLogger aspect;
+    private ProxyAwareAopLogger aspect;
 
     @Autowired
     private FooService fooService;

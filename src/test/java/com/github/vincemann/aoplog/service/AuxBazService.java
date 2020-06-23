@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog.service;
 
 
-import com.github.vincemann.aoplog.annotation.Log;
+import com.github.vincemann.aoplog.api.Log;
 
 /**
  * Implements {@link BazService}.

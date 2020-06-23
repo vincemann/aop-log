@@ -5,8 +5,8 @@
 
 package com.github.vincemann.aoplog.service;
 
-import com.github.vincemann.aoplog.annotation.Log;
-import com.github.vincemann.aoplog.annotation.Lp;
+import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.Lp;
 
 /**
  * Implements {@link BarService}. Log level is lower than in {@link AbstractBarService}, {@link BarService}.

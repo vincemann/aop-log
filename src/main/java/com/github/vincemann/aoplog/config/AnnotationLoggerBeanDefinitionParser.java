@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog.config;
 
-import com.github.vincemann.aoplog.AOPLogger;
+import com.github.vincemann.aoplog.ProxyAwareAopLogger;
 import com.github.vincemann.aoplog.SimpleLogAdapter;
 import com.github.vincemann.aoplog.UniversalLogAdapter;
 import org.springframework.aop.config.AopNamespaceUtils;
@@ -44,7 +44,7 @@ public class AnnotationLoggerBeanDefinitionParser extends AbstractBeanDefinition
     }
 
     private AbstractBeanDefinition parseLoggerElement(Element element) {
-        BeanDefinitionBuilder factory = BeanDefinitionBuilder.rootBeanDefinition(AOPLogger.class);
+        BeanDefinitionBuilder factory = BeanDefinitionBuilder.rootBeanDefinition(ProxyAwareAopLogger.class);
         factory.addPropertyValue("logAdapter", parseLogAdapter(element));
         return factory.getBeanDefinition();
     }

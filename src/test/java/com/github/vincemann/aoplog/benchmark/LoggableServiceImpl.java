@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog.benchmark;
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.annotation.Lp;
+import com.github.vincemann.aoplog.api.Lp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +31,7 @@ public class LoggableServiceImpl implements LoggableService {
         return res;
     }
 
-    @com.github.vincemann.aoplog.annotation.Log(Severity.TRACE)
+    @com.github.vincemann.aoplog.api.Log(Severity.TRACE)
     @Override
     public int aopLogMethod(String a, @Lp int b) {
         return b + 1;
