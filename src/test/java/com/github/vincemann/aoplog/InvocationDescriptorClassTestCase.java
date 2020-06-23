@@ -6,6 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogAll;
 import com.github.vincemann.aoplog.api.LogException;
 import org.junit.After;
 import org.junit.Rule;
@@ -21,7 +22,7 @@ import static org.junit.Assert.*;
 /**
  * Tests {@link InvocationDescriptor} with log annotated methods and class.
  */
-@Log
+@LogAll
 @LogException
 public class InvocationDescriptorClassTestCase {
 

@@ -23,12 +23,12 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     private int INDENTATION_LENGTH = 32;
     private String INDENTATION_CHAR = " ";
 
-    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames) {
-        super(skipNullFields, cropThreshold, excludeFieldNames);
+    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
+        super(skipNullFields, cropThreshold, excludeFieldNames, forceReflection);
     }
 
-    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames) {
-        super(skipNullFields, excludeFieldNames);
+    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection) {
+        super(skipNullFields, excludeFieldNames, forceReflection);
     }
 
     @Override

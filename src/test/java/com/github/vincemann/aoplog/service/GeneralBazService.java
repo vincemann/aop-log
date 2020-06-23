@@ -8,11 +8,12 @@ package com.github.vincemann.aoplog.service;
 
 import com.github.vincemann.aoplog.Severity;
 import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogAll;
 
 /**
  * Implements {@link BazService}.
  */
-@Log(Severity.INFO)
+@LogAll(config = @Log(Severity.INFO))
 public class GeneralBazService extends AbstractBazService {
 
     @Override

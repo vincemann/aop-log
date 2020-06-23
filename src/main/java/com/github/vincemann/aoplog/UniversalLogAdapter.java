@@ -20,6 +20,7 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
     private final Set<String> excludeFieldNames;
     private final int cropThreshold;
     private final boolean skipNullFields;
+    private final boolean forceReflection;
 
     /**
      * Constructor.
@@ -27,10 +28,12 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
      * @param skipNullFields use {@code true} to exclude fields which value is {@code null} from building the string
      * @param cropThreshold threshold value of processed elements count to stop building the string, applied only for multi-element structures
      * @param excludeFieldNames field names to exclude from building the string
+     * @param forceReflection always use reflections to build string, even if toString is available
      * @throws IllegalArgumentException if <code>cropThreshold </code> is negative
      */
-    public UniversalLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames) {
+    public UniversalLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
         this.skipNullFields = skipNullFields;
+        this.forceReflection = forceReflection;
         if (cropThreshold < 0) {
             throw new IllegalArgumentException("cropThreshold is negative: " + cropThreshold);
         }
@@ -40,12 +43,13 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
 
     /**
      * Constructor.
-     *
-     * @param skipNullFields use {@code true} to exclude fields which value is {@code null} from building the string
+     *  @param skipNullFields use {@code true} to exclude fields which value is {@code null} from building the string
      * @param excludeFieldNames field names to exclude from building the string
+     * @param forceReflection always use reflections to build string, even if toString is available
      */
-    public UniversalLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames) {
+    public UniversalLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection) {
         this.skipNullFields = skipNullFields;
+        this.forceReflection = forceReflection;
         this.cropThreshold = -1;
         this.excludeFieldNames = excludeFieldNames == null ? null : new HashSet<String>(excludeFieldNames);
     }
@@ -56,7 +60,7 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
             return ToString.getNull();
         }
         Class<?> clazz = value.getClass();
-        if (!(value instanceof Collection<?> || value instanceof Map<?, ?>) && ToStringDetector.INSTANCE.hasToString(clazz)) {
+        if (!(value instanceof Collection<?> || value instanceof Map<?, ?>) && ToStringDetector.INSTANCE.hasToString(clazz) && !forceReflection) {
             return value.toString();
         }
         ToString builder = cropThreshold == -1 ? ToString.createDefault() : ToString.createCropInstance(cropThreshold);

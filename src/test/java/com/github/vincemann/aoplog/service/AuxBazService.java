@@ -7,11 +7,12 @@ package com.github.vincemann.aoplog.service;
 
 
 import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogAll;
 
 /**
  * Implements {@link BazService}.
  */
-@Log
+@LogAll
 public class AuxBazService extends AbstractBazService {
 
     @Override
