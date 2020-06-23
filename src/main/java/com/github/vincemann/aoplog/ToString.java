@@ -10,6 +10,7 @@ import java.util.*;
 
 /**
  * String representation builder of any class instance.
+ * Has Cycle Detection.
  */
 final class ToString {
     private static final String NULL_VALUE = "NIL";

@@ -5,6 +5,8 @@
 
 package com.github.vincemann.aoplog;
 
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -60,7 +62,9 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
             return ToString.getNull();
         }
         Class<?> clazz = value.getClass();
-        if (!(value instanceof Collection<?> || value instanceof Map<?, ?>) && ToStringDetector.INSTANCE.hasToString(clazz) && !forceReflection) {
+        if (!(value instanceof Collection<?> || value instanceof Map<?, ?>)
+                && ToStringDetector.INSTANCE.hasToString(clazz)
+                && !forceReflection) {
             return value.toString();
         }
         ToString builder = cropThreshold == -1 ? ToString.createDefault() : ToString.createCropInstance(cropThreshold);
@@ -73,10 +77,7 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
         } else if (clazz.isArray()) {
             builder.addArray(value);
         } else {
-            while (clazz != Object.class) {
-                appendFieldsIn(builder, value, clazz.getDeclaredFields());
-                clazz = clazz.getSuperclass();
-            }
+            appendFieldsIn(builder, value, clazz);
         }
         builder.addEnd(value);
         return builder.toString();
@@ -88,12 +89,9 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
                 || excludeFieldNames != null && excludeFieldNames.contains(field.getName());
     }
 
-    private void appendFieldsIn(ToString builder, Object object, Field[] fields) {
-        if (fields.length == 0) {
-            return;
-        }
-        AccessibleObject.setAccessible(fields, true);
-        for (Field field : fields) {
+    private void appendFieldsIn(ToString builder, Object object, Class<?> clazz) {
+        ReflectionUtils.doWithFields(clazz,field -> {
+            ReflectionUtils.makeAccessible(field);
             if (!reject(field)) {
                 String fieldName = field.getName();
                 Object fieldValue;
@@ -107,7 +105,7 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
                     builder.addField(fieldName, fieldValue);
                 }
             }
-        }
+        });
     }
 
 }

@@ -7,15 +7,6 @@ import org.springframework.util.Assert;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-///**
-// * Resolves AOP and CGLIB Proxies.
-// * {@link com.github.vincemann.aoplog.annotation.Logging} can be placed on methods and classes and will be searched for in that order.* Scans interfaces in hierarchical order for JDK Runtime Proxies to find {@link com.github.vincemann.aoplog.annotation.Logging}
-// * and uses latest annotation -> lowest in hierarchy.
-// * Also scans interfaces like that, when it cant find annotation on target method and class via getDeclaredAnnotation in that order for each hierarchy level.
-// * -> search order for non JDK Proxy: target-method, target-class, class hierarchy+1-method, class hierarchy+1-class, ... ,  class hierarchyEnd-method, class hierarchyEnd-class, firstInterface-hierarchy-1-method, firstInterface-hierarchy-1-class, ...
-// * -> search order for JDK Proxy: firstInterface-hierarchy-1-method, firstInterface-hierarchy-1-class, ...
-// *
-// **/
 //todo cache all
 public class HierarchicalAnnotationParser implements AnnotationParser {
 
