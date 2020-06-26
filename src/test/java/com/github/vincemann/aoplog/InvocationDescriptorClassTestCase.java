@@ -26,53 +26,49 @@ import static org.junit.Assert.*;
 @LogException
 public class InvocationDescriptorClassTestCase {
 
-    private Method currMethod;
-    private LogInteraction methodLog;
-    private LogAllInteractions classLog;
-    private AnnotationInfo<LogException> logExceptionAnnotationInfo;
-    private AnnotationParser annotationParser = new HierarchicalAnnotationParser();
+    Method currMethod;
+    InvocationDescriptor currDescriptor;
+    AnnotationParser annotationParser = new HierarchicalAnnotationParser();
 
 
     @Rule
     public MethodRule watchman = new TestWatchman() {
         public void starting(FrameworkMethod method) {
             currMethod = method.getMethod();
-            methodLog = annotationParser.fromMethod(currMethod, LogInteraction.class);
-            classLog = annotationParser.fromClass(getClass(), LogAllInteractions.class);
-            logExceptionAnnotationInfo = annotationParser.fromMethodOrClass(currMethod, LogException.class);
+            LogInteraction methodLog = annotationParser.fromMethod(currMethod, LogInteraction.class);
+            LogAllInteractions classLog = annotationParser.fromClass(getClass(), LogAllInteractions.class);
+            AnnotationInfo<LogException> logException = annotationParser.fromMethodOrClass(currMethod, LogException.class);
+            currDescriptor = new InvocationDescriptor.Builder(methodLog,classLog,logException).build();
         }
     };
 
     @After
     public void tearDown() throws Exception {
         currMethod = null;
-        logExceptionAnnotationInfo = null;
-        methodLog = null;
+//        logExceptionAnnotationInfo = null;
+//        methodLog = null;
     }
 
     @Test
     public void testNoAnnotations() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(methodLog,logExceptionAnnotationInfo).build();
-        assertSame(Severity.DEBUG, descriptor.getSeverity());
-        assertNotNull(descriptor.getExceptionAnnotation());
+        assertSame(Severity.DEBUG, currDescriptor.getSeverity());
+        assertNotNull(currDescriptor.getExceptionAnnotation());
     }
 
     @Test
     @LogInteraction(Severity.TRACE)
     public void testGetSeverityByMethodPriority() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(methodLog,logExceptionAnnotationInfo).build();
-        assertSame(Severity.TRACE, descriptor.getSeverity());
-        assertNotNull(descriptor.getExceptionAnnotation());
+        assertSame(Severity.TRACE, currDescriptor.getSeverity());
+        assertNotNull(currDescriptor.getExceptionAnnotation());
     }
 
 
     @Test
     @LogException(value = {}, trace = @LogException.Exc(Exception.class))
     public void testGetExceptionAnnotationByMethodPriority() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(methodLog,logExceptionAnnotationInfo).build();
         //read from class annotation
-        assertSame(Severity.DEBUG, descriptor.getSeverity());
-        LogException exceptionAnnotation = descriptor.getExceptionAnnotation();
+        assertSame(Severity.DEBUG, currDescriptor.getSeverity());
+        LogException exceptionAnnotation = currDescriptor.getExceptionAnnotation().getAnnotation();
         assertEquals(0, exceptionAnnotation.value().length);
         assertEquals(1, exceptionAnnotation.trace().length);
         assertArrayEquals(exceptionAnnotation.trace()[0].value(), new Object[]{Exception.class});

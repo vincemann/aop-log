@@ -11,7 +11,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.BitSet;
 
-import static com.github.vincemann.aoplog.TestSupportUtility.createArgumentDescriptor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

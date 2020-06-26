@@ -5,6 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.api.LogAllInteractions;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
 import org.junit.*;
@@ -21,43 +22,42 @@ import static org.junit.Assert.*;
  */
 public class InvocationDescriptorTestCase {
 
-    private Method currMethod;
-    private AnnotationInfo<LogInteraction> loggingAnnotationInfo;
-    private AnnotationInfo<LogException> logExceptionAnnotationInfo;
-    private AnnotationParser annotationParser = new HierarchicalAnnotationParser();
+    Method currMethod;
+    InvocationDescriptor currDescriptor;
+    AnnotationParser annotationParser = new HierarchicalAnnotationParser();
 
 
     @Rule
     public MethodRule watchman = new TestWatchman() {
         public void starting(FrameworkMethod method) {
             currMethod = method.getMethod();
-            loggingAnnotationInfo = annotationParser.fromMethodOrClass(currMethod, LogInteraction.class);
-            logExceptionAnnotationInfo = annotationParser.fromMethodOrClass(currMethod, LogException.class);
+            LogInteraction methodLog = annotationParser.fromMethod(currMethod, LogInteraction.class);
+            LogAllInteractions classLog = annotationParser.fromClass(getClass(), LogAllInteractions.class);
+            AnnotationInfo<LogException> logException = annotationParser.fromMethodOrClass(currMethod, LogException.class);
+            currDescriptor = new InvocationDescriptor.Builder(methodLog,classLog,logException).build();
         }
     };
 
     @After
     public void tearDown() throws Exception {
         currMethod = null;
-        logExceptionAnnotationInfo = null;
-        loggingAnnotationInfo = null;
+//        loggingAnnotationInfo = null;
+//        logExceptionAnnotationInfo = null;
     }
 
     @Test
     public void testNoAnnotations() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
 //        assertNull(descriptor.getBeforeSeverity());
-        assertNull(descriptor.getSeverity());
-        assertNull(descriptor.getExceptionAnnotation());
+        assertNull(currDescriptor.getSeverity());
+        assertNull(currDescriptor.getExceptionAnnotation());
     }
 
     @Test
     @LogInteraction(/*logPoint=LogPoint.IN*/)
     public void testGetBeforeSeverity() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
-        assertSame(Severity.DEBUG, descriptor.getSeverity());
+        assertSame(Severity.DEBUG, currDescriptor.getSeverity());
 //        assertNull(descriptor.getSeverity());
-        assertNull(descriptor.getExceptionAnnotation());
+        assertNull(currDescriptor.getExceptionAnnotation());
     }
 
 //    @Test
@@ -73,10 +73,9 @@ public class InvocationDescriptorTestCase {
     @Test
     @LogInteraction(/*logPoint=LogPoint.OUT*/)
     public void testGetAfterSeverity() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
-        assertSame(Severity.DEBUG, descriptor.getSeverity());
+        assertSame(Severity.DEBUG, currDescriptor.getSeverity());
 //        assertNull(descriptor.getBeforeSeverity());
-        assertNull(descriptor.getExceptionAnnotation());
+        assertNull(currDescriptor.getExceptionAnnotation());
     }
 
 //    @Test
@@ -92,10 +91,9 @@ public class InvocationDescriptorTestCase {
     @Test
     @LogInteraction
     public void testGetSeverity() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
 //        assertSame(Severity.DEBUG, descriptor.getBeforeSeverity());
-        assertSame(Severity.DEBUG, descriptor.getSeverity());
-        assertNull(descriptor.getExceptionAnnotation());
+        assertSame(Severity.DEBUG, currDescriptor.getSeverity());
+        assertNull(currDescriptor.getExceptionAnnotation());
     }
 
 //    @Test
@@ -113,19 +111,17 @@ public class InvocationDescriptorTestCase {
     @Test
     @LogException
     public void testGetExceptionAnnotation() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
 //        assertNull(descriptor.getBeforeSeverity());
-        assertNull(descriptor.getSeverity());
-        assertNotNull(descriptor.getExceptionAnnotation());
+        assertNull(currDescriptor.getSeverity());
+        assertNotNull(currDescriptor.getExceptionAnnotation());
     }
 
     @Test
     @LogInteraction(Severity.INFO)
     @LogException
     public void testGetAll() throws Exception {
-        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
 //        assertSame(Severity.INFO, descriptor.getBeforeSeverity());
-        assertSame(Severity.INFO, descriptor.getSeverity());
-        assertNotNull(descriptor.getExceptionAnnotation());
+        assertSame(Severity.INFO, currDescriptor.getSeverity());
+        assertNotNull(currDescriptor.getExceptionAnnotation());
     }
 }
