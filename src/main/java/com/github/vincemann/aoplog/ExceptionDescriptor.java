@@ -34,20 +34,20 @@ final class ExceptionDescriptor {
      * Builder.
      */
     public static final class Builder {
-        private final LogException exceptionAnnotation;
+        private final AnnotationInfo<LogException> exceptionAnnotationInfo;
         private final Map<Class<? extends Exception>, ExceptionSeverity> map = new HashMap<Class<? extends Exception>, ExceptionSeverity>();
 
-        public Builder(LogException exceptionAnnotation) {
-            this.exceptionAnnotation = exceptionAnnotation;
+        public Builder(AnnotationInfo<LogException> exceptionAnnotationInfo) {
+            this.exceptionAnnotationInfo = exceptionAnnotationInfo;
         }
 
         public ExceptionDescriptor build() {
-            setSeverity(exceptionAnnotation.fatal(), Severity.FATAL);
-            setSeverity(exceptionAnnotation.value(), Severity.ERROR);
-            setSeverity(exceptionAnnotation.warn(), Severity.WARN);
-            setSeverity(exceptionAnnotation.info(), Severity.INFO);
-            setSeverity(exceptionAnnotation.debug(), Severity.DEBUG);
-            setSeverity(exceptionAnnotation.trace(), Severity.TRACE);
+            setSeverity(exceptionAnnotationInfo.getAnnotation().fatal(), Severity.FATAL);
+            setSeverity(exceptionAnnotationInfo.getAnnotation().value(), Severity.ERROR);
+            setSeverity(exceptionAnnotationInfo.getAnnotation().warn(), Severity.WARN);
+            setSeverity(exceptionAnnotationInfo.getAnnotation().info(), Severity.INFO);
+            setSeverity(exceptionAnnotationInfo.getAnnotation().debug(), Severity.DEBUG);
+            setSeverity(exceptionAnnotationInfo.getAnnotation().trace(), Severity.TRACE);
             return new ExceptionDescriptor(map);
         }
 

@@ -7,7 +7,7 @@ package com.github.vincemann.aoplog.service;
 
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.Lp;
 
 /**
@@ -15,19 +15,19 @@ import com.github.vincemann.aoplog.api.Lp;
  */
 public abstract class AbstractBarService implements BarService {
 
-    @Log(Severity.INFO)
+    @LogInteraction(Severity.INFO)
     @Override
     public void inAbstract(String aFirst, String aSecond) {
         // do not override
     }
 
-    @Log(Severity.INFO)
+    @LogInteraction(Severity.INFO)
     @Override
     public void overridden(@Lp String aFirst, String aSecond) {
         // should be overridden
     }
 
-    @Log(Severity.INFO)
+    @LogInteraction(Severity.INFO)
     @Override
     public void overriddenLogInAbstractOnly(String aFirst, String aSecond) {
         // should be overridden

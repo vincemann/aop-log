@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog.service;
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.api.Lp;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 @Service
 public class SimpleFooService implements FooService {
 
-   @Log(/*logPoint=LogPoint.IN*/)
+   @LogInteraction(/*logPoint=LogPoint.IN*/)
 //    @LogTrace
     @Override
     public void voidMethodZero() {
@@ -32,26 +32,26 @@ public class SimpleFooService implements FooService {
         return "stringMethodOne:" + first;
     }
 
-    @Log
+    @LogInteraction
     @Override
     public String stringMethodTwo(String first, @Lp String second) {
         return "stringMethodTwo:" + first + ":" + second;
     }
 
-    @Log
+    @LogInteraction
     @Override
     public String stringMethodThree(String first, String second, String third) {
         return "stringMethodThree:" + first + ":" + second + ":" + third;
     }
 
-    @Log(Severity.TRACE)
+    @LogInteraction(Severity.TRACE)
     @LogException
     @Override
     public String stringMethodTwoVarargs(String first, @Lp String... second) {
         return "stringMethodTwoVarargs:" + first + ":" + Arrays.toString(second);
     }
 
-    @Log
+    @LogInteraction
     @LogException(value = {@LogException.Exc(value = Exception.class, stacktrace = true)}, warn = {@LogException.Exc({IllegalArgumentException.class, IOException.class})})
     @Override
     public void voidExcMethodZero() throws IOException {

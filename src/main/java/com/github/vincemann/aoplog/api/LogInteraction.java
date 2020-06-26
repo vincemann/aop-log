@@ -16,7 +16,7 @@ import java.lang.annotation.*;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface Log {
+public @interface LogInteraction {
 
     @AliasFor("level")
     Severity value() default Severity.DEBUG;

@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog.config;
 
-import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogInteraction;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class FooComponent {
 
-    @Log()
+    @LogInteraction()
     void voidMethodZero() {
         // nothing to do
     }
 
-    @Log()
+    @LogInteraction()
     public IntHolder intMethodZero() {
         return new IntHolder();
     }

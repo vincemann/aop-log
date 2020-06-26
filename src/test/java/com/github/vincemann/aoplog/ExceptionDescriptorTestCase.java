@@ -24,13 +24,19 @@ import static org.junit.Assert.assertTrue;
  */
 public class ExceptionDescriptorTestCase {
 
-    private LogException currLogException;
+    private ExceptionDescriptor currDescriptor;
 
     @Rule
     public MethodRule watchman = new TestWatchman() {
         public void starting(FrameworkMethod method) {
             Method currMethod = method.getMethod();
-            currLogException = currMethod.getAnnotation(LogException.class);
+            LogException logException = currMethod.getAnnotation(LogException.class);
+            currDescriptor = new ExceptionDescriptor.Builder(
+                    AnnotationInfo.<LogException>builder()
+                            .annotation(logException)
+                            .classLevel(false)
+                            .build())
+                    .build();
         }
     };
 
@@ -42,11 +48,10 @@ public class ExceptionDescriptorTestCase {
     @Test
     @LogException
     public void testDefaultAnnotation() throws Exception {
-        ExceptionDescriptor descriptor = new ExceptionDescriptor.Builder(currLogException).build();
-        assertCollectionConsistOf(descriptor.getDefinedExceptions(), Exception.class);
+        assertCollectionConsistOf(currDescriptor.getDefinedExceptions(), Exception.class);
 
-        assertNull(descriptor.getExceptionSeverity(IllegalArgumentException.class));
-        assertReflectionEquals(ExceptionSeverity.create(Severity.ERROR, true), descriptor.getExceptionSeverity(Exception.class));
+        assertNull(currDescriptor.getExceptionSeverity(IllegalArgumentException.class));
+        assertReflectionEquals(ExceptionSeverity.create(Severity.ERROR, true), currDescriptor.getExceptionSeverity(Exception.class));
     }
 
     @Test
@@ -54,23 +59,21 @@ public class ExceptionDescriptorTestCase {
             info = {@LogException.Exc(NoMoneyException.class), @LogException.Exc(AccountBlockedException.class)},
             warn = {@LogException.Exc(AccountException.class), @LogException.Exc(value = IllegalArgumentException.class, stacktrace = true)})
     public void testCustomAnnotation() throws Exception {
-        ExceptionDescriptor descriptor = new ExceptionDescriptor.Builder(currLogException).build();
-        assertCollectionConsistOf(descriptor.getDefinedExceptions(),
+        assertCollectionConsistOf(currDescriptor.getDefinedExceptions(),
                 RuntimeException.class, NoMoneyException.class, AccountBlockedException.class, AccountException.class, IllegalArgumentException.class);
 
-        assertNull(descriptor.getExceptionSeverity(Exception.class));
-        assertReflectionEquals(ExceptionSeverity.create(Severity.ERROR, true), descriptor.getExceptionSeverity(RuntimeException.class));
-        assertReflectionEquals(ExceptionSeverity.create(Severity.INFO, false), descriptor.getExceptionSeverity(NoMoneyException.class));
-        assertReflectionEquals(ExceptionSeverity.create(Severity.INFO, false), descriptor.getExceptionSeverity(AccountBlockedException.class));
-        assertReflectionEquals(ExceptionSeverity.create(Severity.WARN, false), descriptor.getExceptionSeverity(AccountException.class));
-        assertReflectionEquals(ExceptionSeverity.create(Severity.WARN, true), descriptor.getExceptionSeverity(IllegalArgumentException.class));
+        assertNull(currDescriptor.getExceptionSeverity(Exception.class));
+        assertReflectionEquals(ExceptionSeverity.create(Severity.ERROR, true), currDescriptor.getExceptionSeverity(RuntimeException.class));
+        assertReflectionEquals(ExceptionSeverity.create(Severity.INFO, false), currDescriptor.getExceptionSeverity(NoMoneyException.class));
+        assertReflectionEquals(ExceptionSeverity.create(Severity.INFO, false), currDescriptor.getExceptionSeverity(AccountBlockedException.class));
+        assertReflectionEquals(ExceptionSeverity.create(Severity.WARN, false), currDescriptor.getExceptionSeverity(AccountException.class));
+        assertReflectionEquals(ExceptionSeverity.create(Severity.WARN, true), currDescriptor.getExceptionSeverity(IllegalArgumentException.class));
     }
 
     @Test
     @LogException({})
     public void testEmptyAnnotation() throws Exception {
-        ExceptionDescriptor descriptor = new ExceptionDescriptor.Builder(currLogException).build();
-        assertTrue(descriptor.getDefinedExceptions().isEmpty());
+        assertTrue(currDescriptor.getDefinedExceptions().isEmpty());
     }
 
     private static class AccountException extends Exception {

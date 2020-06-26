@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog.service;
 
-import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.Lp;
 
 /**
@@ -18,13 +18,13 @@ public class ExtendedBarService extends AbstractBarService {
         // Log annotations in interface
     }
 
-    @Log
+    @LogInteraction
     @Override
     public void inExtended(String eFirst, String eSecond) {
         // Log annotation here only
     }
 
-    @Log
+    @LogInteraction
     @Override
     public void overridden(String eFirst, @Lp String eSecond) {
         // Log annotation altered

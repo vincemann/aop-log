@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.Log;
+import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
 import org.junit.*;
 import org.junit.rules.MethodRule;
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 public class InvocationDescriptorTestCase {
 
     private Method currMethod;
-    private AnnotationInfo<Log> loggingAnnotationInfo;
+    private AnnotationInfo<LogInteraction> loggingAnnotationInfo;
     private AnnotationInfo<LogException> logExceptionAnnotationInfo;
     private AnnotationParser annotationParser = new HierarchicalAnnotationParser();
 
@@ -31,7 +31,7 @@ public class InvocationDescriptorTestCase {
     public MethodRule watchman = new TestWatchman() {
         public void starting(FrameworkMethod method) {
             currMethod = method.getMethod();
-            loggingAnnotationInfo = annotationParser.fromMethodOrClass(currMethod, Log.class);
+            loggingAnnotationInfo = annotationParser.fromMethodOrClass(currMethod, LogInteraction.class);
             logExceptionAnnotationInfo = annotationParser.fromMethodOrClass(currMethod, LogException.class);
         }
     };
@@ -52,7 +52,7 @@ public class InvocationDescriptorTestCase {
     }
 
     @Test
-    @Log(/*logPoint=LogPoint.IN*/)
+    @LogInteraction(/*logPoint=LogPoint.IN*/)
     public void testGetBeforeSeverity() throws Exception {
         InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
         assertSame(Severity.DEBUG, descriptor.getSeverity());
@@ -71,7 +71,7 @@ public class InvocationDescriptorTestCase {
 //    }
 
     @Test
-    @Log(/*logPoint=LogPoint.OUT*/)
+    @LogInteraction(/*logPoint=LogPoint.OUT*/)
     public void testGetAfterSeverity() throws Exception {
         InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
         assertSame(Severity.DEBUG, descriptor.getSeverity());
@@ -90,7 +90,7 @@ public class InvocationDescriptorTestCase {
 //    }
 
     @Test
-    @Log
+    @LogInteraction
     public void testGetSeverity() throws Exception {
         InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
 //        assertSame(Severity.DEBUG, descriptor.getBeforeSeverity());
@@ -120,7 +120,7 @@ public class InvocationDescriptorTestCase {
     }
 
     @Test
-    @Log(Severity.INFO)
+    @LogInteraction(Severity.INFO)
     @LogException
     public void testGetAll() throws Exception {
         InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();

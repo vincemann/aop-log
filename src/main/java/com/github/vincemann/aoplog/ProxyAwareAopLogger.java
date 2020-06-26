@@ -1,9 +1,10 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.Log;
-import com.github.vincemann.aoplog.api.LogAll;
+import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.LogAllInteractions;
 import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.api.UltimateTargetClassAware;
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,9 +21,8 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -42,9 +42,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
     private final ExceptionResolver exceptionResolver = new ExceptionResolver();
     private final ConcurrentMap<Method, MethodDescriptor> cache = new ConcurrentHashMap<Method, MethodDescriptor>();
     private AnnotationParser annotationParser;
+    //I add this impl bc otherwise the ignoreGetters and ignoreSetters in @LogConfig, that is handled by this component, would be ignored,
+    // which would be unexpected behavior
+    private final List<MethodFilter> methodFilters = Lists.newArrayList(new LogConfigMethodFilter());
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(){
         logStrategies = new EnumMap<Severity, LogStrategy>(Severity.class);
         logStrategies.put(Severity.FATAL, new LogStrategy.FatalLogStrategy(logAdapter));
         logStrategies.put(Severity.ERROR, new LogStrategy.ErrorLogStrategy(logAdapter));
@@ -58,22 +61,36 @@ public class ProxyAwareAopLogger implements InitializingBean {
         this.logAdapter = log;
     }
 
-    public ProxyAwareAopLogger(AnnotationParser annotationParser) {
+    public ProxyAwareAopLogger(AnnotationParser annotationParser,MethodFilter... methodFilters) {
         this.annotationParser = annotationParser;
+        this.methodFilters.addAll(Lists.newArrayList(methodFilters));
     }
 
     @Around("this(com.github.vincemann.aoplog.api.InteractionLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
 
-        if (!loggedCall.methodWanted() || (!loggedCall.isLoggingOn() && !loggedCall.isExceptionLoggingOn())){
-            return loggedCall.proceed();
+        //method filter only restricts interaction logging, logException is independent subsystem
+        for (MethodFilter methodFilter : methodFilters) {
+            if (!methodFilter.wanted(loggedCall.methodDescriptor)){
+                return proceedWithExceptionLogging(loggedCall);
+            }
         }
 
-        if (loggedCall.isLoggingOn()) {
+        if (loggedCall.isInteractionLoggingOn()) {
             loggedCall.logInvocation();
         }
 
+        proceedWithExceptionLogging(loggedCall);
+
+
+        if (loggedCall.isInteractionLoggingOn()) {
+            loggedCall.logResult();
+        }
+        return loggedCall.getResult();
+    }
+
+    protected Object proceedWithExceptionLogging(LoggedMethodCall loggedCall) throws Throwable {
         if (!loggedCall.isExceptionLoggingOn()) {
             loggedCall.proceed();
         } else {
@@ -83,10 +100,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
                 loggedCall.logException(e);
                 throw e;
             }
-        }
-
-        if (loggedCall.isLoggingOn()) {
-            loggedCall.logResult();
         }
         return loggedCall.getResult();
     }
@@ -105,17 +118,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
         Method method;
         Class<?> targetClass;
         Object[] args;
-        Log methodLog;
-        LogAll classLog;
-        //stores NOT DISABLED @Log from method or @LogAll's config()
-        AnnotationInfo<Log> logInfo;
-        boolean foundAny;
+        LogInteraction methodLog;
+        LogAllInteractions classLog;
 
-
-        AnnotationInfo<LogException> logExceptionInfo;
         MethodDescriptor methodDescriptor;
         InvocationDescriptor invocationDescriptor;
         ArgumentDescriptor argumentDescriptor;
+        ExceptionDescriptor exceptionDescriptor;
         ProceedingJoinPoint joinPoint;
         org.apache.commons.logging.Log logger;
 
@@ -125,54 +134,15 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.joinPoint = joinPoint;
             this.method = extractMethod(joinPoint);
             this.targetClass = targetClass;
-            this.methodLog = annotationParser.fromMethod(method, Log.class);
-            this.classLog = annotationParser.fromClass(targetClass,LogAll.class);
-            this.foundAny = methodLog!=null || classLog!=null;
-            this.logInfo = evalLogInfo();
-            this.logExceptionInfo = annotationParser.fromMethodOrClass(method,LogException.class);
-            this.methodDescriptor = evalMethodDescriptor(method,logInfo,logExceptionInfo);
+            this.methodLog = annotationParser.fromMethod(method, LogInteraction.class);
+            this.classLog = annotationParser.fromClass(targetClass, LogAllInteractions.class);
+            AnnotationInfo<LogException>logExceptionInfo = annotationParser.fromMethodOrClass(method,LogException.class);
+            this.methodDescriptor = createMethodDescriptor(method,methodLog,classLog,logExceptionInfo);
+            this.exceptionDescriptor = createExceptionDescriptor(methodDescriptor, invocationDescriptor);
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
             this.args = joinPoint.getArgs();
             this.logger = logAdapter.getLog(targetClass);
             this.argumentDescriptor=evalArgumentDescriptor(methodDescriptor,method,args.length);
-        }
-
-        //finds non disabled @Log if any
-        //first search for method, if method disabled or not found : fall back on class level
-        private AnnotationInfo<Log> evalLogInfo(){
-            boolean methodFound = !(methodLog==null);
-            boolean classFound = !(classLog==null);
-            Boolean methodDisabled = methodLog==null? null :  methodLog.disabled();
-            Boolean classDisabled = classLog==null? null :  classLog.config().disabled();
-            if (methodFound){
-                if (methodDisabled){
-                    if (classFound && !classDisabled){
-                        return new AnnotationInfo<>(classLog.config(),true);
-                    }
-                }else {
-                    return new AnnotationInfo<>(methodLog,false);
-                }
-            }else {
-                if (classFound && !classDisabled){
-                    return new AnnotationInfo<>(classLog.config(),true);
-                }
-            }
-            return null;
-        }
-
-        boolean methodWanted(){
-            if (logInfo==null){
-                return false;
-            }
-            if (classLog!=null){
-                if (classLog.ignoreGetters() && (method.getName().startsWith("get") || method.getName().startsWith("is"))){
-                    return false;
-                }
-                if (classLog.ignoreSetters() && (method.getName().startsWith("set"))){
-                    return false;
-                }
-            }
-            return true;
         }
 
         Object proceed() throws Throwable {
@@ -181,7 +151,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         void logException(Exception e){
-            ExceptionDescriptor exceptionDescriptor = evalExceptionDescriptor(methodDescriptor, invocationDescriptor);
+
             Class<? extends Exception> resolved = exceptionResolver.resolve(exceptionDescriptor, e);
             if (resolved != null) {
                 ExceptionSeverity excSeverity = exceptionDescriptor.getExceptionSeverity(resolved);
@@ -202,6 +172,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         boolean isExceptionLoggingOn(){
+            AnnotationInfo<LogException> logExceptionInfo = invocationDescriptor.getExceptionAnnotation();
             if (logExceptionInfo==null){
                 return false;
             }
@@ -213,7 +184,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
                     (logExceptionInfo.getAnnotation().warn().length>0 && isLoggingOn(Severity.WARN));
         }
 
-        boolean isLoggingOn(){
+        boolean isInteractionLoggingOn(){
             return isLoggingOn(invocationDescriptor.getSeverity());
         }
 
@@ -224,12 +195,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
 
 
-    private MethodDescriptor evalMethodDescriptor(Method method, AnnotationInfo<Log> log,  @Nullable AnnotationInfo<LogException> logExceptionInfo) {
+    private MethodDescriptor createMethodDescriptor(Method method, LogInteraction methodLog, LogAllInteractions classLog, @Nullable AnnotationInfo<LogException> logExceptionInfo) {
         MethodDescriptor cached = cache.get(method);
         if (cached != null) {
             return cached;
         }
-        cached = new MethodDescriptor(new InvocationDescriptor.Builder(log,logExceptionInfo).build());
+        cached = new MethodDescriptor(new InvocationDescriptor.Builder(methodLog,classLog,logExceptionInfo).build(), method);
         MethodDescriptor prev = cache.putIfAbsent(method, cached);
         return prev == null ? cached : prev;
     }
@@ -243,7 +214,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         return argumentDescriptor;
     }
 
-    private ExceptionDescriptor evalExceptionDescriptor(MethodDescriptor descriptor, InvocationDescriptor invocationDescriptor) {
+    private ExceptionDescriptor createExceptionDescriptor(MethodDescriptor descriptor, InvocationDescriptor invocationDescriptor) {
         if (descriptor.getExceptionDescriptor() != null) {
             return descriptor.getExceptionDescriptor();
         }
