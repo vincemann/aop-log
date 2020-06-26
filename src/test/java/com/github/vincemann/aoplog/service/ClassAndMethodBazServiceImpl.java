@@ -13,11 +13,16 @@ import com.github.vincemann.aoplog.api.LogAllInteractions;
 /**
  * Implements {@link BazService}.
  */
-@LogAllInteractions(value = @LogInteraction(Severity.INFO))
-public class GeneralBazService extends AbstractBazService {
+@LogAllInteractions(@LogInteraction(Severity.INFO))
+public class ClassAndMethodBazServiceImpl extends AbstractBazService {
 
     @Override
     public void inImpl(String gFirst, String gSecond) {
         // nothing to do
+    }
+
+    @Override
+    public void inInterface(String iFirst, String iSecond) {
+
     }
 }

@@ -11,7 +11,7 @@
 
     <bean class="com.github.vincemann.aoplog.HierarchicalAnnotationParser"/>
     <bean class="com.github.vincemann.aoplog.ProxyAwareAopLogger"/>
-    <bean id="generalBaz" class="com.github.vincemann.aoplog.service.GeneralBazService"/>
-    <bean id="auxBaz" class="com.github.vincemann.aoplog.service.AuxBazService"/>
+    <bean id="generalBaz" class="com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl"/>
+    <bean id="auxBaz" class="com.github.vincemann.aoplog.service.ClassOnlyBazServiceImpl"/>
 
 </beans>

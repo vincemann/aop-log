@@ -12,10 +12,15 @@ import com.github.vincemann.aoplog.api.LogAllInteractions;
  * Implements {@link BazService}.
  */
 @LogAllInteractions
-public class AuxBazService extends AbstractBazService {
+public class ClassOnlyBazServiceImpl extends AbstractBazService {
 
     @Override
     public void inImpl(String xFirst, String xSecond) {
         // nothing to do
+    }
+
+    @Override
+    public void inInterface(String iFirst, String iSecond) {
+
     }
 }

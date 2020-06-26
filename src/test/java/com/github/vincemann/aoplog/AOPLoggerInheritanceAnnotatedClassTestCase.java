@@ -5,19 +5,16 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.service.AuxBazService;
+import com.github.vincemann.aoplog.service.ClassOnlyBazServiceImpl;
 import com.github.vincemann.aoplog.service.BazService;
-import com.github.vincemann.aoplog.service.GeneralBazService;
+import com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl;
 import org.apache.commons.logging.Log;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import static org.mockito.AdditionalMatchers.aryEq;
-import static org.mockito.Matchers.eq;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -25,15 +22,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 
-import static org.mockito.Matchers.eq;import static org.mockito.AdditionalMatchers.aryEq;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 
 /**
  * Tests check that two different classes of the same interface:
  * <ul>
- * <li>has independent log configurations,</li>
- * <li>a log annotation on a class does not apply for inherited methods</li>
+ * <li>can have independent log configurations,</li>
+ * <li>can shared a common log config as well (in interface and abstract class)</li>
+ * <li>can override and disable common log config</li>
+ * <li>method has always precedence</li>
  * </ul>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -48,10 +49,10 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     private ProxyAwareAopLogger aspect;
 
     @Resource(name = "generalBaz")
-    private BazService bazService;
+    private BazService methodAndClassBazService;
 
     @Resource(name = "auxBaz")
-    private BazService auxBazService;
+    private BazService classOnlyBazService;
 
     private LogAdapter logAdapter;
     private Log logger;
@@ -65,16 +66,16 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     }
 
     @Test
-    public void testGeneralBazInImpl() throws Exception {
-        expectSimpleBarServiceLogger(GeneralBazService.class);
+    public void testImpl_Overrides_AbstractClassConfig_WithOwnClassConfig() throws Exception {
+        expectServiceLoggerToBe(ClassAndMethodBazServiceImpl.class);
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
         Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
 
-        expectInfoLogging();
+        verifyInfoLogging();
 
         //EasyMock.replay(logAdapter, logger);
-        bazService.inImpl("@1", "@2");
+        methodAndClassBazService.inImpl("@1", "@2");
         assertParams(captured.getValue(), G_PARAM_NAMES, true, true);
         //EasyMock.verify(logAdapter, logger);
     }
@@ -82,21 +83,23 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     @Test
     public void testGeneralBazInAbstract() throws Exception {
         //EasyMock.replay(logAdapter, logger);
-        bazService.inAbstract("@1", "@2");
+        methodAndClassBazService.inAbstract("@1", "@2");
         //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
     public void testAuxBazInImpl() throws Exception {
-        expectSimpleBarServiceLogger(AuxBazService.class);
+        expectServiceLoggerToBe(ClassOnlyBazServiceImpl.class);
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
         Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
 
-        expectDebugLogging();
+
 
         //EasyMock.replay(logAdapter, logger);
-        auxBazService.inImpl("@1", "@2");
+        prepareDebugLogging();
+        classOnlyBazService.inImpl("@1", "@2");
+        verifyDebugLogging();
         assertParams(captured.getValue(), X_PARAM_NAMES, true, true);
         //EasyMock.verify(logAdapter, logger);
     }
@@ -104,27 +107,35 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     @Test
     public void testAuxBazInAbstract() throws Exception {
         //EasyMock.replay(logAdapter, logger);
-        auxBazService.inAbstract("@1", "@2");
+        classOnlyBazService.inAbstract("@1", "@2");
         //EasyMock.verify(logAdapter, logger);
     }
 
 
-    private void expectSimpleBarServiceLogger(Class<?> clazz) {
+    private void expectServiceLoggerToBe(Class<?> clazz) {
         Mockito.when(logAdapter.getLog(clazz)).thenReturn(logger);
     }
 
-    private void expectInfoLogging() {
+    private void prepareInfoLogging(){
         Mockito.when(logger.isInfoEnabled()).thenReturn(true);
-        logger.info(">");
-        Mockito.when(logger.isInfoEnabled()).thenReturn(true);
-        logger.info("<");
     }
 
-    private void expectDebugLogging() {
+    private void prepareDebugLogging(){
         Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-        logger.debug(">");
-        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-        logger.debug("<");
+    }
+    private void verifyInfoLogging() {
+        InOrder inOrder = inOrder(logger);
+        inOrder.verify(logger).info(eq(">"));
+        inOrder.verify(logger).info(eq("<"));
+    }
+
+    private void verifyDebugLogging() {
+        InOrder inOrder = inOrder(logger);
+        inOrder.verify(logger).debug(eq(">"));
+        inOrder.verify(logger).debug(eq("<"));
+//
+//        logger.debug(">");
+//        logger.debug("<");
     }
 
     private void assertParams(ArgumentDescriptor descriptor, String[] names, boolean first, boolean second) {
