@@ -9,7 +9,9 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.easymock.EasyMock;
 import org.easymock.LogicalOperator;
+import org.easymock.internal.matchers.Compare;
 import org.junit.Assert;
+import org.mockito.ArgumentMatcher;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -59,9 +61,16 @@ public final class TestSupportUtility {
         assertTrue(EqualsBuilder.reflectionEquals(expected, actual));
     }
 
-    public static Object[] arrayEqual(Object[] expectedArray) {
-        return EasyMock.cmp(expectedArray, ARRAY_EQUAL_COMPARATOR, LogicalOperator.EQUAL);
-    }
+//    public static <T> arrayEqual(T expectedArray) {
+//        return new ArgumentMatcher<Object[]>() {
+//            @Override
+//            public boolean matches(Object argument) {
+//                Compare<Object[]> compare = new Compare<>((Object[]) expectedArray, ARRAY_EQUAL_COMPARATOR, LogicalOperator.EQUAL);
+//                return compare.matches(argument);
+//            }
+//        };
+////        return EasyMock.cmp(expectedArray, ARRAY_EQUAL_COMPARATOR, LogicalOperator.EQUAL);
+//    }
 
     public static Object reflectionEquals(Object expected) {
         return EasyMock.cmp(expected, REFLECTION_COMPARATOR, LogicalOperator.EQUAL);

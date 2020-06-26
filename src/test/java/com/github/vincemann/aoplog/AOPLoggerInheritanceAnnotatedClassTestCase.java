@@ -9,8 +9,12 @@ import com.github.vincemann.aoplog.service.AuxBazService;
 import com.github.vincemann.aoplog.service.BazService;
 import com.github.vincemann.aoplog.service.GeneralBazService;
 import org.apache.commons.logging.Log;
-import org.easymock.Capture;
-import org.easymock.EasyMock;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.Matchers.eq;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 
-import static org.easymock.EasyMock.*;
+import static org.mockito.Matchers.eq;import static org.mockito.AdditionalMatchers.aryEq;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -54,8 +58,8 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
 
     @Before
     public void setUp() throws Exception {
-        logAdapter = EasyMock.createMock(LogAdapter.class);
-        logger = EasyMock.createMock(Log.class);
+        logAdapter = Mockito.mock(LogAdapter.class);
+        logger = Mockito.mock(Log.class);
         aspect.setLogAdapter(logAdapter);
         aspect.afterPropertiesSet();
     }
@@ -63,69 +67,69 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     @Test
     public void testGeneralBazInImpl() throws Exception {
         expectSimpleBarServiceLogger(GeneralBazService.class);
-        Capture<ArgumentDescriptor> captured = new Capture<ArgumentDescriptor>();
-        EasyMock.expect(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), capture(captured))).andReturn(">");
-        EasyMock.expect(logAdapter.toMessage("inImpl", 2, Void.TYPE)).andReturn("<");
+        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
+        Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
+        Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
 
         expectInfoLogging();
 
-        EasyMock.replay(logAdapter, logger);
+        //EasyMock.replay(logAdapter, logger);
         bazService.inImpl("@1", "@2");
         assertParams(captured.getValue(), G_PARAM_NAMES, true, true);
-        EasyMock.verify(logAdapter, logger);
+        //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
     public void testGeneralBazInAbstract() throws Exception {
-        EasyMock.replay(logAdapter, logger);
+        //EasyMock.replay(logAdapter, logger);
         bazService.inAbstract("@1", "@2");
-        EasyMock.verify(logAdapter, logger);
+        //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
     public void testAuxBazInImpl() throws Exception {
         expectSimpleBarServiceLogger(AuxBazService.class);
-        Capture<ArgumentDescriptor> captured = new Capture<ArgumentDescriptor>();
-        EasyMock.expect(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), capture(captured))).andReturn(">");
-        EasyMock.expect(logAdapter.toMessage("inImpl", 2, Void.TYPE)).andReturn("<");
+        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
+        Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
+        Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
 
         expectDebugLogging();
 
-        EasyMock.replay(logAdapter, logger);
+        //EasyMock.replay(logAdapter, logger);
         auxBazService.inImpl("@1", "@2");
         assertParams(captured.getValue(), X_PARAM_NAMES, true, true);
-        EasyMock.verify(logAdapter, logger);
+        //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
     public void testAuxBazInAbstract() throws Exception {
-        EasyMock.replay(logAdapter, logger);
+        //EasyMock.replay(logAdapter, logger);
         auxBazService.inAbstract("@1", "@2");
-        EasyMock.verify(logAdapter, logger);
+        //EasyMock.verify(logAdapter, logger);
     }
 
 
     private void expectSimpleBarServiceLogger(Class<?> clazz) {
-        EasyMock.expect(logAdapter.getLog(clazz)).andReturn(logger);
+        Mockito.when(logAdapter.getLog(clazz)).thenReturn(logger);
     }
 
     private void expectInfoLogging() {
-        EasyMock.expect(logger.isInfoEnabled()).andReturn(true);
+        Mockito.when(logger.isInfoEnabled()).thenReturn(true);
         logger.info(">");
-        EasyMock.expect(logger.isInfoEnabled()).andReturn(true);
+        Mockito.when(logger.isInfoEnabled()).thenReturn(true);
         logger.info("<");
     }
 
     private void expectDebugLogging() {
-        EasyMock.expect(logger.isDebugEnabled()).andReturn(true);
+        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
         logger.debug(">");
-        EasyMock.expect(logger.isDebugEnabled()).andReturn(true);
+        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
         logger.debug("<");
     }
 
     private void assertParams(ArgumentDescriptor descriptor, String[] names, boolean first, boolean second) {
         assertArrayEquals(names, descriptor.getNames());
-        assertEquals(first, descriptor.isArgumentIndex(0));
-        assertEquals(second, descriptor.isArgumentIndex(1));
+        assertEquals(first, descriptor.isArgumentIndexLogged(0));
+        assertEquals(second, descriptor.isArgumentIndexLogged(1));
     }
 }

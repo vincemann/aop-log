@@ -40,7 +40,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
         }
         if (names == null) {
             for (int i = 0; i < args.length; i++) {
-                if (argumentDescriptor.isArgumentIndex(i)) {
+                if (argumentDescriptor.isArgumentIndexLogged(i)) {
                     buff.append(asString(args[i]));
                     buff.append(", ");
                 } else {
@@ -48,12 +48,12 @@ abstract class AbstractLogAdapter implements LogAdapter {
                 }
             }
         } else {
-            for (int i = argumentDescriptor.nextArgumentIndex(0); i >= 0; i = argumentDescriptor.nextArgumentIndex(i + 1)) {
+            for (int i = argumentDescriptor.nextLoggedArgumentIndex(0); i >= 0; i = argumentDescriptor.nextLoggedArgumentIndex(i + 1)) {
                 buff.append(names[i]).append('=').append(asString(args[i]));
                 buff.append(", ");
             }
         }
-        if (argumentDescriptor.nextArgumentIndex(0) != -1) {
+        if (argumentDescriptor.nextLoggedArgumentIndex(0) != -1) {
             buff.setLength(buff.length() - 2);
         }
         buff.append(')');

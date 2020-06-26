@@ -7,12 +7,13 @@ package com.github.vincemann.aoplog.service;
 
 
 import com.github.vincemann.aoplog.Severity;
+import com.github.vincemann.aoplog.api.AopLoggable;
 import com.github.vincemann.aoplog.api.LogInteraction;
 
 /**
  * Bar service interface.
  */
-public interface BarService {
+public interface BarService extends AopLoggable {
 
     @LogInteraction(Severity.WARN)
     void inExtendedLogInSuperOnly(String iFirst, String iSecond);

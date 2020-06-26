@@ -5,10 +5,12 @@
 
 package com.github.vincemann.aoplog.service;
 
+import com.github.vincemann.aoplog.api.AopLoggable;
+
 /**
  * Baz service interface.
  */
-public interface BazService {
+public interface BazService extends AopLoggable {
 
     void inAbstract(String iFirst, String iSecond);
 

@@ -24,11 +24,12 @@ final class ArgumentDescriptor {
         this.names = names;
     }
 
-    public int nextArgumentIndex(int i) {
+    public int nextLoggedArgumentIndex(int i) {
         return loggedValueIndexes.nextSetBit(i);
     }
 
-    public boolean isArgumentIndex(int i) {
+    //is argument with that index getting logged? see @Lp annotation
+    public boolean isArgumentIndexLogged(int i) {
         return loggedValueIndexes.get(i);
     }
 

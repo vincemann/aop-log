@@ -16,6 +16,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface LogException {
+
+    //does not need disabled boolean bc one can override with empty value to disable logging
     /**
      * Specifies which exceptions should be logged with fatal message level.
      */

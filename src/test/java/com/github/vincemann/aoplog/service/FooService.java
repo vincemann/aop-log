@@ -5,6 +5,7 @@
 
 package com.github.vincemann.aoplog.service;
 
+import com.github.vincemann.aoplog.api.AopLoggable;
 import com.github.vincemann.aoplog.api.Lp;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.io.IOException;
 /**
  * Service interface.
  */
-public interface FooService {
+public interface FooService extends AopLoggable {
 
     void voidMethodZero();
 

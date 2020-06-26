@@ -20,12 +20,13 @@ import java.util.Arrays;
 @Service
 public class SimpleFooService implements FooService {
 
-   @LogInteraction(/*logPoint=LogPoint.IN*/)
+   @LogInteraction
 //    @LogTrace
     @Override
     public void voidMethodZero() {
         // nothing to do
     }
+
 
     @Override
     public String stringMethodOne(String first) {

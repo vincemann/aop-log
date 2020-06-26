@@ -1,4 +1,4 @@
 package com.github.vincemann.aoplog.api;
 
-public interface InteractionLoggable {
+public interface AopLoggable {
 }

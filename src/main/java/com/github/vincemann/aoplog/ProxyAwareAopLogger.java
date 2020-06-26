@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AopTestUtils;
@@ -61,12 +62,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
         this.logAdapter = log;
     }
 
+    @Autowired
     public ProxyAwareAopLogger(AnnotationParser annotationParser,MethodFilter... methodFilters) {
         this.annotationParser = annotationParser;
         this.methodFilters.addAll(Lists.newArrayList(methodFilters));
     }
 
-    @Around("this(com.github.vincemann.aoplog.api.InteractionLoggable)")
+    @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
 
@@ -138,11 +140,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.classLog = annotationParser.fromClass(targetClass, LogAllInteractions.class);
             AnnotationInfo<LogException>logExceptionInfo = annotationParser.fromMethodOrClass(method,LogException.class);
             this.methodDescriptor = createMethodDescriptor(method,methodLog,classLog,logExceptionInfo);
-            this.exceptionDescriptor = createExceptionDescriptor(methodDescriptor, invocationDescriptor);
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
+            //exception descriptor will be null if no LogException was found
+            if (logExceptionInfo!=null)
+                this.exceptionDescriptor = createExceptionDescriptor(methodDescriptor);
             this.args = joinPoint.getArgs();
             this.logger = logAdapter.getLog(targetClass);
-            this.argumentDescriptor=evalArgumentDescriptor(methodDescriptor,method,args.length);
+            this.argumentDescriptor= createArgumentDescriptor(methodDescriptor,method,args.length);
         }
 
         Object proceed() throws Throwable {
@@ -151,7 +155,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         void logException(Exception e){
-
             Class<? extends Exception> resolved = exceptionResolver.resolve(exceptionDescriptor, e);
             if (resolved != null) {
                 ExceptionSeverity excSeverity = exceptionDescriptor.getExceptionSeverity(resolved);
@@ -172,6 +175,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         boolean isExceptionLoggingOn(){
+            if (exceptionDescriptor==null){
+                return false;
+            }
             AnnotationInfo<LogException> logExceptionInfo = invocationDescriptor.getExceptionAnnotation();
             if (logExceptionInfo==null){
                 return false;
@@ -205,7 +211,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         return prev == null ? cached : prev;
     }
 
-    private ArgumentDescriptor evalArgumentDescriptor(MethodDescriptor descriptor, Method method, int argumentCount) {
+    private ArgumentDescriptor createArgumentDescriptor(MethodDescriptor descriptor, Method method, int argumentCount) {
         if (descriptor.getArgumentDescriptor() != null) {
             return descriptor.getArgumentDescriptor();
         }
@@ -214,11 +220,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
         return argumentDescriptor;
     }
 
-    private ExceptionDescriptor createExceptionDescriptor(MethodDescriptor descriptor, InvocationDescriptor invocationDescriptor) {
+    private ExceptionDescriptor createExceptionDescriptor(MethodDescriptor descriptor) {
         if (descriptor.getExceptionDescriptor() != null) {
             return descriptor.getExceptionDescriptor();
         }
-        ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(invocationDescriptor.getExceptionAnnotation()).build();
+        ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(descriptor.getInvocationDescriptor().getExceptionAnnotation()).build();
         descriptor.setExceptionDescriptor(exceptionDescriptor);
         return exceptionDescriptor;
     }

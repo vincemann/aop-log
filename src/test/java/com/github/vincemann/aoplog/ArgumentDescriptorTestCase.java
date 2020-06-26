@@ -33,7 +33,7 @@ public class ArgumentDescriptorTestCase {
     public void testNoArguments() throws Exception {
         Method method = getMethod(getClass(), "noArguments");
         ArgumentDescriptor descriptor = new ArgumentDescriptor.Builder(method, method.getParameterTypes().length, parameterNameDiscoverer).build();
-        assertEquals(-1, descriptor.nextArgumentIndex(0));
+        assertEquals(-1, descriptor.nextLoggedArgumentIndex(0));
         assertNull(descriptor.getNames());
     }
 
@@ -45,9 +45,9 @@ public class ArgumentDescriptorTestCase {
     public void testOneArgument() throws Exception {
         Method method = getMethod(getClass(), "oneArgument");
         ArgumentDescriptor descriptor = new ArgumentDescriptor.Builder(method, method.getParameterTypes().length, parameterNameDiscoverer).build();
-        assertEquals(0, descriptor.nextArgumentIndex(0));
-        assertTrue(descriptor.isArgumentIndex(0));
-        assertEquals(-1, descriptor.nextArgumentIndex(1));
+        assertEquals(0, descriptor.nextLoggedArgumentIndex(0));
+        assertTrue(descriptor.isArgumentIndexLogged(0));
+        assertEquals(-1, descriptor.nextLoggedArgumentIndex(1));
         if (descriptor.getNames() != null) {
             assertArrayEquals(new String[]{"foo"}, descriptor.getNames());
         }
@@ -61,9 +61,9 @@ public class ArgumentDescriptorTestCase {
     public void testTwoArguments() throws Exception {
         Method method = getMethod(getClass(), "twoArguments");
         ArgumentDescriptor descriptor = new ArgumentDescriptor.Builder(method, method.getParameterTypes().length, parameterNameDiscoverer).build();
-        assertEquals(0, descriptor.nextArgumentIndex(0));
-        assertTrue(descriptor.isArgumentIndex(0));
-        assertEquals(-1, descriptor.nextArgumentIndex(1));
+        assertEquals(0, descriptor.nextLoggedArgumentIndex(0));
+        assertTrue(descriptor.isArgumentIndexLogged(0));
+        assertEquals(-1, descriptor.nextLoggedArgumentIndex(1));
         if (descriptor.getNames() != null) {
             assertArrayEquals(new String[]{"foo", "foo2"}, descriptor.getNames());
         }
@@ -78,11 +78,11 @@ public class ArgumentDescriptorTestCase {
     public void testVarArguments() throws Exception {
         Method method = getMethod(getClass(), "varArguments");
         ArgumentDescriptor descriptor = new ArgumentDescriptor.Builder(method, method.getParameterTypes().length, parameterNameDiscoverer).build();
-        assertEquals(1, descriptor.nextArgumentIndex(0));
-        assertFalse(descriptor.isArgumentIndex(0));
-        assertTrue(descriptor.isArgumentIndex(1));
-        assertEquals(1, descriptor.nextArgumentIndex(1));
-        assertEquals(-1, descriptor.nextArgumentIndex(2));
+        assertEquals(1, descriptor.nextLoggedArgumentIndex(0));
+        assertFalse(descriptor.isArgumentIndexLogged(0));
+        assertTrue(descriptor.isArgumentIndexLogged(1));
+        assertEquals(1, descriptor.nextLoggedArgumentIndex(1));
+        assertEquals(-1, descriptor.nextLoggedArgumentIndex(2));
         if (descriptor.getNames() != null) {
             assertArrayEquals(new String[]{"foo", "foo2"}, descriptor.getNames());
         }

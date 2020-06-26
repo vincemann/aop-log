@@ -53,7 +53,7 @@ public class InvocationDescriptorTestCase {
     }
 
     @Test
-    @LogInteraction(/*logPoint=LogPoint.IN*/)
+    @LogInteraction()
     public void testGetBeforeSeverity() throws Exception {
         assertSame(Severity.DEBUG, currDescriptor.getSeverity());
 //        assertNull(descriptor.getSeverity());
@@ -62,7 +62,7 @@ public class InvocationDescriptorTestCase {
 
 //    @Test
 //    @Log(logPoint = LogPoint.IN,level = Severity.INFO)
-//   @Log(/*logPoint=LogPoint.IN*/)
+//   @Log()
 //    public void testGetBeforeSeverityByPriority() throws Exception {
 //        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();
 //        assertSame(Severity.INFO, descriptor.getBeforeSeverity());
@@ -99,7 +99,7 @@ public class InvocationDescriptorTestCase {
 //    @Test
 //    @LogWarn
 //    @LogInfo(logPoint=LogPoint.OUT)
-//   @Log(/*logPoint=LogPoint.IN*/)
+//   @Log()
 //    @LogTrace
 //    public void testGetSeverityByPriority() throws Exception {
 //        InvocationDescriptor descriptor = new InvocationDescriptor.Builder(loggingAnnotationInfo,logExceptionAnnotationInfo).build();

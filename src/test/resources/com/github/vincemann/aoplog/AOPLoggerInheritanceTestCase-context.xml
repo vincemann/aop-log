@@ -9,6 +9,7 @@
 
     <aop:aspectj-autoproxy/>
 
+    <bean class="com.github.vincemann.aoplog.HierarchicalAnnotationParser"/>
     <bean class="com.github.vincemann.aoplog.ProxyAwareAopLogger"/>
     <bean class="com.github.vincemann.aoplog.service.ExtendedBarService"/>
 
