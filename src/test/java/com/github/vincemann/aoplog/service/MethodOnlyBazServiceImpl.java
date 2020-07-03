@@ -13,27 +13,26 @@ import com.github.vincemann.aoplog.api.LogInteraction;
 /**
  * Implements {@link BazService}.
  */
-@LogInteraction(Severity.INFO)
-@LogConfig(ignoreGetters = true)
-public class ClassAndMethodBazServiceImpl extends AbstractBazService {
+public class MethodOnlyBazServiceImpl extends AbstractBazService {
 
     @Override
-    public void inImpl(String cmFirst, String cmSecond) {
+    public void inImpl(String mFirst, String mSecond) {
         // nothing to do
     }
 
+    @LogInteraction(Severity.INFO)
     @Override
-    public void inInterface(String iFirst, String iSecond) {
+    public void inInterface(String mFirst, String mSecond) {
 
     }
 
-    @Override
-    public void getInImpl(String cmFirst, String cmSecond) {
+    public void setInImpl(String mFirst, String mSecond){
 
     }
 
+    @LogInteraction(Severity.INFO)
     @Override
-    public void setInImpl(String cmFirst, String cmSecond) {
+    public void getInImpl(String mFirst, String mSecond) {
 
     }
 }

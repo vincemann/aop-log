@@ -12,7 +12,9 @@
     <bean class="com.github.vincemann.aoplog.parseAnnotation.TypeHierarchyAnnotationParser"/>
     <bean class="com.github.vincemann.aoplog.ProxyAwareAopLogger"/>
     <bean class="com.github.vincemann.aoplog.InvocationDescriptorFactoryImpl"/>
-    <bean id="generalBaz" class="com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl"/>
-    <bean id="auxBaz" class="com.github.vincemann.aoplog.service.ClassOnlyBazServiceImpl"/>
+    <bean id="generalBaz" class="com.github.vincemann.aoplog.service.MethodOnlyBazServiceImpl"/>
+    <bean id="auxBaz" class="com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl"/>
+    <bean id="disabledBaz" class="com.github.vincemann.aoplog.service.DisabledBazService"/>
+
 
 </beans>

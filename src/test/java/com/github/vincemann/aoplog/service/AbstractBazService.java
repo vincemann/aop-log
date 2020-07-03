@@ -5,17 +5,21 @@
 
 package com.github.vincemann.aoplog.service;
 
+import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.api.LogInteraction;
 
 /**
  * Base implementation of {@link BazService}.
  */
 @LogInteraction
+@LogConfig(ignoreSetters = true)
 public abstract class AbstractBazService implements BazService {
 
     @Override
-    public void inAbstract(String iFirst, String iSecond) {
+    public void inAbstract(String aFirst, String aSecond) {
         // do not override
     }
+
+
 
 }

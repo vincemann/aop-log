@@ -20,4 +20,8 @@ public interface BazService extends AopLoggable {
 
     @LogInteraction(Severity.TRACE)
     void inInterface(String iFirst, String iSecond);
+
+    public void getInImpl(String iFirst, String iSecond);
+
+    public void setInImpl(String iFirst, String iSecond);
 }
