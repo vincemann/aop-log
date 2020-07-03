@@ -137,13 +137,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
         LoggedMethodCall(ProceedingJoinPoint joinPoint,Class<?> targetClass) throws NoSuchMethodException {
             this.joinPoint = joinPoint;
+            this.args = joinPoint.getArgs();
             this.method = extractMethod(joinPoint);
             this.targetClass = targetClass;
             this.methodDescriptor = createMethodDescriptor();
             this.exceptionDescriptor = methodDescriptor.getExceptionDescriptor();
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
             this.argumentDescriptor = methodDescriptor.getArgumentDescriptor();
-            this.args = joinPoint.getArgs();
             this.logger = logAdapter.getLog(targetClass);
         }
 
@@ -160,7 +160,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
                     ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(logExceptionInfo).build();
                     InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo);
                     cached = new MethodDescriptor(invocationDescriptor, argumentDescriptor, exceptionDescriptor, method);
-                    MethodDescriptor prev = cache.putIfAbsent(method, methodDescriptor);
+                    MethodDescriptor prev = cache.putIfAbsent(method, cached);
                     return prev == null ? cached : prev;
                 }
             }

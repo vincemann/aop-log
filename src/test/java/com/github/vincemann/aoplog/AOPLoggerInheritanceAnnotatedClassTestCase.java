@@ -68,7 +68,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
 
 
     @Test
-    public void testImpl_Overrides_AbstractClassLogConfig_WithOwnClassLogConfig() throws Exception {
+    public void testImpl_OverridesMethod_abstractHasClassLog_shouldUseOwnClassLog() throws Exception {
         //abstract class has debug class level, impl has info class level -> should pick info level
         expectServiceLoggerToBe(ClassAndMethodBazServiceImpl.class);
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
@@ -81,15 +81,15 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     }
 
     @Test
-    public void testImpl_doesNotOverrideMethod_fromAbstractClass_shouldUseAbstractClassLogConfig() throws Exception {
-        //abstract class has debug class level, impl has info class level -> should pick info level
-        expectServiceLoggerToBe(AbstractBazService.class);
+    public void testImpl_doesNotOverrideMethod_fromAbstractClass_shouldUseImplClassConfig() throws Exception {
+        //abstract class has debug class level, impl has info class level -> should pick debug level
+        expectServiceLoggerToBe(ClassAndMethodBazServiceImpl.class);
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         Mockito.when(logAdapter.toMessage(eq("inAbstract"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
         Mockito.when(logAdapter.toMessage("inAbstract", 2, Void.TYPE)).thenReturn("<");
-        enableDebugLogging();
+        enableInfoLogging();
         classAndMethodBazService.inAbstract("@1", "@2");
-        verifyDebugLogging();
+        verifyInfoLogging();
         assertParams(captured.getValue(), G_PARAM_NAMES, true, true);
     }
 

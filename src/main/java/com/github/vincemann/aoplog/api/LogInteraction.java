@@ -6,10 +6,11 @@
 package com.github.vincemann.aoplog.api;
 
 import com.github.vincemann.aoplog.Severity;
-import org.springframework.core.annotation.AliasFor;
 
-
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Meta annotation that indicates a log method annotation.
@@ -18,12 +19,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD,ElementType.TYPE})
 public @interface LogInteraction {
 
-    @AliasFor("level")
     Severity value() default Severity.DEBUG;
-
-    @AliasFor("value")
-    Severity level() default Severity.DEBUG;
-
     boolean disabled() default false;
 
 }

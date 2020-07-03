@@ -5,7 +5,6 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import org.junit.After;
@@ -15,13 +14,14 @@ import org.junit.rules.MethodRule;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Tests {@link InvocationDescriptor} with log annotated methods and class.
  */
 @LogInteraction
-public class InvocationDescriptorFactoryClassTestCase {
+public class InvocationDescriptorFactoryMixedTestCase {
 
     InvocationDescriptor currDescriptor;
     InvocationDescriptorFactory factory = new InvocationDescriptorFactoryImpl();
@@ -29,8 +29,10 @@ public class InvocationDescriptorFactoryClassTestCase {
     @Rule
     public MethodRule watchman = new TestWatchman() {
         public void starting(FrameworkMethod method) {
-            AnnotationInfo<LogInteraction> methodLog = new AnnotationInfo<>(method.getMethod().getDeclaredAnnotation(LogInteraction.class),this.getClass());
-            AnnotationInfo<LogInteraction> classLog = new AnnotationInfo<>(this.getClass().getDeclaredAnnotation(LogInteraction.class),this.getClass());
+            LogInteraction classLogAnnotation = InvocationDescriptorFactoryMixedTestCase.class.getDeclaredAnnotation(LogInteraction.class);
+            LogInteraction methodLogAnnotation = method.getMethod().getDeclaredAnnotation(LogInteraction.class);
+            AnnotationInfo<LogInteraction> methodLog = methodLogAnnotation==null? null : new AnnotationInfo<>(methodLogAnnotation,InvocationDescriptorFactoryMixedTestCase.class);
+            AnnotationInfo<LogInteraction> classLog = classLogAnnotation==null? null : new AnnotationInfo<>(classLogAnnotation,InvocationDescriptorFactoryMixedTestCase.class);
             currDescriptor = factory.create(methodLog,classLog);
         }
     };
@@ -47,8 +49,14 @@ public class InvocationDescriptorFactoryClassTestCase {
 
     @Test
     @LogInteraction(Severity.TRACE)
-    public void testGetSeverityByMethodPriority() throws Exception {
+    public void testMethodOverridesClassAnnotation() throws Exception {
         assertSame(Severity.TRACE, currDescriptor.getSeverity());
+    }
+
+    @Test
+    @LogInteraction(value = Severity.TRACE,disabled = true)
+    public void testMethodOverridesClassAnnotation_butDisabled() throws Exception {
+        assertNull(currDescriptor.getSeverity());
     }
 
 

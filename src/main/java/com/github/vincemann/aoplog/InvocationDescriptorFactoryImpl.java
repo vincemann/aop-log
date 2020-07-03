@@ -32,7 +32,7 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
             logConfig= logInfo.isClassLevel() ?
                     logInfo.getDeclaringClass().getDeclaredAnnotation(LogConfig.class)
                     : null;
-            severity = logInfo.getAnnotation().level();
+            severity = logInfo.getAnnotation().value();
         }
         return new InvocationDescriptor(
                 severity,

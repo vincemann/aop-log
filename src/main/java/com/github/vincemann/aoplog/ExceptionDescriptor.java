@@ -49,12 +49,14 @@ final class ExceptionDescriptor {
         }
 
         public ExceptionDescriptor build() {
-            setSeverity(exceptionAnnotationInfo.getAnnotation().fatal(), Severity.FATAL);
-            setSeverity(exceptionAnnotationInfo.getAnnotation().value(), Severity.ERROR);
-            setSeverity(exceptionAnnotationInfo.getAnnotation().warn(), Severity.WARN);
-            setSeverity(exceptionAnnotationInfo.getAnnotation().info(), Severity.INFO);
-            setSeverity(exceptionAnnotationInfo.getAnnotation().debug(), Severity.DEBUG);
-            setSeverity(exceptionAnnotationInfo.getAnnotation().trace(), Severity.TRACE);
+            if (exceptionAnnotationInfo!=null) {
+                setSeverity(exceptionAnnotationInfo.getAnnotation().fatal(), Severity.FATAL);
+                setSeverity(exceptionAnnotationInfo.getAnnotation().value(), Severity.ERROR);
+                setSeverity(exceptionAnnotationInfo.getAnnotation().warn(), Severity.WARN);
+                setSeverity(exceptionAnnotationInfo.getAnnotation().info(), Severity.INFO);
+                setSeverity(exceptionAnnotationInfo.getAnnotation().debug(), Severity.DEBUG);
+                setSeverity(exceptionAnnotationInfo.getAnnotation().trace(), Severity.TRACE);
+            }
             return new ExceptionDescriptor(map, exceptionAnnotationInfo);
         }
 

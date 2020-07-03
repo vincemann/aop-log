@@ -34,27 +34,29 @@ public class ExceptionDescriptorTestCase {
         public void starting(FrameworkMethod method) {
             Method currMethod = method.getMethod();
             LogException logException = currMethod.getDeclaredAnnotation(LogException.class);
-            methodExceptionDescriptor = new ExceptionDescriptor.Builder(
+            methodExceptionDescriptor = logException==null? null : new ExceptionDescriptor.Builder(
                     SourceAwareAnnotationInfo.<LogException>builder()
                             .annotation(logException)
                             .classLevel(false)
+                            .declaringClass(ExceptionDescriptorTestCase.class)
                             .build())
                     .build();
 
-            LogException classLogException = this.getClass().getDeclaredAnnotation(LogException.class);
-            classExceptionDescriptor = new ExceptionDescriptor.Builder(
+            LogException classLogException = ExceptionDescriptorTestCase.class.getDeclaredAnnotation(LogException.class);
+            classExceptionDescriptor = classLogException==null? null : new ExceptionDescriptor.Builder(
                     SourceAwareAnnotationInfo.<LogException>builder()
                             .annotation(classLogException)
                             .classLevel(true)
+                            .declaringClass(ExceptionDescriptorTestCase.class)
                             .build())
                     .build();
         }
     };
 
-    @Test(expected = NullPointerException.class)
-    public void testNoAnnotation() throws Exception {
-        new ExceptionDescriptor.Builder(null).build();
-    }
+//    @Test(expected = NullPointerException.class)
+//    public void testNoAnnotation() throws Exception {
+//        new ExceptionDescriptor.Builder(null).build();
+//    }
 
     @Test
     @LogException
@@ -84,7 +86,8 @@ public class ExceptionDescriptorTestCase {
     @Test
     public void testGetClassLevelOnlyExceptionAnnotation() throws Exception {
         //read from class annotation
-        assertSame(Severity.TRACE, classExceptionDescriptor.getExceptionSeverity(Exception.class));
+        assertNotNull(classExceptionDescriptor);
+        assertSame(Severity.TRACE, classExceptionDescriptor.getExceptionSeverity(Exception.class).getSeverity());
         LogException exceptionAnnotation = classExceptionDescriptor.getExceptionAnnotationInfo().getAnnotation();
         assertEquals(0, exceptionAnnotation.value().length);
         assertEquals(1, exceptionAnnotation.trace().length);
