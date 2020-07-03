@@ -1,24 +1,66 @@
-package com.github.vincemann.aoplog;
+package com.github.vincemann.aoplog.parseAnnotation;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.Assert;
+import com.google.common.collect.Iterables;
+import com.google.common.graph.SuccessorsFunction;
+import com.google.common.graph.Traverser;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 //todo cache all
-public class HierarchicalAnnotationParser implements AnnotationParser {
+public class TypeHierachyAnnotationParser implements AnnotationParser {
+
+    private static Iterable<Class<?>> getClassHierarchy(Class<?> baseClass) {
+        return Traverser.forGraph(
+                (SuccessorsFunction<Class<?>>) node -> {
+                    Class<?> superclass = node.getSuperclass();
+                    List<Class<?>> interfaces = Arrays.asList(node.getInterfaces());
+                    return superclass == null ? interfaces
+                            : Iterables.concat(interfaces, Collections.singleton(superclass));
+                }
+        ).breadthFirst(baseClass);
+    }
 
 
     @Override
-    public <A extends Annotation> A fromMethod(Method method, Class<A> type) {
-        return AnnotationUtils.findAnnotation(method, type);
+    public <A extends Annotation> AnnotationInfo<A> fromMethod(Method method, Class<A> annotationType) {
+        A directlyPresentAnnotation = method.getDeclaredAnnotation(annotationType);
+        if (directlyPresentAnnotation!=null){
+            return new AnnotationInfo<>(directlyPresentAnnotation,method.getDeclaringClass());
+        }
+        return fromMethod(method.getDeclaringClass().getSuperclass(),method.getName(),method.getParameterTypes(),annotationType);
+
     }
 
     @Override
-    public <A extends Annotation> A fromClass(Class<?> clazz, Class<A> type) {
-        return AnnotationUtils.findAnnotation(clazz, type);
+    public <A extends Annotation> AnnotationInfo<A> fromMethod(Class<?> clazz, String methodName, Class<?>[] argTypes, Class<A> annotationType) {
+        for (Class<?> type : getClassHierarchy(clazz)) {
+            try {
+                Method methodInType = type.getDeclaredMethod(methodName,argTypes);
+                A annotation = methodInType.getDeclaredAnnotation(annotationType);
+                if (annotation!=null){
+                    return new AnnotationInfo<>(annotation,type);
+                }
+            } catch (NoSuchMethodException e) {
+                //continue;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public <A extends Annotation> AnnotationInfo<A> fromClass(Class<?> clazz, Class<A> annotationType) {
+        for (Class<?> type : getClassHierarchy(clazz)) {
+            A annotation = type.getDeclaredAnnotation(annotationType);
+            if (annotation!=null){
+                return new AnnotationInfo<>(annotation,type);
+            }
+        }
+        return null;
+//        return AnnotationUtils.findAnnotation(clazz, type);
 //        if (annotation==null){
 //            return null;
 //        }
@@ -29,22 +71,30 @@ public class HierarchicalAnnotationParser implements AnnotationParser {
     }
 
     @Override
-    public <A extends Annotation> AnnotationInfo<A> fromMethodOrClass(Method method, Class<A> type) {
-        A fromMethod = fromMethod(method, type);
+    public <A extends Annotation> SourceAwareAnnotationInfo<A> fromMethodOrClass(Class<?> clazz, String methodName, Class<?>[] argTypes, Class<A> type) {
+        AnnotationInfo<A> fromMethod = fromMethod(clazz,methodName,argTypes, type);
+        return fromMethodOrClass(fromMethod,type,clazz);
+    }
+
+
+
+    @Override
+    public <A extends Annotation> SourceAwareAnnotationInfo<A> fromMethodOrClass(Method method, Class<A> type) {
+        AnnotationInfo<A> fromMethod = fromMethod(method, type);
+        return fromMethodOrClass(fromMethod,type,method.getDeclaringClass());
+    }
+
+    public <A extends Annotation> SourceAwareAnnotationInfo<A> fromMethodOrClass(AnnotationInfo<A> fromMethod,Class<A> type, Class<?> clazz){
         if (fromMethod == null) {
-            A fromClass = fromClass(method.getDeclaringClass(), type);
+            AnnotationInfo<A> fromClass = fromClass(clazz, type);
             return fromClass == null ? null
-                    : AnnotationInfo.<A>builder()
-                        .classLevel(true)
-                        .annotation(fromClass)
-                        .build();
+                    : new SourceAwareAnnotationInfo<>(fromClass,true);
         } else {
-            return AnnotationInfo.<A>builder()
-                    .annotation(fromMethod)
-                    .classLevel(false)
-                    .build();
+            return new SourceAwareAnnotationInfo<>(fromMethod,false);
         }
     }
+
+
 
     //    //dont cache this
 //    @Override

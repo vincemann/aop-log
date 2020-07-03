@@ -10,6 +10,7 @@ import com.github.vincemann.aoplog.api.LogAllInteractions;
 import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.api.LogException;
 import lombok.Getter;
+import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 import org.springframework.lang.Nullable;
 
 /**
@@ -19,9 +20,9 @@ import org.springframework.lang.Nullable;
 final class InvocationDescriptor {
     private final Severity severity;
     @Nullable
-    private final AnnotationInfo<LogException> exceptionAnnotation;
+    private final SourceAwareAnnotationInfo<LogException> exceptionAnnotation;
     @Nullable
-    private final AnnotationInfo<LogInteraction> logInfo;
+    private final SourceAwareAnnotationInfo<LogInteraction> logInfo;
     @Nullable
     private final LogConfig classLogConfig;
 
@@ -35,7 +36,7 @@ final class InvocationDescriptor {
      * @param classLogConfig    Effective {@link LogConfig} from {@link LogAllInteractions} extracted.
      *                          Can be null if log is {@link LogInteraction#disabled()} or method level @{@link LogInteraction} was found (which takes precedence over class level annotation).
      */
-    private InvocationDescriptor(Severity severity, @Nullable AnnotationInfo<LogException> exceptionAnnotation, AnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig) {
+    private InvocationDescriptor(Severity severity, @Nullable SourceAwareAnnotationInfo<LogException> exceptionAnnotation, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig) {
         this.severity = severity;
         this.exceptionAnnotation = exceptionAnnotation;
         this.logInfo = logInfo;
@@ -52,9 +53,9 @@ final class InvocationDescriptor {
         @Nullable
         private final LogInteraction methodLog;
         private final LogAllInteractions classLog;
-        private AnnotationInfo<LogException> logExceptionInfo;
+        private SourceAwareAnnotationInfo<LogException> logExceptionInfo;
 
-        public Builder(@Nullable LogInteraction methodLog, LogAllInteractions classLog , @Nullable AnnotationInfo<LogException> logExceptionInfo) {
+        public Builder(@Nullable LogInteraction methodLog, LogAllInteractions classLog , @Nullable SourceAwareAnnotationInfo<LogException> logExceptionInfo) {
             this.methodLog = methodLog;
             this.classLog = classLog;
             this.logExceptionInfo = logExceptionInfo;
@@ -62,7 +63,7 @@ final class InvocationDescriptor {
 
         //finds non disabled @Log if any
         //first search for method, if method not found : fall back on class level
-        private AnnotationInfo<LogInteraction> evalLogInfo(){
+        private SourceAwareAnnotationInfo<LogInteraction> evalLogInfo(){
             boolean methodFound = !(methodLog==null);
             boolean classFound = !(classLog==null);
             Boolean methodDisabled = !methodFound? null :  methodLog.disabled();
@@ -75,18 +76,18 @@ final class InvocationDescriptor {
 //                    }
                     return null;
                 }else {
-                    return new AnnotationInfo<>(methodLog,false);
+                    return new SourceAwareAnnotationInfo<>(methodLog,false,declaringClass );
                 }
             }else {
                 if (classFound && !classDisabled){
-                    return new AnnotationInfo<>(classLog.value(),true);
+                    return new SourceAwareAnnotationInfo<>(classLog.value(),true, declaringClass);
                 }
             }
             return null;
         }
 
         public InvocationDescriptor build() {
-            AnnotationInfo<LogInteraction> logInfo = evalLogInfo();
+            SourceAwareAnnotationInfo<LogInteraction> logInfo = evalLogInfo();
 
             LogConfig logConfig = null;
             Severity severity = null;

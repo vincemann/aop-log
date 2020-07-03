@@ -15,7 +15,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.lang.Nullable;
+import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.parseAnnotation.AnnotationParser;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -119,9 +120,10 @@ public class ProxyAwareAopLogger implements InitializingBean {
     public class LoggedMethodCall{
         Method method;
         Class<?> targetClass;
+        //class that has chosen annotation or declares method with valid annotation
+        Class<?> logClass;
         Object[] args;
-        LogInteraction methodLog;
-        LogAllInteractions classLog;
+        SourceAwareAnnotationInfo<LogInteraction> logInfo;
 
         MethodDescriptor methodDescriptor;
         InvocationDescriptor invocationDescriptor;
@@ -136,11 +138,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.joinPoint = joinPoint;
             this.method = extractMethod(joinPoint);
             this.targetClass = targetClass;
+            this.logInfo = annotationParser.fromMethodOrClass()
             this.methodLog = annotationParser.fromMethod(method, LogInteraction.class);
             this.classLog = annotationParser.fromClass(targetClass, LogAllInteractions.class);
-            AnnotationInfo<LogException>logExceptionInfo = annotationParser.fromMethodOrClass(method,LogException.class);
-            this.methodDescriptor = createMethodDescriptor(method,methodLog,classLog,logExceptionInfo);
-            this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
+            SourceAwareAnnotationInfo<LogException> logExceptionInfo = annotationParser.fromMethodOrClass(method,LogException.class);
+            this.invocationDescriptor = new InvocationDescriptor.Builder(methodLog,classLog,logExceptionInfo).build();
+            this.methodDescriptor = createMethodDescriptor(method,invocationDescriptor);
             //exception descriptor will be null if no LogException was found
             if (logExceptionInfo!=null)
                 this.exceptionDescriptor = createExceptionDescriptor(methodDescriptor);
@@ -178,7 +181,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
             if (exceptionDescriptor==null){
                 return false;
             }
-            AnnotationInfo<LogException> logExceptionInfo = invocationDescriptor.getExceptionAnnotation();
+            SourceAwareAnnotationInfo<LogException> logExceptionInfo = invocationDescriptor.getExceptionAnnotation();
             if (logExceptionInfo==null){
                 return false;
             }
@@ -201,12 +204,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
 
 
-    private MethodDescriptor createMethodDescriptor(Method method, LogInteraction methodLog, LogAllInteractions classLog, @Nullable AnnotationInfo<LogException> logExceptionInfo) {
+    private MethodDescriptor createMethodDescriptor(Method method, InvocationDescriptor invocationDescriptor) {
         MethodDescriptor cached = cache.get(method);
         if (cached != null) {
             return cached;
         }
-        cached = new MethodDescriptor(new InvocationDescriptor.Builder(methodLog,classLog,logExceptionInfo).build(), method);
+        cached = new MethodDescriptor(invocationDescriptor, method);
         MethodDescriptor prev = cache.putIfAbsent(method, cached);
         return prev == null ? cached : prev;
     }

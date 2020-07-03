@@ -15,7 +15,7 @@ import java.lang.annotation.*;
  * Meta annotation that indicates a log method annotation.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD,ElementType.TYPE})
 public @interface LogInteraction {
 
     @AliasFor("level")

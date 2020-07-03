@@ -5,6 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.service.AbstractBazService;
 import com.github.vincemann.aoplog.service.ClassOnlyBazServiceImpl;
 import com.github.vincemann.aoplog.service.BazService;
 import com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl;
@@ -49,7 +50,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
     private ProxyAwareAopLogger aspect;
 
     @Resource(name = "generalBaz")
-    private BazService methodAndClassBazService;
+    private BazService classAndMethodBazService;
 
     @Resource(name = "auxBaz")
     private BazService classOnlyBazService;
@@ -65,26 +66,31 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
         aspect.afterPropertiesSet();
     }
 
+
     @Test
-    public void testImpl_Overrides_AbstractClassConfig_WithOwnClassConfig() throws Exception {
+    public void testImpl_Overrides_AbstractClassLogConfig_WithOwnClassLogConfig() throws Exception {
+        //abstract class has debug class level, impl has info class level -> should pick info level
         expectServiceLoggerToBe(ClassAndMethodBazServiceImpl.class);
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
         Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
-
+        enableInfoLogging();
+        classAndMethodBazService.inImpl("@1", "@2");
         verifyInfoLogging();
-
-        //EasyMock.replay(logAdapter, logger);
-        methodAndClassBazService.inImpl("@1", "@2");
         assertParams(captured.getValue(), G_PARAM_NAMES, true, true);
-        //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
-    public void testGeneralBazInAbstract() throws Exception {
-        //EasyMock.replay(logAdapter, logger);
-        methodAndClassBazService.inAbstract("@1", "@2");
-        //EasyMock.verify(logAdapter, logger);
+    public void testImpl_doesNotOverrideMethod_fromAbstractClass_shouldUseAbstractClassLogConfig() throws Exception {
+        //abstract class has debug class level, impl has info class level -> should pick info level
+        expectServiceLoggerToBe(AbstractBazService.class);
+        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
+        Mockito.when(logAdapter.toMessage(eq("inAbstract"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
+        Mockito.when(logAdapter.toMessage("inAbstract", 2, Void.TYPE)).thenReturn("<");
+        enableDebugLogging();
+        classAndMethodBazService.inAbstract("@1", "@2");
+        verifyDebugLogging();
+        assertParams(captured.getValue(), G_PARAM_NAMES, true, true);
     }
 
     @Test
@@ -97,7 +103,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
 
 
         //EasyMock.replay(logAdapter, logger);
-        prepareDebugLogging();
+        enableDebugLogging();
         classOnlyBazService.inImpl("@1", "@2");
         verifyDebugLogging();
         assertParams(captured.getValue(), X_PARAM_NAMES, true, true);
@@ -116,11 +122,11 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase {
         Mockito.when(logAdapter.getLog(clazz)).thenReturn(logger);
     }
 
-    private void prepareInfoLogging(){
+    private void enableInfoLogging(){
         Mockito.when(logger.isInfoEnabled()).thenReturn(true);
     }
 
-    private void prepareDebugLogging(){
+    private void enableDebugLogging(){
         Mockito.when(logger.isDebugEnabled()).thenReturn(true);
     }
     private void verifyInfoLogging() {

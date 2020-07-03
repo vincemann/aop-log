@@ -14,6 +14,9 @@ import org.junit.Test;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
+import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.parseAnnotation.AnnotationParser;
+import com.github.vincemann.aoplog.parseAnnotation.TypeHierachyAnnotationParser;
 
 import java.lang.reflect.Method;
 
@@ -28,7 +31,7 @@ public class InvocationDescriptorClassTestCase {
 
     Method currMethod;
     InvocationDescriptor currDescriptor;
-    AnnotationParser annotationParser = new HierarchicalAnnotationParser();
+    AnnotationParser annotationParser = new TypeHierachyAnnotationParser();
 
 
     @Rule
@@ -37,7 +40,7 @@ public class InvocationDescriptorClassTestCase {
             currMethod = method.getMethod();
             LogInteraction methodLog = annotationParser.fromMethod(currMethod, LogInteraction.class);
             LogAllInteractions classLog = annotationParser.fromClass(getClass(), LogAllInteractions.class);
-            AnnotationInfo<LogException> logException = annotationParser.fromMethodOrClass(currMethod, LogException.class);
+            SourceAwareAnnotationInfo<LogException> logException = annotationParser.fromMethodOrClass(currMethod, LogException.class);
             currDescriptor = new InvocationDescriptor.Builder(methodLog,classLog,logException).build();
         }
     };

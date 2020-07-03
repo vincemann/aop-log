@@ -9,7 +9,7 @@
 
     <aop:aspectj-autoproxy/>
 
-    <bean class="com.github.vincemann.aoplog.HierarchicalAnnotationParser"/>
+    <bean class="com.github.vincemann.aoplog.parseAnnotation.TypeHierachyAnnotationParser"/>
     <bean class="com.github.vincemann.aoplog.ProxyAwareAopLogger"/>
     <bean id="generalBaz" class="com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl"/>
     <bean id="auxBaz" class="com.github.vincemann.aoplog.service.ClassOnlyBazServiceImpl"/>

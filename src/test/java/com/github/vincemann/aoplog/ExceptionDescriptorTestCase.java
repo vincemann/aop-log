@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
+import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 
 import java.lang.reflect.Method;
 
@@ -32,7 +33,7 @@ public class ExceptionDescriptorTestCase {
             Method currMethod = method.getMethod();
             LogException logException = currMethod.getAnnotation(LogException.class);
             currDescriptor = new ExceptionDescriptor.Builder(
-                    AnnotationInfo.<LogException>builder()
+                    SourceAwareAnnotationInfo.<LogException>builder()
                             .annotation(logException)
                             .classLevel(false)
                             .build())

@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE_PARAMETER})
+@Target({ElementType.TYPE})
 public @interface LogConfig {
     boolean ignoreGetters() default false;
     boolean ignoreSetters() default false;

@@ -6,6 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.LogException;
+import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,10 +35,10 @@ final class ExceptionDescriptor {
      * Builder.
      */
     public static final class Builder {
-        private final AnnotationInfo<LogException> exceptionAnnotationInfo;
+        private final SourceAwareAnnotationInfo<LogException> exceptionAnnotationInfo;
         private final Map<Class<? extends Exception>, ExceptionSeverity> map = new HashMap<Class<? extends Exception>, ExceptionSeverity>();
 
-        public Builder(AnnotationInfo<LogException> exceptionAnnotationInfo) {
+        public Builder(SourceAwareAnnotationInfo<LogException> exceptionAnnotationInfo) {
             this.exceptionAnnotationInfo = exceptionAnnotationInfo;
         }
 
