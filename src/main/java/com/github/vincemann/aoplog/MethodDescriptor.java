@@ -5,47 +5,25 @@
 
 package com.github.vincemann.aoplog;
 
+import lombok.Getter;
+
 import java.lang.reflect.Method;
 
 /**
  * Method descriptor.
  */
+@Getter
 final class MethodDescriptor {
     private final InvocationDescriptor invocationDescriptor;
-    private volatile ArgumentDescriptor argumentDescriptor;
-    private volatile ExceptionDescriptor exceptionDescriptor;
-    private Method method;
+    private final ArgumentDescriptor argumentDescriptor;
+    private final ExceptionDescriptor exceptionDescriptor;
+    private final Method method;
 
-    public MethodDescriptor(InvocationDescriptor invocationDescriptor, Method method) {
+    public MethodDescriptor(InvocationDescriptor invocationDescriptor, ArgumentDescriptor argumentDescriptor, ExceptionDescriptor exceptionDescriptor, Method method) {
         this.invocationDescriptor = invocationDescriptor;
-        this.method = method;
-    }
-
-    public InvocationDescriptor getInvocationDescriptor() {
-        return invocationDescriptor;
-    }
-
-    public ArgumentDescriptor getArgumentDescriptor() {
-        return argumentDescriptor;
-    }
-
-    public void setArgumentDescriptor(ArgumentDescriptor argumentDescriptor) {
         this.argumentDescriptor = argumentDescriptor;
-    }
-
-    public ExceptionDescriptor getExceptionDescriptor() {
-        return exceptionDescriptor;
-    }
-
-    public void setExceptionDescriptor(ExceptionDescriptor exceptionDescriptor) {
         this.exceptionDescriptor = exceptionDescriptor;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public void setMethod(Method method) {
         this.method = method;
     }
+
 }

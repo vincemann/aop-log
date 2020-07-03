@@ -18,9 +18,11 @@ import java.util.Map;
 final class ExceptionDescriptor {
 
     private final Map<Class<? extends Exception>, ExceptionSeverity> exceptionSeverity;
+    private final SourceAwareAnnotationInfo<LogException> exceptionAnnotationInfo;
 
-    private ExceptionDescriptor(Map<Class<? extends Exception>, ExceptionSeverity> exceptionSeverity) {
+    private ExceptionDescriptor(Map<Class<? extends Exception>, ExceptionSeverity> exceptionSeverity, SourceAwareAnnotationInfo<LogException> exceptionAnnotationInfo) {
         this.exceptionSeverity = exceptionSeverity;
+        this.exceptionAnnotationInfo = exceptionAnnotationInfo;
     }
 
     public Collection<Class<? extends Exception>> getDefinedExceptions() {
@@ -29,6 +31,10 @@ final class ExceptionDescriptor {
 
     public ExceptionSeverity getExceptionSeverity(Class<? extends Exception> resolvedException) {
         return exceptionSeverity.get(resolvedException);
+    }
+
+    public SourceAwareAnnotationInfo<LogException> getExceptionAnnotationInfo() {
+        return exceptionAnnotationInfo;
     }
 
     /**
@@ -49,7 +55,7 @@ final class ExceptionDescriptor {
             setSeverity(exceptionAnnotationInfo.getAnnotation().info(), Severity.INFO);
             setSeverity(exceptionAnnotationInfo.getAnnotation().debug(), Severity.DEBUG);
             setSeverity(exceptionAnnotationInfo.getAnnotation().trace(), Severity.TRACE);
-            return new ExceptionDescriptor(map);
+            return new ExceptionDescriptor(map, exceptionAnnotationInfo);
         }
 
         private void setSeverity(LogException.Exc[] exceptionGroups, Severity targetSeverity) {

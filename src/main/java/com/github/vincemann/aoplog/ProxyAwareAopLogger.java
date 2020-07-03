@@ -1,9 +1,9 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.LogInteraction;
-import com.github.vincemann.aoplog.api.LogAllInteractions;
 import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.api.UltimateTargetClassAware;
+import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -47,6 +47,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
     //I add this impl bc otherwise the ignoreGetters and ignoreSetters in @LogConfig, that is handled by this component, would be ignored,
     // which would be unexpected behavior
     private final List<MethodFilter> methodFilters = Lists.newArrayList(new LogConfigMethodFilter());
+    private InvocationDescriptorFactory invocationDescriptorFactory;
 
     @Override
     public void afterPropertiesSet(){
@@ -64,8 +65,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
     }
 
     @Autowired
-    public ProxyAwareAopLogger(AnnotationParser annotationParser,MethodFilter... methodFilters) {
+    public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, MethodFilter... methodFilters) {
         this.annotationParser = annotationParser;
+        this.invocationDescriptorFactory = invocationDescriptorFactory;
         this.methodFilters.addAll(Lists.newArrayList(methodFilters));
     }
 
@@ -123,12 +125,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
         //class that has chosen annotation or declares method with valid annotation
         Class<?> logClass;
         Object[] args;
-        SourceAwareAnnotationInfo<LogInteraction> logInfo;
 
         MethodDescriptor methodDescriptor;
-        InvocationDescriptor invocationDescriptor;
         ArgumentDescriptor argumentDescriptor;
         ExceptionDescriptor exceptionDescriptor;
+        InvocationDescriptor invocationDescriptor;
         ProceedingJoinPoint joinPoint;
         org.apache.commons.logging.Log logger;
 
@@ -138,18 +139,31 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.joinPoint = joinPoint;
             this.method = extractMethod(joinPoint);
             this.targetClass = targetClass;
-            this.logInfo = annotationParser.fromMethodOrClass()
-            this.methodLog = annotationParser.fromMethod(method, LogInteraction.class);
-            this.classLog = annotationParser.fromClass(targetClass, LogAllInteractions.class);
-            SourceAwareAnnotationInfo<LogException> logExceptionInfo = annotationParser.fromMethodOrClass(method,LogException.class);
-            this.invocationDescriptor = new InvocationDescriptor.Builder(methodLog,classLog,logExceptionInfo).build();
-            this.methodDescriptor = createMethodDescriptor(method,invocationDescriptor);
-            //exception descriptor will be null if no LogException was found
-            if (logExceptionInfo!=null)
-                this.exceptionDescriptor = createExceptionDescriptor(methodDescriptor);
+            this.methodDescriptor = createMethodDescriptor();
+            this.exceptionDescriptor = methodDescriptor.getExceptionDescriptor();
+            this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
+            this.argumentDescriptor = methodDescriptor.getArgumentDescriptor();
             this.args = joinPoint.getArgs();
             this.logger = logAdapter.getLog(targetClass);
-            this.argumentDescriptor= createArgumentDescriptor(methodDescriptor,method,args.length);
+        }
+
+        private MethodDescriptor createMethodDescriptor(){
+            synchronized (cache) {
+                MethodDescriptor cached = cache.get(method);
+                if (cached != null) {
+                    return cached;
+                } else {
+                    AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
+                    AnnotationInfo<LogInteraction> classLogInfo = annotationParser.fromClass(targetClass, LogInteraction.class);
+                    SourceAwareAnnotationInfo<LogException> logExceptionInfo = annotationParser.fromMethodOrClass(method, LogException.class);
+                    ArgumentDescriptor argumentDescriptor = new ArgumentDescriptor.Builder(method, args.length, localVariableNameDiscoverer).build();
+                    ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(logExceptionInfo).build();
+                    InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo);
+                    cached = new MethodDescriptor(invocationDescriptor, argumentDescriptor, exceptionDescriptor, method);
+                    MethodDescriptor prev = cache.putIfAbsent(method, methodDescriptor);
+                    return prev == null ? cached : prev;
+                }
+            }
         }
 
         Object proceed() throws Throwable {
@@ -178,10 +192,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         boolean isExceptionLoggingOn(){
-            if (exceptionDescriptor==null){
-                return false;
-            }
-            SourceAwareAnnotationInfo<LogException> logExceptionInfo = invocationDescriptor.getExceptionAnnotation();
+            SourceAwareAnnotationInfo<LogException> logExceptionInfo = exceptionDescriptor.getExceptionAnnotationInfo();
             if (logExceptionInfo==null){
                 return false;
             }
@@ -200,36 +211,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
         private boolean isLoggingOn(Severity severity) {
             return severity != null && logStrategies.get(severity).isLogEnabled(logger);
         }
-    }
-
-
-
-    private MethodDescriptor createMethodDescriptor(Method method, InvocationDescriptor invocationDescriptor) {
-        MethodDescriptor cached = cache.get(method);
-        if (cached != null) {
-            return cached;
-        }
-        cached = new MethodDescriptor(invocationDescriptor, method);
-        MethodDescriptor prev = cache.putIfAbsent(method, cached);
-        return prev == null ? cached : prev;
-    }
-
-    private ArgumentDescriptor createArgumentDescriptor(MethodDescriptor descriptor, Method method, int argumentCount) {
-        if (descriptor.getArgumentDescriptor() != null) {
-            return descriptor.getArgumentDescriptor();
-        }
-        ArgumentDescriptor argumentDescriptor = new ArgumentDescriptor.Builder(method, argumentCount, localVariableNameDiscoverer).build();
-        descriptor.setArgumentDescriptor(argumentDescriptor);
-        return argumentDescriptor;
-    }
-
-    private ExceptionDescriptor createExceptionDescriptor(MethodDescriptor descriptor) {
-        if (descriptor.getExceptionDescriptor() != null) {
-            return descriptor.getExceptionDescriptor();
-        }
-        ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(descriptor.getInvocationDescriptor().getExceptionAnnotation()).build();
-        descriptor.setExceptionDescriptor(exceptionDescriptor);
-        return exceptionDescriptor;
     }
 
     private Method extractMethod(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {

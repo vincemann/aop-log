@@ -5,12 +5,12 @@
 
 package com.github.vincemann.aoplog.service;
 
-import com.github.vincemann.aoplog.api.LogAllInteractions;
+import com.github.vincemann.aoplog.api.LogInteraction;
 
 /**
  * Base implementation of {@link BazService}.
  */
-@LogAllInteractions
+@LogInteraction
 public abstract class AbstractBazService implements BazService {
 
     @Override

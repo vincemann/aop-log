@@ -5,47 +5,44 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogAllInteractions;
-import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
-import org.junit.*;
+import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
+import com.github.vincemann.aoplog.parseAnnotation.AnnotationParser;
+import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.parseAnnotation.TypeHierarchyAnnotationParser;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
-import com.github.vincemann.aoplog.parseAnnotation.AnnotationParser;
-import com.github.vincemann.aoplog.parseAnnotation.TypeHierachyAnnotationParser;
-
-import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 
 /**
  * Tests {@link InvocationDescriptor} with log annotated methods.
  */
-public class InvocationDescriptorTestCase {
+public class InvocationDescriptorFactoryMethodTestCase {
 
-    Method currMethod;
     InvocationDescriptor currDescriptor;
-    AnnotationParser annotationParser = new TypeHierachyAnnotationParser();
-
+    AnnotationParser annotationParser = new TypeHierarchyAnnotationParser();
+    InvocationDescriptorFactory factory = new InvocationDescriptorFactoryImpl();
 
     @Rule
     public MethodRule watchman = new TestWatchman() {
         public void starting(FrameworkMethod method) {
-            currMethod = method.getMethod();
-            LogInteraction methodLog = annotationParser.fromMethod(currMethod, LogInteraction.class);
-            LogAllInteractions classLog = annotationParser.fromClass(getClass(), LogAllInteractions.class);
-            SourceAwareAnnotationInfo<LogException> logException = annotationParser.fromMethodOrClass(currMethod, LogException.class);
-            currDescriptor = new InvocationDescriptor.Builder(methodLog,classLog,logException).build();
+            AnnotationInfo<LogInteraction> methodLog = annotationParser.fromMethod(method.getMethod(), LogInteraction.class);
+            AnnotationInfo<LogInteraction> classLog = annotationParser.fromClass(getClass(), LogInteraction.class);
+            SourceAwareAnnotationInfo<LogException> logException = annotationParser.fromMethodOrClass(method.getMethod(), LogException.class);
+            currDescriptor = factory.create(methodLog,classLog,logException);
         }
     };
 
     @After
     public void tearDown() throws Exception {
-        currMethod = null;
-//        loggingAnnotationInfo = null;
-//        logExceptionAnnotationInfo = null;
+        currDescriptor=null;
     }
 
     @Test
@@ -116,7 +113,6 @@ public class InvocationDescriptorTestCase {
     public void testGetExceptionAnnotation() throws Exception {
 //        assertNull(descriptor.getBeforeSeverity());
         assertNull(currDescriptor.getSeverity());
-        assertNotNull(currDescriptor.getExceptionAnnotation());
     }
 
     @Test

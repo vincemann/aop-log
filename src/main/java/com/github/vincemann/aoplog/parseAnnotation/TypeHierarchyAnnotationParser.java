@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 //todo cache all
-public class TypeHierachyAnnotationParser implements AnnotationParser {
+public class TypeHierarchyAnnotationParser implements AnnotationParser {
 
     private static Iterable<Class<?>> getClassHierarchy(Class<?> baseClass) {
         return Traverser.forGraph(
