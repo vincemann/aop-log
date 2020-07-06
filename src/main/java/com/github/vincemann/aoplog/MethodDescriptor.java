@@ -6,6 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import lombok.Getter;
+import lombok.ToString;
 
 import java.lang.reflect.Method;
 
@@ -13,6 +14,7 @@ import java.lang.reflect.Method;
  * Method descriptor.
  */
 @Getter
+@ToString
 final class MethodDescriptor {
     private final InvocationDescriptor invocationDescriptor;
     private final ArgumentDescriptor argumentDescriptor;

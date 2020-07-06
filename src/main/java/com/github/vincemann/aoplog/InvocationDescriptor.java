@@ -9,12 +9,14 @@ import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.lang.Nullable;
 
 /**
  * Method descriptor. With effective Severity and LogInfos.
  */
 @Getter
+@ToString
 final class InvocationDescriptor {
     private final Severity severity;
     @Nullable

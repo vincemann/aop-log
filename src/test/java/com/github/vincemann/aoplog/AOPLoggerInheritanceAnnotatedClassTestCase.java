@@ -9,6 +9,7 @@ import com.github.vincemann.aoplog.service.BazService;
 import com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl;
 import com.github.vincemann.aoplog.service.DisabledBazService;
 import com.github.vincemann.aoplog.service.MethodOnlyBazServiceImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import static org.junit.Assert.assertEquals;
  * <li>can have independent log configurations,</li>
  * <li>can shared a common log config as well (in interface and abstract class)</li>
  * <li>can override and disable common log config</li>
- * <li>method has always precedence</li>
+ * <li>method has always precedence over class</li>
  * </ul>
  */
 @RunWith(SpringJUnit4ClassRunner.class)

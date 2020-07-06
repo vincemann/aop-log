@@ -2,11 +2,13 @@ package com.github.vincemann.aoplog.parseAnnotation;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.util.Assert;
 
 import java.lang.annotation.Annotation;
 
 @Getter
+@ToString(callSuper = true)
 public class SourceAwareAnnotationInfo<A extends Annotation>
         extends AnnotationInfo<A>{
     private boolean classLevel;

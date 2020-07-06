@@ -6,6 +6,7 @@ import com.github.vincemann.aoplog.api.UltimateTargetClassAware;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -42,12 +43,20 @@ public class ProxyAwareAopLogger implements InitializingBean {
     private Map<Severity, LogStrategy> logStrategies;
     private final LocalVariableTableParameterNameDiscoverer localVariableNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
     private final ExceptionResolver exceptionResolver = new ExceptionResolver();
-    private final ConcurrentMap<Method, MethodDescriptor> cache = new ConcurrentHashMap<Method, MethodDescriptor>();
+    private final ConcurrentMap<LoggedMethodIdentifier, MethodDescriptor> cache = new ConcurrentHashMap<>();
     private AnnotationParser annotationParser;
     //I add this impl bc otherwise the ignoreGetters and ignoreSetters in @LogConfig, that is handled by this component, would be ignored,
     // which would be unexpected behavior
     private final List<MethodFilter> methodFilters = Lists.newArrayList(new LogConfigMethodFilter());
     private InvocationDescriptorFactory invocationDescriptorFactory;
+
+    @EqualsAndHashCode
+    @Getter
+    @AllArgsConstructor
+    private static class LoggedMethodIdentifier {
+        private Method method;
+        private Class<?> targetClass;
+    }
 
     @Override
     public void afterPropertiesSet(){
@@ -138,8 +147,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
         LoggedMethodCall(ProceedingJoinPoint joinPoint,Class<?> targetClass) throws NoSuchMethodException {
             this.joinPoint = joinPoint;
             this.args = joinPoint.getArgs();
-            this.method = extractMethod(joinPoint);
             this.targetClass = targetClass;
+            this.method = extractMethod(targetClass,joinPoint);
             this.methodDescriptor = createMethodDescriptor();
             this.exceptionDescriptor = methodDescriptor.getExceptionDescriptor();
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
@@ -148,9 +157,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         private MethodDescriptor createMethodDescriptor(){
+            System.err.println("Searching for method Descriptor in cache with key: " + method);
             synchronized (cache) {
-                MethodDescriptor cached = cache.get(method);
+                MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method,targetClass));
                 if (cached != null) {
+                    System.err.println("Returning method Descriptor from cache: " + cached);
                     return cached;
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
@@ -160,8 +171,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
                     ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(logExceptionInfo).build();
                     InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo);
                     cached = new MethodDescriptor(invocationDescriptor, argumentDescriptor, exceptionDescriptor, method);
-                    MethodDescriptor prev = cache.putIfAbsent(method, cached);
-                    return prev == null ? cached : prev;
+                    cache.put(new LoggedMethodIdentifier(method,targetClass), cached);
+                    return cached;
                 }
             }
         }
@@ -216,11 +227,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
     }
 
     //todo maybe need to be changed
-    private Method extractMethod(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
+    private Method extractMethod(Class<?> targetClass, ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         // signature.getMethod() points to method declared in interface. it is not suit to discover arg names and arg annotations
         // see AopProxyUtils: org.springframework.cache.interceptor.CacheAspectSupport#execute(CacheAspectSupport.Invoker, Object, Method, Object[])
-        Class<?> targetClass = joinPoint.getTarget().getClass();
+//        Class<?> targetClass = joinPoint.getTarget().getClass();
         if (Modifier.isPublic(signature.getMethod().getModifiers())) {
             return targetClass.getMethod(signature.getName(), signature.getParameterTypes());
         } else {

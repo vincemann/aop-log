@@ -7,6 +7,7 @@ package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import lombok.ToString;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
 /**
  * Method exceptions descriptor.
  */
+@ToString
 final class ExceptionDescriptor {
 
     private final Map<Class<? extends Exception>, ExceptionSeverity> exceptionSeverity;

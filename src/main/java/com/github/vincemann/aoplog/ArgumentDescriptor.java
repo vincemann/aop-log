@@ -6,6 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.Lp;
+import lombok.ToString;
 import org.springframework.core.ParameterNameDiscoverer;
 
 import java.lang.annotation.Annotation;
@@ -15,6 +16,7 @@ import java.util.BitSet;
 /**
  * Method arguments descriptor.
  */
+@ToString
 final class ArgumentDescriptor {
     private final BitSet loggedValueIndexes;
     private final String[] names;
