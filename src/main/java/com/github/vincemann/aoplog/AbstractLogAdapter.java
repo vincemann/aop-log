@@ -8,6 +8,8 @@ package com.github.vincemann.aoplog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.Method;
+
 /**
  * Abstract log adapter.
  */
@@ -28,7 +30,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(String method, Object[] args, ArgumentDescriptor argumentDescriptor) {
+    public Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
         if (args.length == 0) {
             return CALLING + method + "()";
         }
@@ -61,7 +63,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(String method, int argCount, Object result) {
+    public Object toMessage(Method method, int argCount, Object result) {
         if (argCount == 0) {
             return RETURNING + method + "():" + asString(result);
         }
@@ -69,7 +71,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(String method, int argCount, Exception e, boolean stackTrace) {
+    public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
         String message;
         if (argCount == 0) {
             message = THROWING + method + "():" + e.getClass();

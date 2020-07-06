@@ -1,8 +1,10 @@
 package com.github.vincemann.aoplog;
 
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,12 +18,24 @@ import java.util.Set;
 public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     private static final String EMPTY_LINE = " "+System.lineSeparator();
     private final Map<Thread, Integer> thread_amountOpenMethodCalls = new HashMap<>();
+    private final Map<Thread,MethodDescriptor> thread_openMethod = new HashMap<>();
     private String HARD_START_PADDING_CHAR = "+";
     private String HARD_END_PADDING_CHAR = "=";
     private String SOFT_PADDING_CHAR = "_";
     private int LENGTH = 122;
     private int INDENTATION_LENGTH = 32;
     private String INDENTATION_CHAR = " ";
+
+    @EqualsAndHashCode
+    private static class MethodDescriptor{
+        private String name;
+        private Class<?>[] argTypes;
+
+        MethodDescriptor(Method method){
+            this.name=method.getName();
+            this.argTypes=method.getParameterTypes();
+        }
+    }
 
     public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
         super(skipNullFields, cropThreshold, excludeFieldNames, forceReflection);
@@ -32,23 +46,29 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(String method, Object[] args, ArgumentDescriptor argumentDescriptor) {
+    public Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
         String msg = (String) super.toMessage(method,args,argumentDescriptor);
         int openMethodCalls = incrementOpenMethodCalls();
+        thread_openMethod.put(Thread.currentThread(),new MethodDescriptor(method));
         return formatCall(msg,openMethodCalls);
     }
 
     @Override
-    public Object toMessage(String method, int argCount, Object result) {
+    public Object toMessage(Method method, int argCount, Object result) {
         String msg = (String) super.toMessage(method, argCount, result);
         int openMethodCalls = decrementOpenMethodCalls();
         return formatResult(msg,openMethodCalls);
     }
 
     @Override
-    public Object toMessage(String method, int argCount, Exception e, boolean stackTrace) {
+    public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
         String msg = (String) super.toMessage(method, argCount, e, stackTrace);
-        int openMethodCalls = decrementOpenMethodCalls();
+        int openMethodCalls;
+        if (thread_openMethod.get(Thread.currentThread()).equals(new MethodDescriptor(method))){
+            openMethodCalls = decrementOpenMethodCalls();
+        }else {
+            openMethodCalls = 0;
+        }
         return formatResult(msg,openMethodCalls);
     }
 

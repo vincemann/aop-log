@@ -7,6 +7,8 @@ package com.github.vincemann.aoplog;
 
 import org.apache.commons.logging.Log;
 
+import java.lang.reflect.Method;
+
 /**
  * Declares access to the logger and log message creation.
  */
@@ -15,15 +17,9 @@ interface LogAdapter {
 
     Log getLog(String name);
 
-    Object toMessage(String method, Object[] args, ArgumentDescriptor argumentDescriptor);
+    Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor);
 
-    Object toMessage(String method, int argCount, Object result);
+    Object toMessage(Method method, int argCount, Object result);
 
-    Object toMessage(String method, int argCount, Exception e, boolean stackTrace);
-
-    public class LogPointInfo{
-        boolean callPoint;
-        boolean returnPoint;
-        boolean exceptionPoint;
-    }
+    Object toMessage(Method method, int argCount, Exception e, boolean stackTrace);
 }

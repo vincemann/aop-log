@@ -15,6 +15,7 @@ import org.mockito.ArgumentMatcher;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
@@ -44,6 +45,14 @@ public final class TestSupportUtility {
 
 
     private TestSupportUtility() {
+    }
+
+    public static Method findTestMethod(Class<?> clazz, String name){
+        try {
+            return clazz.getDeclaredMethod(name,String.class,String.class);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void assertCollection(Collection<?> collection, Object... expected) {

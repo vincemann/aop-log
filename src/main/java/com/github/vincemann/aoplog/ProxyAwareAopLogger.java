@@ -176,19 +176,21 @@ public class ProxyAwareAopLogger implements InitializingBean {
             if (resolved != null) {
                 ExceptionSeverity excSeverity = exceptionDescriptor.getExceptionSeverity(resolved);
                 if (isLoggingOn(excSeverity.getSeverity())) {
-                    logStrategies.get(excSeverity.getSeverity()).logException(logger, method.getName(), args.length, e, excSeverity.getStackTrace());
+                    logStrategies.get(excSeverity.getSeverity())
+                            .logException(logger, method, args.length, e, excSeverity.getStackTrace());
                 }
             }
         }
 
         void logInvocation(){
             logStrategies.get(invocationDescriptor.getSeverity())
-                    .logBefore(logger, method.getName(), args, argumentDescriptor);
+                    .logBefore(logger, method, args, argumentDescriptor);
         }
 
         void logResult(){
             Object loggedResult = (method.getReturnType() == Void.TYPE) ? Void.TYPE : result;
-            logStrategies.get(invocationDescriptor.getSeverity()).logAfter(logger, method.getName(), args.length, loggedResult);
+            logStrategies.get(invocationDescriptor.getSeverity())
+                    .logAfter(logger, method, args.length, loggedResult);
         }
 
         boolean isExceptionLoggingOn(){
@@ -213,6 +215,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
     }
 
+    //todo maybe need to be changed
     private Method extractMethod(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         // signature.getMethod() points to method declared in interface. it is not suit to discover arg names and arg annotations
