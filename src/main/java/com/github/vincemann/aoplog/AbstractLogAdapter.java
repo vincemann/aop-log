@@ -32,11 +32,11 @@ abstract class AbstractLogAdapter implements LogAdapter {
     @Override
     public Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
         if (args.length == 0) {
-            return CALLING + method + "()";
+            return CALLING + method.getName() + "()";
         }
 
         String[] names = argumentDescriptor.getNames();
-        StringBuilder buff = new StringBuilder(CALLING).append(method).append('(');
+        StringBuilder buff = new StringBuilder(CALLING).append(method.getName()).append('(');
         if (args.length > 1) {
             buff.append(args.length).append(" arguments: ");
         }
@@ -65,18 +65,18 @@ abstract class AbstractLogAdapter implements LogAdapter {
     @Override
     public Object toMessage(Method method, int argCount, Object result) {
         if (argCount == 0) {
-            return RETURNING + method + "():" + asString(result);
+            return RETURNING + method.getName() + "():" + asString(result);
         }
-        return RETURNING + method + '(' + argCount + " arguments):" + asString(result);
+        return RETURNING + method.getName() + '(' + argCount + " arguments):" + asString(result);
     }
 
     @Override
     public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
         String message;
         if (argCount == 0) {
-            message = THROWING + method + "():" + e.getClass();
+            message = THROWING + method.getName() + "():" + e.getClass();
         } else {
-            message = THROWING + method + '(' + argCount + " arguments):" + e.getClass();
+            message = THROWING + method.getName() + '(' + argCount + " arguments):" + e.getClass();
         }
         if (e.getMessage() != null) {
             message += '=' + e.getMessage();
