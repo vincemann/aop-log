@@ -14,8 +14,9 @@ import java.lang.reflect.Method;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalMatchers.aryEq;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 
 @Getter
 public abstract class AbstractAopLoggerTestCase {
@@ -65,16 +66,57 @@ public abstract class AbstractAopLoggerTestCase {
                 .thenReturn("<");
         InOrder inOrder = inOrder(logger);
         test.run(new TestCase(inputMethod,outputMethod,capturedArgDescriptor));
-        verifyLogSeverity(level,inOrder);
+        verifyLogsHappened(level,inOrder);
         assertEquals(methodName,inputMethod.getValue().getName());
         assertEquals(methodName,outputMethod.getValue().getName());
     }
+
+    protected void testLogAdapterShouldLogNothing(Runnable testRunnable){
+        enableAllLogger();
+        enableAllLogSeverities();
+        alwaysLog();
+        testRunnable.run();
+        verifyNoLogsHappened();
+    }
+
+    protected void alwaysLog(){
+        Mockito.when(logAdapter.toMessage(any(Method.class),anyObject(), any(ArgumentDescriptor.class)))
+                .thenReturn(">");
+        Mockito.when(logAdapter.toMessage(any(Method.class), anyInt(), anyObject()))
+                .thenReturn("<");
+    }
+    protected void enableAllLogger() {
+        Mockito.when(logAdapter.getLog(any(Class.class)))
+                .thenReturn(logger);
+    }
+    protected void enableAllLogSeverities(){
+        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
+        Mockito.when(logger.isInfoEnabled()).thenReturn(true);
+        Mockito.when(logger.isWarnEnabled()).thenReturn(true);
+        Mockito.when(logger.isErrorEnabled()).thenReturn(true);
+        Mockito.when(logger.isTraceEnabled()).thenReturn(true);
+        Mockito.when(logger.isFatalEnabled()).thenReturn(true);
+    }
+
+    protected void verifyNoLogsHappened(){
+        Mockito.verify(logger,never()).fatal(anyString());
+        Mockito.verify(logger,never()).debug(anyString());
+        Mockito.verify(logger,never()).info(anyString());
+        Mockito.verify(logger,never()).warn(anyString());
+        Mockito.verify(logger,never()).trace(anyString());
+        Mockito.verify(logger,never()).error(anyString());
+    }
+
+
 
     protected void enableLogger(Class<?> clazz) {
         Mockito.when(logAdapter.getLog(clazz)).thenReturn(logger);
     }
 
-    protected void verifyLogSeverity(Severity level,InOrder inOrder){
+
+
+
+    protected void verifyLogsHappened(Severity level, InOrder inOrder){
 
         switch (level){
             case DEBUG:
@@ -103,6 +145,8 @@ public abstract class AbstractAopLoggerTestCase {
                 break;
         }
     }
+
+
 
     protected void enableLogSeverity(Severity level){
         switch (level){

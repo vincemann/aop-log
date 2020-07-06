@@ -7,7 +7,6 @@ package com.github.vincemann.aoplog.service;
 
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.api.LogInteraction;
 
 /**
@@ -33,6 +32,10 @@ public class MethodOnlyBazServiceImpl extends AbstractBazService {
     @LogInteraction(Severity.INFO)
     @Override
     public void getInImpl(String mFirst, String mSecond) {
+
+    }
+
+    public void declaredInImpl(String cmFirst, String cmSecond){
 
     }
 }

@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface LogConfig {
     boolean ignoreGetters() default false;
     boolean ignoreSetters() default false;
+    boolean logChildensDeclaredMethods() default false;
 }

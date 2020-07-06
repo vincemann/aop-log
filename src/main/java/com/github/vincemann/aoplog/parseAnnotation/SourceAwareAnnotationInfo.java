@@ -7,7 +7,8 @@ import org.springframework.util.Assert;
 import java.lang.annotation.Annotation;
 
 @Getter
-public class SourceAwareAnnotationInfo<A extends Annotation> extends AnnotationInfo<A>{
+public class SourceAwareAnnotationInfo<A extends Annotation>
+        extends AnnotationInfo<A>{
     private boolean classLevel;
 
     @Builder

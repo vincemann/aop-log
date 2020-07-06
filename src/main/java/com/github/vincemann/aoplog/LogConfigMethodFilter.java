@@ -4,6 +4,8 @@ import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 
+import java.lang.reflect.Method;
+
 public class LogConfigMethodFilter implements MethodFilter{
 
     @Override
@@ -14,14 +16,34 @@ public class LogConfigMethodFilter implements MethodFilter{
         if (logInfo==null){
             return false;
         }
-        if (classLogConfig!=null){
-            if (classLogConfig.ignoreGetters() && (methodName.startsWith("get") || methodName.startsWith("is"))){
-                return false;
-            }
-            if (classLogConfig.ignoreSetters() && (methodName.startsWith("set"))){
-                return false;
+        if (logInfo.isClassLevel()) {
+            boolean methodDefinedInAnnotationClass = isMethodDefinedInAnnotationClass(methodDescriptor.getMethod(), logInfo);
+            if (classLogConfig != null) {
+                if (!methodDefinedInAnnotationClass && !classLogConfig.logChildensDeclaredMethods()) {
+                    return false;
+                }
+                if (classLogConfig.ignoreGetters() && (methodName.startsWith("get") || methodName.startsWith("is"))) {
+                    return false;
+                }
+                if (classLogConfig.ignoreSetters() && (methodName.startsWith("set"))) {
+                    return false;
+                }
+            } else {
+                if (!methodDefinedInAnnotationClass) {
+                    return false;
+                }
             }
         }
         return true;
+    }
+
+    // checks whether the annotated class or super classes of it, declared the called method
+    private boolean isMethodDefinedInAnnotationClass(Method targetMethod, SourceAwareAnnotationInfo<LogInteraction> classLogInfo){
+        try {
+            classLogInfo.getDeclaringClass().getMethod(targetMethod.getName(),targetMethod.getParameterTypes());
+            return true;
+        } catch (NoSuchMethodException e) {
+           return false;
+        }
     }
 }

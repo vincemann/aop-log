@@ -36,4 +36,5 @@ public class ClassAndMethodBazServiceImpl extends AbstractBazService {
     public void setInImpl(String cmFirst, String cmSecond) {
 
     }
+
 }

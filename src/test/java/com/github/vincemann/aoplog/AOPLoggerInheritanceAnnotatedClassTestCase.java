@@ -11,6 +11,7 @@ import com.github.vincemann.aoplog.service.DisabledBazService;
 import com.github.vincemann.aoplog.service.MethodOnlyBazServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -51,11 +52,14 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     @Resource(name = "auxBaz")
     private BazService classAndMethodBazService;
 
+    @Autowired
+    private MethodOnlyBazServiceImpl methodOnlyBazServiceImpl;
+
     @Resource(name = "disabledBaz")
     private BazService disabledBazService;
 
     @Test
-    public void testImpl_OverridesMethod_fromAbstractClass_withClassLog_shouldUseImplClassLog(){
+    public void testImpl_overridesMethod_fromAbstractClass_withClassLog_shouldUseImplClassLog(){
         //abstract class has debug class level, impl has info class level -> should pick info level
         enableLogger(ClassAndMethodBazServiceImpl.class);
         testLogAdapter(Severity.INFO, "inImpl", testCase -> {
@@ -65,7 +69,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     }
 
     @Test
-    public void testImpl_doesNotOverrideMethod_fromAbstractClass_shouldStillUseImplClassLog() throws Exception {
+    public void testImplWithClassLog_doesNotOverrideMethod_declaredInAbstractClassWithClassLevelLog_shouldStillUseImplClassLog() throws Exception {
         //abstract class has debug class level, impl has info class level -> should pick info level
         enableLogger(ClassAndMethodBazServiceImpl.class);
         testLogAdapter(Severity.INFO, "inAbstract", testCase -> {
@@ -75,7 +79,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     }
 
     @Test
-    public void testImpl_inheritsClassLog_fromAbstractClass(){
+    public void testImpl_inheritsClassLog_fromAbstractClass_forMethodDeclaredOnlyInInterface(){
         enableLogger(MethodOnlyBazServiceImpl.class);
         testLogAdapter(Severity.DEBUG, "inImpl", testCase -> {
             methodOnlyBazService.inImpl("@1", "@2");
@@ -84,10 +88,28 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     }
 
     @Test
+    public void testImpl_inheritsClassLog_fromAbstractClass_forMethodDeclaredOnlyInAbstractClassAndInterface(){
+        enableLogger(MethodOnlyBazServiceImpl.class);
+        testLogAdapter(Severity.DEBUG, "inAbstract", testCase -> {
+        methodOnlyBazService.inAbstract("@1", "@2");
+          assertParams(testCase.getArgumentCaptor().getValue(), A_PARAM_NAMES, true, true);
+        });
+    }
+
+    @Test
+    public void testImpl_doesNotInheritsClassLog_fromAbstractClass_forMethodDeclaredOnlyInImpl(){
+        super.testLogAdapterShouldLogNothing(() -> {
+            methodOnlyBazServiceImpl.declaredInImpl("@1","@2");
+        });
+
+    }
+
+    @Test
     public void testImpl_inheritsClassConfig_fromAbstractClass(){
         //setters are disabled in abstract logConfig -> impl inherits -> setter wont be logged
-        enableLogger(MethodOnlyBazServiceImpl.class);
-        methodOnlyBazService.setInImpl("@1", "@2");
+        super.testLogAdapterShouldLogNothing(() -> {
+            methodOnlyBazService.setInImpl("@1", "@2");
+        });
     }
 
     @Test
@@ -102,7 +124,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
 
     @Test
     public void testImpl_overridesClassLog_fromAbstractClass_withMethodLog(){
-        //annotation from method in impl has precedence over inherited class annotation
+        //annotation from method in impl has precedence over inherited class annotation -> log level info is chosen
         enableLogger(MethodOnlyBazServiceImpl.class);
         testLogAdapter(Severity.INFO, "getInImpl", testCase -> {
             methodOnlyBazService.getInImpl("@1", "@2");
@@ -111,7 +133,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     }
 
     @Test
-    public void testImpl_interfaceMethodLog_overridesImplClassLog(){
+    public void testImpl_interfacesMethodLogAnnotation_overridesImplClassLog(){
         enableLogger(ClassAndMethodBazServiceImpl.class);
         testLogAdapter(Severity.TRACE, "inInterface", testCase -> {
             classAndMethodBazService.inInterface("@1", "@2");
@@ -132,12 +154,12 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     //disable tests
     @Test
     public void testImpl_overridesAbstractClassLog_withDisabledClassLog(){
-        enableLogger(DisabledBazService.class);
-        disabledBazService.inImpl("@1", "@2");
+        //now logging wont work anymore
+        super.testLogAdapterShouldLogNothing(() -> disabledBazService.inImpl("@1", "@2"));
     }
 
     @Test
-    public void testImpl_overridesAbstractClassLog_withDisabledClassLog_butInterfaceMethodLogMethod_stillLogged(){
+    public void testImpl_overridesAbstractClassLog_withDisabledClassLog_butInterfaceMethodLogOverridesAll(){
         enableLogger(DisabledBazService.class);
         testLogAdapter(Severity.TRACE, "inInterface", testCase -> {
             disabledBazService.inInterface("@1", "@2");
@@ -147,7 +169,7 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     }
 
     @Test
-    public void testImpl_hasMethodLog_onMethodFilteredOutMethod_shouldStillBeLogged(){
+    public void testImpl_hasExplicitMethodLogAnnotation_onFilteredOutMethod_shouldStillBeLogged(){
         //setter from DisabledBazService is ignored via class level disabled AND method filter, but still gets called bc explicitly annotated
         enableLogger(DisabledBazService.class);
         testLogAdapter(Severity.INFO, "setInImpl", testCase -> {

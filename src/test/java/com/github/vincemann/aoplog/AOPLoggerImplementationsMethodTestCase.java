@@ -7,7 +7,6 @@ package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.service.FooService;
 import com.github.vincemann.aoplog.service.SimpleFooService;
-import org.apache.commons.logging.Log;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.mockito.internal.InOrderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -95,7 +93,7 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
         String res = fooService.stringMethodTwoVarargs("@1", "@2-1", "@2-2");
         assertEquals("stringMethodTwoVarargs",inputMethod.getValue().getName());
         assertEquals("stringMethodTwoVarargs",outputMethod.getValue().getName());
-        verifyLogSeverity(Severity.TRACE,inOrder);
+        verifyLogsHappened(Severity.TRACE,inOrder);
         assertEquals("stringMethodTwoVarargs:@1:" + Arrays.toString(secondArgValue), res);
         assertParams(captured.getValue(), new String[]{"first", "second"}, false, true);
     }
