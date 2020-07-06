@@ -19,7 +19,7 @@ public class LogConfigMethodFilter implements MethodFilter{
         if (logInfo.isClassLevel()) {
             boolean methodDefinedInAnnotationClass = isMethodDefinedInAnnotationClass(methodDescriptor.getMethod(), logInfo);
             if (classLogConfig != null) {
-                if (!methodDefinedInAnnotationClass && !classLogConfig.logChildensDeclaredMethods()) {
+                if (!methodDefinedInAnnotationClass && !classLogConfig.logAllChildrenMethods()) {
                     return false;
                 }
                 if (classLogConfig.ignoreGetters() && (methodName.startsWith("get") || methodName.startsWith("is"))) {

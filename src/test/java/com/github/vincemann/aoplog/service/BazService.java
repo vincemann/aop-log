@@ -7,6 +7,7 @@ package com.github.vincemann.aoplog.service;
 
 import com.github.vincemann.aoplog.Severity;
 import com.github.vincemann.aoplog.api.AopLoggable;
+import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.api.LogInteraction;
 
 /**

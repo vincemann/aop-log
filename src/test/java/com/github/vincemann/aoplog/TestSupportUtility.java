@@ -47,13 +47,13 @@ public final class TestSupportUtility {
     private TestSupportUtility() {
     }
 
-    public static Method findTestMethod(Class<?> clazz, String name){
-        try {
-            return clazz.getDeclaredMethod(name,String.class,String.class);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static Method findTestMethod(Class<?> clazz, String name){
+//        try {
+//            return clazz.getDeclaredMethod(name,String.class,String.class);
+//        } catch (NoSuchMethodException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public static void assertCollection(Collection<?> collection, Object... expected) {
         assertArrayEquals(expected, collection.toArray());

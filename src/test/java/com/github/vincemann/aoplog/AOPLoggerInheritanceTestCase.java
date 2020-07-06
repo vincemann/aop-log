@@ -5,11 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.service.BazService;
-import com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl;
-import com.github.vincemann.aoplog.service.DisabledBazService;
-import com.github.vincemann.aoplog.service.MethodOnlyBazServiceImpl;
-import org.junit.Ignore;
+import com.github.vincemann.aoplog.service.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +30,10 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/com/github/vincemann/aoplog/AOPLoggerInheritanceAnnotatedClassTestCase-context.xml")
 @DirtiesContext
-public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLoggerTestCase{
+public class AOPLoggerInheritanceTestCase extends AbstractAopLoggerTestCase{
 
+    //extended bar service impl
+    private static final String[] E_PARAM_NAMES = new String[]{"eFirst", "eSecond"};
     //method only impl
     private static final String[] M_PARAM_NAMES = new String[]{"mFirst", "mSecond"};
     //class and method impl
@@ -55,6 +53,9 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
 
     @Autowired
     private MethodOnlyBazServiceImpl methodOnlyBazServiceImpl;
+
+    @Autowired
+    private ExtendedBarService barService;
 
     @Resource(name = "disabledBaz")
     private BazService disabledBazService;
@@ -100,7 +101,17 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
     @Test
     public void testImpl_doesNotInheritsClassLog_fromAbstractClass_forMethodDeclaredOnlyInImpl(){
         super.testLogAdapterShouldLogNothing(() -> {
-            methodOnlyBazServiceImpl.declaredInImpl("@1","@2");
+            methodOnlyBazServiceImpl.onlyInImpl("@1","@2");
+        });
+
+    }
+
+    @Test
+    public void testImpl_inheritClassLog_fromAbstractClass_forMethodDeclaredOnlyInImpl_bc_logConfigs_LogChildensDeclaredMethods(){
+        enableLogger(ExtendedBarService.class);
+        testLogAdapter(Severity.DEBUG, "onlyInImpl", testCase -> {
+            barService.onlyInImpl("@1", "@2");
+            assertParams(testCase.getArgumentCaptor().getValue(), E_PARAM_NAMES, true, true);
         });
 
     }

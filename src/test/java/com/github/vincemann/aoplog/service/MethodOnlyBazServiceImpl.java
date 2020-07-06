@@ -35,7 +35,7 @@ public class MethodOnlyBazServiceImpl extends AbstractBazService {
 
     }
 
-    public void declaredInImpl(String cmFirst, String cmSecond){
+    public void onlyInImpl(String cmFirst, String cmSecond){
 
     }
 }
