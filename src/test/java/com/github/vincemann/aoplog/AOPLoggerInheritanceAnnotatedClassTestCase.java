@@ -9,6 +9,7 @@ import com.github.vincemann.aoplog.service.BazService;
 import com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl;
 import com.github.vincemann.aoplog.service.DisabledBazService;
 import com.github.vincemann.aoplog.service.MethodOnlyBazServiceImpl;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -71,17 +72,6 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
             classAndMethodBazService.inAbstract("@1", "@2");
             assertParams(testCase.getArgumentCaptor().getValue(), A_PARAM_NAMES, true, true);
         });
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(firstMethod.capture(), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage(secondMethod.capture(), 2, Void.TYPE)).thenReturn("<");
-//        enableInfoLogging();
-//        classAndMethodBazService.inAbstract("@1", "@2");
-//        assertEquals("inAbstract",firstMethod.getValue().getName());
-//        assertEquals("inAbstract",secondMethod.getValue().getName());
-//        verifyInfoLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), A_PARAM_NAMES, true, true);
     }
 
     @Test
@@ -91,18 +81,6 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
             methodOnlyBazService.inImpl("@1", "@2");
             assertParams(testCase.getArgumentCaptor().getValue(), M_PARAM_NAMES, true, true);
         });
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//
-//        Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
-//        enableDebugLogging();
-//        methodOnlyBazService.inImpl("@1", "@2");
-//        assertEquals("inImpl",firstMethod.getValue().getName());
-//        assertEquals("inImpl",secondMethod.getValue().getName());
-//        verifyDebugLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), M_PARAM_NAMES, true, true);
     }
 
     @Test
@@ -120,17 +98,6 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
             classAndMethodBazService.setInImpl("@1", "@2");
             assertParams(testCase.getArgumentCaptor().getValue(), CM_PARAM_NAMES, true, true);
         });
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(eq("setInImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("setInImpl", 2, Void.TYPE)).thenReturn("<");
-//        enableInfoLogging();
-//        classAndMethodBazService.setInImpl("@1", "@2");
-//        assertEquals("setInImpl",firstMethod.getValue().getName());
-//        assertEquals("setInImpl",secondMethod.getValue().getName());
-//        verifyInfoLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), CM_PARAM_NAMES, true, true);
     }
 
     @Test
@@ -141,41 +108,15 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
             methodOnlyBazService.getInImpl("@1", "@2");
             assertParams(testCase.getArgumentCaptor().getValue(), M_PARAM_NAMES, true, true);
         });
-
-
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(eq("getInImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("getInImpl", 2, Void.TYPE)).thenReturn("<");
-//        enableInfoLogging();
-//        methodOnlyBazService.getInImpl("@1", "@2");
-//        assertEquals("getInImpl",firstMethod.getValue().getName());
-//        assertEquals("getInImpl",secondMethod.getValue().getName());
-//        verifyInfoLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), M_PARAM_NAMES, true, true);
     }
 
     @Test
     public void testImpl_interfaceMethodLog_overridesImplClassLog(){
         enableLogger(ClassAndMethodBazServiceImpl.class);
-        testLogAdapter(Severity.INFO, "inInterface", testCase -> {
+        testLogAdapter(Severity.TRACE, "inInterface", testCase -> {
             classAndMethodBazService.inInterface("@1", "@2");
             assertParams(testCase.getArgumentCaptor().getValue(), I_PARAM_NAMES, true, true);
         });
-
-
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(eq("inInterface"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("inInterface", 2, Void.TYPE)).thenReturn("<");
-//        enableTraceLogging();
-//        classAndMethodBazService.inInterface("@1", "@2");
-//        assertEquals("inInterface",firstMethod.getValue().getName());
-//        assertEquals("inInterface",secondMethod.getValue().getName());
-//        verifyTraceLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), I_PARAM_NAMES, true, true);
     }
 
     @Test
@@ -186,17 +127,6 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
             assertParams(testCase.getArgumentCaptor().getValue(), M_PARAM_NAMES, true, true);
         });
 
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(eq("inInterface"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("inInterface", 2, Void.TYPE)).thenReturn("<");
-//        enableInfoLogging();
-//        methodOnlyBazService.inInterface("@1", "@2");
-//        assertEquals("inInterface",firstMethod.getValue().getName());
-//        assertEquals("inInterface",secondMethod.getValue().getName());
-//        verifyInfoLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), M_PARAM_NAMES, true, true);
     }
 
     //disable tests
@@ -214,17 +144,6 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
             assertParams(testCase.getArgumentCaptor().getValue(), D_PARAM_NAMES, true, true);
         });
 
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(eq("inInterface"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("inInterface", 2, Void.TYPE)).thenReturn("<");
-//        enableTraceLogging();
-//        disabledBazService.inInterface("@1", "@2");
-//        assertEquals("inInterface",firstMethod.getValue().getName());
-//        assertEquals("inInterface",secondMethod.getValue().getName());
-//        verifyTraceLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), D_PARAM_NAMES, true, true);
     }
 
     @Test
@@ -232,81 +151,11 @@ public class AOPLoggerInheritanceAnnotatedClassTestCase extends AbstractAopLogge
         //setter from DisabledBazService is ignored via class level disabled AND method filter, but still gets called bc explicitly annotated
         enableLogger(DisabledBazService.class);
         testLogAdapter(Severity.INFO, "setInImpl", testCase -> {
-            disabledBazService.inInterface("@1", "@2");
+            disabledBazService.setInImpl("@1", "@2");
             assertParams(testCase.getArgumentCaptor().getValue(), D_PARAM_NAMES, true, true);
         });
 
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        ArgumentCaptor<Method> firstMethod = ArgumentCaptor.forClass(Method.class);
-//        ArgumentCaptor<Method> secondMethod = ArgumentCaptor.forClass(Method.class);
-//        Mockito.when(logAdapter.toMessage(eq("setInImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("setInImpl", 2, Void.TYPE)).thenReturn("<");
-//        enableInfoLogging();
-//        disabledBazService.setInImpl("@1", "@2");
-//        assertEquals("setInImpl",firstMethod.getValue().getName());
-//        assertEquals("setInImpl",secondMethod.getValue().getName());
-//        verifyInfoLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), D_PARAM_NAMES, true, true);
     }
-
-
-
-//    @Test
-//    public void testAuxBazInImpl() throws Exception {
-//        expectServiceLoggerToBe(ClassAndMethodBazServiceImpl.class);
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        Mockito.when(logAdapter.toMessage(eq("inImpl"), aryEq(PARAM_VALUE), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage("inImpl", 2, Void.TYPE)).thenReturn("<");
-//
-//
-//
-//        //EasyMock.replay(logAdapter, logger);
-//        enableDebugLogging();
-//        classAndMethodBazService.inImpl("@1", "@2");
-//        verifyDebugLogging();
-//        assertParams(testCase.getArgumentCaptor().getValue(), X_PARAM_NAMES, true, true);
-//        //EasyMock.verify(logAdapter, logger);
-//    }
-//
-//    @Test
-//    public void testAuxBazInAbstract() throws Exception {
-//        //EasyMock.replay(logAdapter, logger);
-//        classAndMethodBazService.inAbstract("@1", "@2");
-//        //EasyMock.verify(logAdapter, logger);
-//    }
-
-
-//    private void enableInfoLogging(){
-//        Mockito.when(logger.isInfoEnabled()).thenReturn(true);
-//    }
-//
-//    private void enableDebugLogging(){
-//        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-//    }
-//    private void verifyInfoLogging() {
-//        InOrder inOrder = inOrder(logger);
-//        inOrder.verify(logger).info(eq(">"));
-//        inOrder.verify(logger).info(eq("<"));
-//    }
-//
-//    private void verifyDebugLogging() {
-//        InOrder inOrder = inOrder(logger);
-//        inOrder.verify(logger).debug(eq(">"));
-//        inOrder.verify(logger).debug(eq("<"));
-////
-////        logger.debug(">");
-////        logger.debug("<");
-//    }
-//
-//    private void enableTraceLogging(){
-//        Mockito.when(logger.isTraceEnabled()).thenReturn(true);
-//    }
-//    private void verifyTraceLogging() {
-//        InOrder inOrder = inOrder(logger);
-//        inOrder.verify(logger).trace(eq(">"));
-//        inOrder.verify(logger).trace(eq("<"));
-//    }
-
 
     private void assertParams(ArgumentDescriptor descriptor, String[] names, boolean first, boolean second) {
         assertArrayEquals(names, descriptor.getNames());

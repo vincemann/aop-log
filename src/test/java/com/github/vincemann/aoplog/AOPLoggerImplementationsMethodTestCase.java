@@ -10,6 +10,7 @@ import com.github.vincemann.aoplog.service.SimpleFooService;
 import org.apache.commons.logging.Log;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -53,23 +54,6 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
             fooService.voidMethodZero();
             assertParams(testCase.getArgumentCaptor().getValue(), null);
         });
-
-
-
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//
-//        Mockito.when(logAdapter.toMessage(eq("voidMethodZero"), aryEq(new Object[]{}), captured.capture()))
-//                .thenReturn(">");
-//        Mockito.when(logAdapter.toMessage(eq("voidMethodZero"), eq(0), eq(Void.TYPE)))
-//                .thenReturn("<");
-//
-//        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-//        InOrder inOrder = inOrder(logger);
-//        fooService.voidMethodZero();
-//
-//        inOrder.verify(logger).debug(eq(">"));
-//        inOrder.verify(logger).debug(eq("<"));
-//        assertParams(testCase.getArgumentCaptor().getValue(), null);
     }
 
     @Test
@@ -85,27 +69,6 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
             assertParams(testCase.argumentCaptor.getValue(), new String[]{"first", "second"}, false, true);
         });
 
-
-//        expectLoggerToBeSimpleFooServiceLogger();
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        Mockito.when(logAdapter.toMessage(eq("stringMethodTwo"), aryEq(new Object[]{"@1", "@2"}), captured.capture()))
-//                .thenReturn(">");
-//        Mockito.when(logAdapter.toMessage(eq("stringMethodTwo"), eq(2), eq("stringMethodTwo:@1:@2")))
-//                .thenReturn("<");
-//        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-////        logger.debug(">");
-//        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-////        logger.debug("<");
-//        //EasyMock.replay(logAdapter, logger);
-//        String res = fooService.stringMethodTwo("@1", "@2");
-//
-//        InOrder inOrder = inOrder(logger);
-//        inOrder.verify(logger).debug(eq(">"));
-//        inOrder.verify(logger).debug(eq("<"));
-//
-//        assertEquals("stringMethodTwo:@1:@2", res);
-//        assertParams(testCase.getArgumentCaptor().getValue(), new String[]{"first", "second"}, false, true);
-//        //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
@@ -115,28 +78,10 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
             assertEquals("stringMethodThree:@1:@2:@3", res);
             assertParams(testCase.getArgumentCaptor().getValue(), new String[]{"first", "second", "third"}, true, true, true);
         });
-
-
-//        expectLoggerToBeSimpleFooServiceLogger();
-//        ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
-//        Mockito.when(logAdapter.toMessage(eq("stringMethodThree"), aryEq(new Object[]{"@1", "@2", "@3"}), captured.capture())).thenReturn(">");
-//        Mockito.when(logAdapter.toMessage(eq("stringMethodThree"), eq(3), eq("stringMethodThree:@1:@2:@3"))).thenReturn("<");
-//        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-////        logger.debug(">");
-//        Mockito.when(logger.isDebugEnabled()).thenReturn(true);
-////        logger.debug("<");
-//        //EasyMock.replay(logAdapter, logger);
-//        String res = fooService.stringMethodThree("@1", "@2", "@3");
-//        InOrder inOrder = inOrder(logger);
-//        inOrder.verify(logger).debug(eq(">"));
-//        inOrder.verify(logger).debug(eq("<"));
-//        assertEquals("stringMethodThree:@1:@2:@3", res);
-//        assertParams(testCase.getArgumentCaptor().getValue(), new String[]{"first", "second", "third"}, true, true, true);
-//        //EasyMock.verify(logAdapter, logger);
     }
 
     @Test
-    public void testLogTraceOfSomeVarArgs() throws Exception {
+    public void testLogTraceOfSomeVarArgs() {
         String[] secondArgValue = {"@2-1", "@2-2"};
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
@@ -156,7 +101,7 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
     }
 
     @Test
-    public void testLogDebugException() throws Exception {
+    public void testLogDebugException() {
         String exceptionMsg = "<";
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
@@ -167,10 +112,7 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
                 .thenReturn(exceptionMsg);
 
         Mockito.when(getLogger().isDebugEnabled()).thenReturn(true);
-//        logger.debug(">");
         Mockito.when(getLogger().isWarnEnabled()).thenReturn(true);
-//        logger.warn("io thrown");
-        //EasyMock.replay(logAdapter, logger);
         try {
             fooService.voidExcMethodZero();
             fail("IOException is expected");
@@ -184,7 +126,6 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
         inOrder.verify(getLogger()).warn(eq(exceptionMsg));
 
         assertParams(captured.getValue(), null);
-        //EasyMock.verify(logAdapter, logger);
     }
 
     

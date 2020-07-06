@@ -45,23 +45,23 @@ public abstract class AbstractAopLoggerTestCase {
         aspect.afterPropertiesSet();
     }
 
-    protected interface Test{
+    protected interface TestRunnable{
         public void run(TestCase testCase);
     }
 
-    protected void testLogAdapter(Severity level, String methodName,Test test){
+    protected void testLogAdapter(Severity level, String methodName,TestRunnable test){
         testLogAdapter(level,PARAM_VALUE,Void.TYPE,methodName,test);
     }
 
     
-    protected void testLogAdapter(Severity level, Object[] args, Object result, String methodName, Test test){
+    protected void testLogAdapter(Severity level, Object[] args, Object result, String methodName, TestRunnable test){
         enableLogSeverity(level);
         ArgumentCaptor<ArgumentDescriptor> capturedArgDescriptor = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
         ArgumentCaptor<Method> outputMethod = ArgumentCaptor.forClass(Method.class);
         Mockito.when(logAdapter.toMessage(inputMethod.capture(),aryEq(args), capturedArgDescriptor.capture()))
                 .thenReturn(">");
-        Mockito.when(logAdapter.toMessage(outputMethod.capture(), args.length, result))
+        Mockito.when(logAdapter.toMessage(outputMethod.capture(), eq(args.length), eq(result)))
                 .thenReturn("<");
         InOrder inOrder = inOrder(logger);
         test.run(new TestCase(inputMethod,outputMethod,capturedArgDescriptor));
@@ -136,4 +136,6 @@ public abstract class AbstractAopLoggerTestCase {
         }
         assertEquals(-1, descriptor.nextLoggedArgumentIndex(indexes.length));
     }
+
+
 }
