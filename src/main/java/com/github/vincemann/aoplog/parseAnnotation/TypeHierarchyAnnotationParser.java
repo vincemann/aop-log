@@ -31,7 +31,8 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
         if (directlyPresentAnnotation!=null){
             return new AnnotationInfo<>(directlyPresentAnnotation,method.getDeclaringClass());
         }
-        return fromMethod(method.getDeclaringClass().getSuperclass(),method.getName(),method.getParameterTypes(),annotationType);
+        Class<?> startClassNode = method.getDeclaringClass().getSuperclass()==null? method.getDeclaringClass() : method.getDeclaringClass().getSuperclass();
+        return fromMethod(startClassNode,method.getName(),method.getParameterTypes(),annotationType);
 
     }
 

@@ -1,13 +1,11 @@
 package com.github.vincemann.aoplog;
 
-import lombok.EqualsAndHashCode;
 import lombok.Setter;
-import org.springframework.util.Assert;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Adds padding to msg, adds ThreadId at the end of payload,
@@ -17,25 +15,26 @@ import java.util.Set;
 @Setter
 public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     private static final String EMPTY_LINE = " "+System.lineSeparator();
-    private final Map<Thread, Integer> thread_amountOpenMethodCalls = new HashMap<>();
-    private final Map<Thread,MethodDescriptor> thread_openMethod = new HashMap<>();
+    private final ConcurrentHashMap<Thread, Stack<Method>> thread_callStack = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Thread,Boolean> thread_openException = new ConcurrentHashMap<>();
     private String HARD_START_PADDING_CHAR = "+";
     private String HARD_END_PADDING_CHAR = "=";
     private String SOFT_PADDING_CHAR = "_";
     private int LENGTH = 122;
-    private int INDENTATION_LENGTH = 32;
+    private int INDENTATION_LENGTH = 15;
     private String INDENTATION_CHAR = " ";
 
-    @EqualsAndHashCode
-    private static class MethodDescriptor{
-        private String name;
-        private Class<?>[] argTypes;
-
-        MethodDescriptor(Method method){
-            this.name=method.getName();
-            this.argTypes=method.getParameterTypes();
-        }
-    }
+//    @EqualsAndHashCode
+//    @ToString
+//    private static class MethodDescriptor{
+//        private String name;
+//        private Class<?>[] argTypes;
+//
+//        MethodDescriptor(Method method){
+//            this.name=method.getName();
+//            this.argTypes=method.getParameterTypes();
+//        }
+//    }
 
     public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
         super(skipNullFields, cropThreshold, excludeFieldNames, forceReflection);
@@ -48,33 +47,55 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     @Override
     public Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
         String msg = (String) super.toMessage(method,args,argumentDescriptor);
-        int openMethodCalls = incrementOpenMethodCalls();
-        thread_openMethod.put(Thread.currentThread(),new MethodDescriptor(method));
-        return formatCall(msg,openMethodCalls);
+        Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
+        if (openException){
+            thread_openException.put(Thread.currentThread(),Boolean.FALSE);
+//            System.err.println("open exception found while opening method: " + method);
+//            System.err.println("clearing stack ");
+            //exception was never catched by logged method -> clear call stack
+            getStack().clear();
+        }
+        int openMethodCalls = getStack().size();
+        String formattedMsg = formatCall(msg, openMethodCalls);
+        addToCallStack(method);
+//        System.err.println("call stack after input logging: " + getStack());
+        return formattedMsg;
     }
 
     @Override
     public Object toMessage(Method method, int argCount, Object result) {
+//        Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
+//        if (openException){
+//            System.err.println("Found open exception, but logging result so it was catched by: " + method );
+//        }
+        thread_openException.put(Thread.currentThread(),Boolean.FALSE);
         String msg = (String) super.toMessage(method, argCount, result);
-        int openMethodCalls = decrementOpenMethodCalls();
-        return formatResult(msg,openMethodCalls);
+        removeFromCallStack(method);
+        int openMethodCalls = getStack().size();
+        String formattedMsg = formatResult(msg, openMethodCalls);
+//        System.err.println("call stack after output logging: " + getStack());
+        return formattedMsg;
     }
 
     @Override
     public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
         String msg = (String) super.toMessage(method, argCount, e, stackTrace);
-        int openMethodCalls;
-        if (thread_openMethod.get(Thread.currentThread()).equals(new MethodDescriptor(method))){
-            openMethodCalls = decrementOpenMethodCalls();
+        boolean removed = removeFromCallStack(method);
+        int openMethodCalls = getStack().size();
+        if (!removed){
+//            System.err.println("Found LogException only method: " + method + ", was not removed from stack bc was not on top");
+            openMethodCalls++;
         }else {
-            openMethodCalls = 0;
+            thread_openException.put(Thread.currentThread(),Boolean.TRUE);
         }
-        return formatResult(msg,openMethodCalls);
+        String formattedMsg = formatResult(msg, openMethodCalls);
+//        System.err.println("call stack after exception logging: " + getStack());
+        return formattedMsg;
     }
 
     protected String formatResult(String msg, int openMethodCalls){
         //open method calls is already updated -> using predecessor
-        String indentation = createIdentation(openMethodCalls+1);
+        String indentation = createIdentation(openMethodCalls);
         String softPadding = createPadding(SOFT_PADDING_CHAR);
         String endPadding = createPadding(HARD_END_PADDING_CHAR);
         return new StringBuilder()
@@ -109,33 +130,30 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 
 
     protected String createIdentation(int openMethodCalls){
-        return INDENTATION_CHAR.repeat((openMethodCalls - 1) * INDENTATION_LENGTH);
+        return INDENTATION_CHAR.repeat((openMethodCalls) * INDENTATION_LENGTH);
     }
 
-    private int incrementOpenMethodCalls() {
-        int openMethodCalls;
-        Integer currentCalls = thread_amountOpenMethodCalls.get(Thread.currentThread());
-        if (currentCalls == null) {
-            thread_amountOpenMethodCalls.put(Thread.currentThread(), 1);
-        } else {
-            int incremented = currentCalls + 1;
-            thread_amountOpenMethodCalls.put(Thread.currentThread(), incremented);
+    private void addToCallStack(Method method) {
+        Stack<Method> stack = getStack();
+        stack.push(method);
+    }
+
+    private boolean removeFromCallStack(Method method) {
+        Stack<Method> stack = getStack();
+        if (stack.peek().equals(method)){
+            stack.pop();
+            return true;
+        }else {
+//            System.err.println("Method Descriptor was not on top of stack but shall be popped -> do nothing: " + method);
+            return false;
         }
-        openMethodCalls = thread_amountOpenMethodCalls.get(Thread.currentThread());
-        return openMethodCalls;
     }
 
-    private int decrementOpenMethodCalls() {
-        int openMethodCalls;
-        Integer currentCalls = thread_amountOpenMethodCalls.get(Thread.currentThread());
-        Assert.notNull(currentCalls);
-        int decremented = currentCalls - 1;
-        //update
-        thread_amountOpenMethodCalls.put(Thread.currentThread(), decremented);
-        //get updated
-        openMethodCalls = thread_amountOpenMethodCalls.get(Thread.currentThread());
-        return openMethodCalls;
+    private Stack<Method> getStack(){
+        thread_callStack.putIfAbsent(Thread.currentThread(),new Stack<>());
+        return thread_callStack.get(Thread.currentThread());
     }
+
 
 
 }

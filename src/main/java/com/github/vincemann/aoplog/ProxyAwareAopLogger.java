@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -52,10 +53,16 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @EqualsAndHashCode
     @Getter
-    @AllArgsConstructor
+    @ToString
     private static class LoggedMethodIdentifier {
-        private Method method;
+        private String name;
+        private Class<?>[] argTypes;
         private Class<?> targetClass;
+        LoggedMethodIdentifier(Method method,Class<?> targetClass){
+            this.name=method.getName();
+            this.argTypes=method.getParameterTypes();
+            this.targetClass = targetClass;
+        }
     }
 
     @Override
@@ -111,6 +118,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
             try {
                 loggedCall.proceed();
             } catch (Exception e) {
+                //exception was not catched by logged Method
                 loggedCall.logException(e);
                 throw e;
             }
@@ -157,11 +165,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         private MethodDescriptor createMethodDescriptor(){
-            System.err.println("Searching for method Descriptor in cache with key: " + method);
+//            System.err.println("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method,targetClass));
+//            System.err.println("cache:: " + cache);
             synchronized (cache) {
                 MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method,targetClass));
                 if (cached != null) {
-                    System.err.println("Returning method Descriptor from cache: " + cached);
+//                    System.err.println("Returning method Descriptor from cache: " + cached);
                     return cached;
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
