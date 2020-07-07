@@ -6,6 +6,7 @@ modified version of [this](https://github.com/nickvl/aop-logging).
 * Config annotation to configure class level logging  
 * automatic identation of log statements to show call hierachry  
 * add padding and thread-info  
+* finegrained control over logging on each level of the class- (and interface-)hierarchy   
 
 ## removed features  
 * repeatable log annotations 
