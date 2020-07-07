@@ -93,14 +93,6 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
         return formattedMsg;
     }
 
-    @Override
-    public void onUnLoggedException(Method method, Exception e) {
-        boolean removed = removeFromCallStack(method);
-        if (removed){
-            thread_openException.put(Thread.currentThread(),Boolean.TRUE);
-        }
-    }
-
     protected String formatResult(String msg, int openMethodCalls){
         //open method calls is already updated -> using predecessor
         String indentation = createIdentation(openMethodCalls);
@@ -148,6 +140,9 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 
     private boolean removeFromCallStack(Method method) {
         Stack<Method> stack = getStack();
+        if (stack.isEmpty()){
+            return false;
+        }
         if (stack.peek().equals(method)){
             stack.pop();
             return true;

@@ -57,9 +57,6 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
         this.excludeFieldNames = excludeFieldNames == null ? null : new HashSet<String>(excludeFieldNames);
     }
 
-    @Override
-    public void onUnLoggedException(Method method, Exception e) {
-    }
 
     @Override
     protected String asString(Object value) {

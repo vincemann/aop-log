@@ -5,8 +5,6 @@
 
 package com.github.vincemann.aoplog;
 
-import java.lang.reflect.Method;
-
 /**
  * Simple log adapter.
  */
@@ -17,8 +15,4 @@ public class SimpleLogAdapter extends AbstractLogAdapter {
         return String.valueOf(value);
     }
 
-    @Override
-    public void onUnLoggedException(Method method, Exception e) {
-
-    }
 }

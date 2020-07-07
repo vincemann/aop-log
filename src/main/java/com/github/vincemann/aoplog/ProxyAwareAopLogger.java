@@ -120,7 +120,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
             if (loggedCall.isExceptionLoggingOn()) {
                 loggedCall.logException(e);
             }else {
-                logAdapter.onUnLoggedException(loggedCall.method,e);
+                if (loggedCall.isInteractionLoggingOn()) {
+                    loggedCall.logInteractionException(e);
+                }
             }
             throw e;
         }
@@ -203,6 +205,15 @@ public class ProxyAwareAopLogger implements InitializingBean {
                 }
             }
         }
+
+        void logInteractionException(Exception e){
+            Severity severity = invocationDescriptor.getSeverity();
+            if (isLoggingOn(severity)){
+                logStrategies.get(severity)
+                        .logException(logger, method, args.length, e,false);
+            }
+        }
+
 
         void logInvocation(){
             logStrategies.get(invocationDescriptor.getSeverity())
