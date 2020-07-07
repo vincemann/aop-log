@@ -9,6 +9,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,6 +55,10 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
         this.forceReflection = forceReflection;
         this.cropThreshold = -1;
         this.excludeFieldNames = excludeFieldNames == null ? null : new HashSet<String>(excludeFieldNames);
+    }
+
+    @Override
+    public void onUnLoggedException(Method method, Exception e) {
     }
 
     @Override

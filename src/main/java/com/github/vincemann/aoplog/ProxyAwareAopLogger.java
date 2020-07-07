@@ -89,6 +89,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
+        //System.err.println("joinPoint matched: " + joinPoint.getTarget().getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
 
         //method filter only restricts interaction logging, logException is independent subsystem
@@ -112,16 +113,16 @@ public class ProxyAwareAopLogger implements InitializingBean {
     }
 
     protected Object proceedWithExceptionLogging(LoggedMethodCall loggedCall) throws Throwable {
-        if (!loggedCall.isExceptionLoggingOn()) {
+        try {
             loggedCall.proceed();
-        } else {
-            try {
-                loggedCall.proceed();
-            } catch (Exception e) {
-                //exception was not catched by logged Method
+        } catch (Exception e) {
+            //exception was not catched by logged Method
+            if (loggedCall.isExceptionLoggingOn()) {
                 loggedCall.logException(e);
-                throw e;
+            }else {
+                logAdapter.onUnLoggedException(loggedCall.method,e);
             }
+            throw e;
         }
         return loggedCall.getResult();
     }
@@ -170,7 +171,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
             synchronized (cache) {
                 MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method,targetClass));
                 if (cached != null) {
-//                    System.err.println("Returning method Descriptor from cache: " + cached);
+                    //System.err.println("key: " + new LoggedMethodIdentifier(method,targetClass));
+                    //System.err.println("Returning method Descriptor from cache: " + cached);
                     return cached;
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);

@@ -22,4 +22,6 @@ interface LogAdapter {
     Object toMessage(Method method, int argCount, Object result);
 
     Object toMessage(Method method, int argCount, Exception e, boolean stackTrace);
+
+    void onUnLoggedException(Method method, Exception e);
 }
