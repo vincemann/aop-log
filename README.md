@@ -11,6 +11,36 @@ modified version of [this](https://github.com/nickvl/aop-logging).
 ## removed features  
 * repeatable log annotations 
 * toggling of args/result logging -> it will always log args and result  
+  
+## Include  
+### Maven  
+```code
+<repositories>  
+    <repository>  
+        <id>jitpack.io</id>  
+        <url>https://jitpack.io</url>  
+    </repository>  
+</repositories>  
+  
+<dependency>  
+    <groupId>com.github.vincemann</groupId>  
+    <artifactId>aop-log</artifactId>  
+    <version>1.0.0-SNAPSHOT.1</version>  
+</dependency>  
+```  
+ 
+### Gradle  
+   
+```code
+repositories {  
+    jcenter()  
+    maven { url "https://jitpack.io" }  
+}  
+dependencies {  
+     implementation 'com.github.vincemann:aop-log:1.0.0-SNAPSHOT.1'  
+}  
+```
+ 
 
 ## config  
 ```java  
