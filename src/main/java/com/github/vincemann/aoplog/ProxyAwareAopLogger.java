@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -37,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Aspect
 @NoArgsConstructor
+@Slf4j
 public class ProxyAwareAopLogger implements InitializingBean {
 
     // private static final Log LOGGER = LogFactory.getLog(AOPLogger.class);
@@ -89,7 +91,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
-        //System.err.println("joinPoint matched: " + joinPoint.getTarget().getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
+        log.trace("joinPoint matched: " + joinPoint.getTarget().getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
 
         //method filter only restricts interaction logging, logException is independent subsystem
@@ -168,13 +170,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         private MethodDescriptor createMethodDescriptor(){
-//            System.err.println("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method,targetClass));
-//            System.err.println("cache:: " + cache);
+            log.trace("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method,targetClass));
+            log.trace("cache:: " + cache);
             synchronized (cache) {
                 MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method,targetClass));
                 if (cached != null) {
-                    //System.err.println("key: " + new LoggedMethodIdentifier(method,targetClass));
-                    //System.err.println("Returning method Descriptor from cache: " + cached);
+                    //log.trace("key: " + new LoggedMethodIdentifier(method,targetClass));
+                    //log.trace("Returning method Descriptor from cache: " + cached);
                     return cached;
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);

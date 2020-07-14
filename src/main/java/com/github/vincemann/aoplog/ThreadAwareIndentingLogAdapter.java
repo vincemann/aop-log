@@ -1,6 +1,7 @@
 package com.github.vincemann.aoplog;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * -> makes call stack of logged methods visible
  */
 @Setter
+@Slf4j
 public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     private static final String EMPTY_LINE = " "+System.lineSeparator();
     private final ConcurrentHashMap<Thread, Stack<Method>> thread_callStack = new ConcurrentHashMap<>();
@@ -50,15 +52,15 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException){
             thread_openException.put(Thread.currentThread(),Boolean.FALSE);
-            //System.err.println("open exception found while opening method: " + method);
-            //System.err.println("clearing stack ");
+            log.trace("open exception found while opening method: " + method);
+            log.trace("clearing stack ");
             //exception was never catched by logged method -> clear call stack
             getStack().clear();
         }
         int openMethodCalls = getStack().size();
         String formattedMsg = formatCall(msg, openMethodCalls);
         addToCallStack(method);
-        //System.err.println("call stack after input logging: " + getStack());
+        log.trace("call stack after input logging: " + getStack());
         return formattedMsg;
     }
 
@@ -66,14 +68,14 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     public Object toMessage(Method method, int argCount, Object result) {
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException){
-            //System.err.println("Found open exception, but logging result so it was catched by: " + method );
+            log.trace("Found open exception, but logging result so it was catched by: " + method );
         }
         thread_openException.put(Thread.currentThread(),Boolean.FALSE);
         String msg = (String) super.toMessage(method, argCount, result);
         removeFromCallStack(method);
         int openMethodCalls = getStack().size();
         String formattedMsg = formatResult(msg, openMethodCalls);
-        //System.err.println("call stack after output logging: " + getStack());
+        log.trace("call stack after output logging: " + getStack());
         return formattedMsg;
     }
 
@@ -83,13 +85,13 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
         boolean removed = removeFromCallStack(method);
         int openMethodCalls = getStack().size();
         if (!removed){
-            //System.err.println("Found LogException only method: " + method + ", was not removed from stack bc was not on top");
+            log.trace("Found LogException only method: " + method + ", was not removed from stack bc was not on top");
             openMethodCalls++;
         }else {
             thread_openException.put(Thread.currentThread(),Boolean.TRUE);
         }
         String formattedMsg = formatResult(msg, openMethodCalls);
-        //System.err.println("call stack after exception logging: " + getStack());
+        log.trace("call stack after exception logging: " + getStack());
         return formattedMsg;
     }
 
@@ -147,7 +149,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
             stack.pop();
             return true;
         }else {
-            //System.err.println("Method Descriptor was not on top of stack but shall be popped -> do nothing: " + method);
+            log.trace("Method Descriptor was not on top of stack but shall be popped -> do nothing: " + method);
             return false;
         }
     }
