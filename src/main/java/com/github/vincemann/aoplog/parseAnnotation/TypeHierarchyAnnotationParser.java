@@ -1,5 +1,6 @@
 package com.github.vincemann.aoplog.parseAnnotation;
 
+import com.github.vincemann.aoplog.MethodUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
@@ -40,7 +41,8 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
     public <A extends Annotation> AnnotationInfo<A> fromMethod(Class<?> clazz, String methodName, Class<?>[] argTypes, Class<A> annotationType) {
         for (Class<?> type : getClassHierarchy(clazz)) {
             try {
-                Method methodInType = type.getDeclaredMethod(methodName,argTypes);
+                Method methodInType = /*type.getDeclaredMethod(methodName,argTypes);*/
+                        MethodUtils.findDeclaredMethod(type,methodName,argTypes);
                 A annotation = methodInType.getDeclaredAnnotation(annotationType);
                 if (annotation!=null){
                     return new AnnotationInfo<>(annotation,type);
@@ -51,6 +53,9 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
         }
         return null;
     }
+
+
+
 
     @Override
     public <A extends Annotation> AnnotationInfo<A> fromClass(Class<?> clazz, Class<A> annotationType) {
