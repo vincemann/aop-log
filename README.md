@@ -25,7 +25,7 @@ modified version of [this](https://github.com/nickvl/aop-logging).
 <dependency>  
     <groupId>com.github.vincemann</groupId>  
     <artifactId>aop-log</artifactId>  
-    <version>1.0.0-SNAPSHOT.1</version>  
+    <version>1.0.0-SNAPSHOT.2</version>  
 </dependency>  
 ```  
  
@@ -37,7 +37,7 @@ repositories {
     maven { url "https://jitpack.io" }  
 }  
 dependencies {  
-     implementation 'com.github.vincemann:aop-log:1.0.0-SNAPSHOT.1'  
+     implementation 'com.github.vincemann:aop-log:1.0.0-SNAPSHOT.2'  
 }  
 ```
  
