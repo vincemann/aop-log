@@ -2,18 +2,21 @@ package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogConfig;
+import com.github.vincemann.aoplog.parseAnnotation.AnnotationParser;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 
 import java.lang.reflect.Method;
 
-public class LogConfigMethodFilter implements MethodFilter{
+import static com.github.vincemann.aoplog.ClassUtils.getClassHierarchy;
+
+public class LogConfigMethodFilter implements MethodFilter {
 
     @Override
     public boolean wanted(MethodDescriptor methodDescriptor) {
         SourceAwareAnnotationInfo<LogInteraction> logInfo = methodDescriptor.getInvocationDescriptor().getLogInfo();
         LogConfig classLogConfig = methodDescriptor.getInvocationDescriptor().getClassLogConfig();
         String methodName = methodDescriptor.getMethod().getName();
-        if (logInfo==null){
+        if (logInfo == null) {
             return false;
         }
         if (logInfo.isClassLevel()) {
@@ -38,12 +41,15 @@ public class LogConfigMethodFilter implements MethodFilter{
     }
 
     // checks whether the annotated class or super classes of it, declared the called method
-    private boolean isMethodDefinedInAnnotationClass(Method targetMethod, SourceAwareAnnotationInfo<LogInteraction> classLogInfo){
-        try {
-            classLogInfo.getDeclaringClass().getMethod(targetMethod.getName(),targetMethod.getParameterTypes());
-            return true;
-        } catch (NoSuchMethodException e) {
-           return false;
+    private boolean isMethodDefinedInAnnotationClass(Method targetMethod, SourceAwareAnnotationInfo<LogInteraction> classLogInfo) {
+        for (Class<?> type : getClassHierarchy(classLogInfo.getDeclaringClass())) {
+            try {
+                MethodUtils.findDeclaredMethod(type, targetMethod.getName(), targetMethod.getParameterTypes());
+                return true;
+            } catch (NoSuchMethodException e) {
+
+            }
         }
+        return false;
     }
 }

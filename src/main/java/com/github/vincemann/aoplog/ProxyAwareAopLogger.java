@@ -93,6 +93,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
         log.trace("joinPoint matched: " + joinPoint.getTarget().getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
+        log.trace("LoggedMethodCall:  " + loggedCall);
 
         //method filter only restricts interaction logging, logException is independent subsystem
         for (MethodFilter methodFilter : methodFilters) {
@@ -141,6 +142,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @Getter
     @AllArgsConstructor
+    @ToString
     public class LoggedMethodCall{
         Method method;
         Class<?> targetClass;
@@ -176,7 +178,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
                 MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method,targetClass));
                 if (cached != null) {
                     //log.trace("key: " + new LoggedMethodIdentifier(method,targetClass));
-                    //log.trace("Returning method Descriptor from cache: " + cached);
+                    log.trace("Returning method Descriptor from cache: " + cached);
                     return cached;
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
