@@ -42,14 +42,11 @@ public class LogConfigMethodFilter implements MethodFilter {
 
     // checks whether the annotated class or super classes of it, declared the called method
     private boolean isMethodDefinedInAnnotationClass(Method targetMethod, SourceAwareAnnotationInfo<LogInteraction> classLogInfo) {
-        for (Class<?> type : getClassHierarchy(classLogInfo.getDeclaringClass())) {
-            try {
-                MethodUtils.findDeclaredMethod(type, targetMethod.getName(), targetMethod.getParameterTypes());
-                return true;
-            } catch (NoSuchMethodException e) {
-
-            }
+        try {
+            MethodUtils.findMethod(classLogInfo.getDeclaringClass(),targetMethod.getName(),targetMethod.getParameterTypes());
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
         }
-        return false;
     }
 }
