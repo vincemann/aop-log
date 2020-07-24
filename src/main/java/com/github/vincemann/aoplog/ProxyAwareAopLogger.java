@@ -15,6 +15,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -91,7 +92,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
-        log.trace("joinPoint matched: " + joinPoint.getTarget().getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
+        log.trace("joinPoint matched: " + AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
+//        if (AopUtils.isAopProxy(joinPoint.getTarget())){
+//            log.debug("Skipping logging of Cglib Proxy call");
+//            return joinPoint.proceed();
+//        }
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
         log.trace("LoggedMethodCall:  " + loggedCall);
 
@@ -135,7 +140,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
     protected Class<?> findTargetClass(ProceedingJoinPoint joinPoint){
         Object target = joinPoint.getTarget();
         if (target instanceof UltimateTargetClassAware){
-            return ((UltimateTargetClassAware) target).getTargetClass();
+            return ((UltimateTargetClassAware) AopTestUtils.getUltimateTargetObject(target)).getTargetClass();
         }
         return AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass();
     }
