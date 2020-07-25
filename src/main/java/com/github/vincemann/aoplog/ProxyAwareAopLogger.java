@@ -1,8 +1,8 @@
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.api.AopLoggable;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
-import com.github.vincemann.aoplog.api.UltimateTargetClassAware;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -33,11 +33,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/**
- * To make it work with JDK Runtime Proxies implement {@link UltimateTargetClassAware}.
- *
- * @see UltimateTargetClassAware
- */
+
 @Aspect
 @NoArgsConstructor
 @Slf4j
@@ -94,9 +90,15 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
-        log.trace("joinPoint matched: " + AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
-        LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
+        Class<?> targetClass = AopUtils.getTargetClass(joinPoint.getTarget());
+        log.trace("joinPoint matched: " + targetClass.getSimpleName()+" "+joinPoint.getSignature().getName());
+        LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,targetClass);
         log.trace("LoggedMethodCall:  " + loggedCall);
+
+//        Class<?> unmodifiedTargetClass = AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass();
+//        if (!targetClass.equals(unmodifiedTargetClass)){
+//            log.info("Target class modified: " + unmodifiedTargetClass.getSimpleName() + " -> " + targetClass.getSimpleName());
+//        }
 
         if (isDuplicateProxyLogging(loggedCall)) {
             log.debug("Skipping duplicate logging of proxy call");
@@ -154,13 +156,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
         return loggedCall.getResult();
     }
 
-    protected Class<?> findTargetClass(ProceedingJoinPoint joinPoint){
-        Object target = joinPoint.getTarget();
-        if (target instanceof UltimateTargetClassAware){
-            return ((UltimateTargetClassAware) AopTestUtils.getUltimateTargetObject(target)).getTargetClass();
-        }
-        return AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass();
-    }
 
     @Getter
     @AllArgsConstructor
@@ -185,7 +180,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.joinPoint = joinPoint;
             this.args = joinPoint.getArgs();
             this.targetClass = targetClass;
-            this.method = extractMethod(targetClass,joinPoint);
+            this.method = extractMethod(/*targetClass,*/joinPoint);
             this.methodDescriptor = createMethodDescriptor();
             this.exceptionDescriptor = methodDescriptor.getExceptionDescriptor();
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
@@ -281,8 +276,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
     }
 
     //todo maybe need to be changed
-    private Method extractMethod(Class<?> targetClass, ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
+    private Method extractMethod(/*Class<?> targetClass, */ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Class<?> targetClass = joinPoint.getTarget().getClass();
         // signature.getMethod() points to method declared in interface. it is not suit to discover arg names and arg annotations
         // see AopProxyUtils: org.springframework.cache.interceptor.CacheAspectSupport#execute(CacheAspectSupport.Invoker, Object, Method, Object[])
 //        Class<?> targetClass = joinPoint.getTarget().getClass();
