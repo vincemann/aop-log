@@ -4,6 +4,7 @@ import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.api.UltimateTargetClassAware;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -53,6 +54,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
     // which would be unexpected behavior
     private final List<MethodFilter> methodFilters = Lists.newArrayList(new LogConfigMethodFilter());
     private InvocationDescriptorFactory invocationDescriptorFactory;
+    private ConcurrentHashMap<Thread,LoggedMethodCall> thread_lastLoggedCall_map = new ConcurrentHashMap<>();
 
     @EqualsAndHashCode
     @Getter
@@ -93,12 +95,17 @@ public class ProxyAwareAopLogger implements InitializingBean {
     @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
         log.trace("joinPoint matched: " + AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass().getSimpleName()+" "+joinPoint.getSignature().getName());
-//        if (AopUtils.isAopProxy(joinPoint.getTarget())){
-//            log.debug("Skipping logging of Cglib Proxy call");
-//            return joinPoint.proceed();
-//        }
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint,findTargetClass(joinPoint));
         log.trace("LoggedMethodCall:  " + loggedCall);
+
+        if (isDuplicateProxyLogging(loggedCall)) {
+            log.debug("Skipping duplicate logging of proxy call");
+            return loggedCall.proceed();
+        }else {
+            thread_lastLoggedCall_map.put(Thread.currentThread(),loggedCall);
+        }
+
+
 
         //method filter only restricts interaction logging, logException is independent subsystem
         for (MethodFilter methodFilter : methodFilters) {
@@ -118,6 +125,16 @@ public class ProxyAwareAopLogger implements InitializingBean {
             loggedCall.logResult();
         }
         return loggedCall.getResult();
+    }
+
+    protected boolean isDuplicateProxyLogging(LoggedMethodCall loggedMethodCall){
+        LoggedMethodCall call = thread_lastLoggedCall_map.get(Thread.currentThread());
+        if (call!=null) {
+            if (loggedMethodCall.getMethodDescriptor().equals(call.getMethodDescriptor())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected Object proceedWithExceptionLogging(LoggedMethodCall loggedCall) throws Throwable {
@@ -197,6 +214,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
                     return cached;
                 }
             }
+        }
+
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getMethodDescriptor(), getArgumentDescriptor(), getExceptionDescriptor(), getInvocationDescriptor());
         }
 
         Object proceed() throws Throwable {
