@@ -6,7 +6,7 @@
 
     <groupId>com.github.vincemann</groupId>
     <artifactId>aop-log</artifactId>
-    <version>1.0.0-SNAPSHOT.2</version>
+    <version>1.0.0-SNAPSHOT.3</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
