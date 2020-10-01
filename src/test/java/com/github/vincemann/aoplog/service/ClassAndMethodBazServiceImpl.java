@@ -14,7 +14,7 @@ import com.github.vincemann.aoplog.api.LogInteraction;
  * Implements {@link BazService}.
  */
 @LogInteraction(Severity.INFO)
-@LogConfig(ignoreGetters = true)
+@LogConfig(ignoreGetters = true,ignoreSetters = false)
 public class ClassAndMethodBazServiceImpl extends AbstractBazService {
 
     @Override

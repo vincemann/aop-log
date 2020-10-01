@@ -8,7 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface LogConfig {
-    boolean ignoreGetters() default false;
-    boolean ignoreSetters() default false;
+    boolean ignoreGetters() default true;
+    boolean ignoreSetters() default true;
+    String[] ignoredMethods() default {"toString,hashCode,equals"};
     boolean logAllChildrenMethods() default false;
 }

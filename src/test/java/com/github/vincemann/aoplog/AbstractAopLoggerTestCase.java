@@ -89,6 +89,8 @@ public abstract class AbstractAopLoggerTestCase {
         Mockito.when(logAdapter.getLog(any(Class.class)))
                 .thenReturn(logger);
     }
+
+
     protected void enableAllLogSeverities(){
         Mockito.when(logger.isDebugEnabled()).thenReturn(true);
         Mockito.when(logger.isInfoEnabled()).thenReturn(true);
