@@ -19,6 +19,8 @@ abstract class AbstractLogAdapter implements LogAdapter {
     protected static final String RETURNING = "returning: ";
     protected static final String THROWING = "throwing: ";
 
+    protected static final String ARG_DELIMITER = " ||| ";
+
     @Override
     public Log getLog(Class clazz) {
         return LogFactory.getLog(clazz);
@@ -44,15 +46,15 @@ abstract class AbstractLogAdapter implements LogAdapter {
             for (int i = 0; i < args.length; i++) {
                 if (argumentDescriptor.isArgumentIndexLogged(i)) {
                     buff.append(asString(args[i]));
-                    buff.append(", ");
+                    buff.append(ARG_DELIMITER);
                 } else {
-                    buff.append("?, ");
+                    buff.append(ARG_DELIMITER+"?"+ARG_DELIMITER);
                 }
             }
         } else {
             for (int i = argumentDescriptor.nextLoggedArgumentIndex(0); i >= 0; i = argumentDescriptor.nextLoggedArgumentIndex(i + 1)) {
                 buff.append(names[i]).append('=').append(asString(args[i]));
-                buff.append(", ");
+                buff.append(ARG_DELIMITER);
             }
         }
         if (argumentDescriptor.nextLoggedArgumentIndex(0) != -1) {
