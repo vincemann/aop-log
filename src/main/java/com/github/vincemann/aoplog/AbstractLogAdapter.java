@@ -15,11 +15,10 @@ import java.lang.reflect.Method;
  */
 abstract class AbstractLogAdapter implements LogAdapter {
 
-    protected static final String CALLING = "calling: ";
-    protected static final String RETURNING = "returning: ";
-    protected static final String THROWING = "throwing: ";
-
-    protected static final String ARG_DELIMITER = " ||| ";
+    protected static final String CALLING = "     ->  CALLING: ";
+    protected static final String RETURNING = "     <-  RETURNING: ";
+    protected static final String THROWING = "     <-  THROWING: ";
+    protected static final String ARG_DELIMITER = " |==| ";
 
     @Override
     public Log getLog(Class clazz) {
@@ -48,7 +47,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
                     buff.append(asString(args[i]));
                     buff.append(ARG_DELIMITER);
                 } else {
-                    buff.append(ARG_DELIMITER+"?"+ARG_DELIMITER);
+                    buff.append(ARG_DELIMITER + "?" + ARG_DELIMITER);
                 }
             }
         } else {
@@ -66,20 +65,20 @@ abstract class AbstractLogAdapter implements LogAdapter {
 
     @Override
     public Object toMessage(Method method, int argCount, Object result) {
-        if (argCount == 0) {
-            return RETURNING + method.getName() + "():" + asString(result);
-        }
-        return RETURNING + method.getName() + '(' + argCount + " arguments):" + asString(result);
+//        if (argCount == 0) {
+//            return RETURNING + method.getName() + "():" + asString(result);
+//        }
+        return RETURNING + method.getName() + /*'(' + argCount + " arguments):"*/ " { " + asString(result) + " } ";
     }
 
     @Override
     public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
         String message;
-        if (argCount == 0) {
-            message = THROWING + method.getName() + "():" + e.getClass();
-        } else {
-            message = THROWING + method.getName() + '(' + argCount + " arguments):" + e.getClass();
-        }
+//        if (argCount == 0) {
+//            message = THROWING + method.getName() + "():" + e.getClass();
+//        } else {
+        message = THROWING + method.getName() + /*'(' + argCount + " arguments):"*/" { " + e.getClass() + " } ";
+//        }
         if (e.getMessage() != null) {
             message += '=' + e.getMessage();
         }
