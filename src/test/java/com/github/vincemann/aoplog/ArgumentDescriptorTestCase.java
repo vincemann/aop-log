@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.Lp;
+import com.github.vincemann.aoplog.api.LogParam;
 import org.junit.Test;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
@@ -69,7 +69,7 @@ public class ArgumentDescriptorTestCase {
         }
     }
 
-    private void twoArguments(@Lp String foo, String foo2) {
+    private void twoArguments(@LogParam String foo, String foo2) {
         // used in test methods viq reflection
     }
 
@@ -88,7 +88,7 @@ public class ArgumentDescriptorTestCase {
         }
     }
 
-    private void varArguments(String foo, @Lp String... foo2) {
+    private void varArguments(String foo, @LogParam String... foo2) {
         // used in test methods viq reflection
     }
 

@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog.service;
 
 import com.github.vincemann.aoplog.api.AopLoggable;
-import com.github.vincemann.aoplog.api.Lp;
+import com.github.vincemann.aoplog.api.LogParam;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public interface FooService extends AopLoggable {
 
     String stringMethodThree(String first, String second, String third);
 
-    String stringMethodTwoVarargs(String first, @Lp String... second);
+    String stringMethodTwoVarargs(String first, @LogParam String... second);
 
     void voidExcMethodZero() throws IOException;
 }

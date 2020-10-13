@@ -8,7 +8,7 @@ package com.github.vincemann.aoplog.service;
 import com.github.vincemann.aoplog.Severity;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
-import com.github.vincemann.aoplog.api.Lp;
+import com.github.vincemann.aoplog.api.LogParam;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class SimpleFooService implements FooService {
 
     @LogInteraction
     @Override
-    public String stringMethodTwo(String first, @Lp String second) {
+    public String stringMethodTwo(String first, @LogParam String second) {
         return "stringMethodTwo:" + first + ":" + second;
     }
 
@@ -48,7 +48,7 @@ public class SimpleFooService implements FooService {
     @LogInteraction(Severity.TRACE)
     @LogException
     @Override
-    public String stringMethodTwoVarargs(String first, @Lp String... second) {
+    public String stringMethodTwoVarargs(String first, @LogParam String... second) {
         return "stringMethodTwoVarargs:" + first + ":" + Arrays.toString(second);
     }
 

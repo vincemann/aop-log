@@ -7,7 +7,7 @@ package com.github.vincemann.aoplog.benchmark;
 
 import com.github.vincemann.aoplog.Severity;
 import com.github.vincemann.aoplog.api.LogInteraction;
-import com.github.vincemann.aoplog.api.Lp;
+import com.github.vincemann.aoplog.api.LogParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,7 +34,7 @@ public class LoggableServiceImpl implements LoggableService {
 
     @LogInteraction(Severity.TRACE)
     @Override
-    public int aopLogMethod(String a, @Lp int b) {
+    public int aopLogMethod(String a, @LogParam int b) {
         return b + 1;
     }
 }

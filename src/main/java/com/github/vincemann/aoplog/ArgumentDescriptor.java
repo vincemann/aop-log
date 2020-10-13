@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.Lp;
+import com.github.vincemann.aoplog.api.LogParam;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -67,7 +67,7 @@ final class ArgumentDescriptor {
             }
             String[] argNames = parameterNameDiscoverer.getParameterNames(method);
 
-            BitSet lpParameters = getMethodParameters(Lp.class);
+            BitSet lpParameters = getMethodParameters(LogParam.class);
             if (lpParameters.isEmpty()) {
                 lpParameters.set(0, argumentCount);
             }
