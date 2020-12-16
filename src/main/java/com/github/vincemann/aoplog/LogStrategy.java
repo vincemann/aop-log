@@ -40,7 +40,7 @@ abstract class LogStrategy {
      * @param args arguments of the method
      * @param argumentDescriptor argument descriptor
      */
-    public abstract void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor);
+    public abstract void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor);
 
     /**
      * Logs returning from the method.
@@ -50,7 +50,7 @@ abstract class LogStrategy {
      * @param argCount parameter count number of the method
      * @param result returned result of the method
      */
-    public abstract void logAfter(Log logger, Method method, int argCount, Object result);
+    public abstract void logAfter(Log logger, Method method,String beanName, int argCount, Object result);
 
     /**
      * Logs throwing exception from the method.
@@ -61,7 +61,7 @@ abstract class LogStrategy {
      * @param e exception thrown from the method
      * @param stackTrace if stack trace should be logged
      */
-    public abstract void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace);
+    public abstract void logException(Log logger, Method method,String beanName, int argCount, Exception e, boolean stackTrace);
 
     /**
      * Provides fatal strategy.
@@ -78,21 +78,21 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.fatal(getLogAdapter().toMessage(method, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+            logger.fatal(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor));
         }
 
         @Override
-        public void logAfter(Log logger, Method method, int argCount, Object result) {
-            logger.fatal(getLogAdapter().toMessage(method, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
+            logger.fatal(getLogAdapter().toMessage(method,beanName, argCount, result));
         }
 
         @Override
-        public void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace) {
+        public void logException(Log logger, Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
             if (stackTrace) {
-                logger.fatal(getLogAdapter().toMessage(method, argCount, e, stackTrace), e);
+                logger.fatal(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace), e);
             } else {
-                logger.fatal(getLogAdapter().toMessage(method, argCount, e, stackTrace));
+                logger.fatal(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace));
             }
         }
     }
@@ -112,21 +112,21 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.error(getLogAdapter().toMessage(method, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName ,Object[] args, ArgumentDescriptor argumentDescriptor) {
+            logger.error(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor));
         }
 
         @Override
-        public void logAfter(Log logger, Method method, int argCount, Object result) {
-            logger.error(getLogAdapter().toMessage(method, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName , int argCount, Object result) {
+            logger.error(getLogAdapter().toMessage(method,beanName,argCount, result));
         }
 
         @Override
-        public void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace) {
+        public void logException(Log logger, Method method,String beanName , int argCount, Exception e, boolean stackTrace) {
             if (stackTrace) {
-                logger.error(getLogAdapter().toMessage(method, argCount, e, stackTrace), e);
+                logger.error(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace), e);
             } else {
-                logger.error(getLogAdapter().toMessage(method, argCount, e, stackTrace));
+                logger.error(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace));
             }
         }
 
@@ -147,21 +147,21 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.warn(getLogAdapter().toMessage(method, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+            logger.warn(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor));
         }
 
         @Override
-        public void logAfter(Log logger, Method method, int argCount, Object result) {
-            logger.warn(getLogAdapter().toMessage(method, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
+            logger.warn(getLogAdapter().toMessage(method,beanName, argCount, result));
         }
 
         @Override
-        public void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace) {
+        public void logException(Log logger, Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
             if (stackTrace) {
-                logger.warn(getLogAdapter().toMessage(method, argCount, e, stackTrace), e);
+                logger.warn(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace), e);
             } else {
-                logger.warn(getLogAdapter().toMessage(method, argCount, e, stackTrace));
+                logger.warn(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace));
             }
         }
 
@@ -182,21 +182,21 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.info(getLogAdapter().toMessage(method, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+            logger.info(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor));
         }
 
         @Override
-        public void logAfter(Log logger, Method method, int argCount, Object result) {
-            logger.info(getLogAdapter().toMessage(method, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
+            logger.info(getLogAdapter().toMessage(method,beanName, argCount, result));
         }
 
         @Override
-        public void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace) {
+        public void logException(Log logger, Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
             if (stackTrace) {
-                logger.info(getLogAdapter().toMessage(method, argCount, e, stackTrace), e);
+                logger.info(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace), e);
             } else {
-                logger.info(getLogAdapter().toMessage(method, argCount, e, stackTrace));
+                logger.info(getLogAdapter().toMessage(method,beanName, argCount, e, stackTrace));
             }
         }
 
@@ -217,21 +217,21 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.debug(getLogAdapter().toMessage(method, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+            logger.debug(getLogAdapter().toMessage(method,beanName,  args, argumentDescriptor));
         }
 
         @Override
-        public void logAfter(Log logger, Method method, int argCount, Object result) {
-            logger.debug(getLogAdapter().toMessage(method, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
+            logger.debug(getLogAdapter().toMessage(method,beanName,  argCount, result));
         }
 
         @Override
-        public void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace) {
+        public void logException(Log logger, Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
             if (stackTrace) {
-                logger.debug(getLogAdapter().toMessage(method, argCount, e, stackTrace), e);
+                logger.debug(getLogAdapter().toMessage(method,beanName,  argCount, e, stackTrace), e);
             } else {
-                logger.debug(getLogAdapter().toMessage(method, argCount, e, stackTrace));
+                logger.debug(getLogAdapter().toMessage(method,beanName,  argCount, e, stackTrace));
             }
         }
 
@@ -252,21 +252,21 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.trace(getLogAdapter().toMessage(method, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+            logger.trace(getLogAdapter().toMessage(method,beanName,  args, argumentDescriptor));
         }
 
         @Override
-        public void logAfter(Log logger, Method method, int argCount, Object result) {
-            logger.trace(getLogAdapter().toMessage(method, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
+            logger.trace(getLogAdapter().toMessage(method,beanName,  argCount, result));
         }
 
         @Override
-        public void logException(Log logger, Method method, int argCount, Exception e, boolean stackTrace) {
+        public void logException(Log logger, Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
             if (stackTrace) {
-                logger.trace(getLogAdapter().toMessage(method, argCount, e, stackTrace), e);
+                logger.trace(getLogAdapter().toMessage(method,beanName,  argCount, e, stackTrace), e);
             } else {
-                logger.trace(getLogAdapter().toMessage(method, argCount, e, stackTrace));
+                logger.trace(getLogAdapter().toMessage(method,beanName,  argCount, e, stackTrace));
             }
         }
     }

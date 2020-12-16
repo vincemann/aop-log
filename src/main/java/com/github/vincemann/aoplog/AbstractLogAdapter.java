@@ -20,6 +20,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     protected static final String THROWING = "     <-  THROWING: ";
     protected static final String ARG_DELIMITER = " |==| ";
 
+
     @Override
     public Log getLog(Class clazz) {
         return LogFactory.getLog(clazz);
@@ -31,13 +32,22 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
+    public Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
         if (args.length == 0) {
-            return CALLING + method.getName() + "()";
+            StringBuilder buff = new StringBuilder();
+//            if (beanName!=null){
+//                buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
+//            }
+            buff.append(CALLING).append(method.getName()).append("()");
+            return buff.toString();
         }
 
         String[] names = argumentDescriptor.getNames();
-        StringBuilder buff = new StringBuilder(CALLING).append(method.getName()).append('(');
+        StringBuilder buff = new StringBuilder();
+//        if (beanName!=null){
+//            buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
+//        }
+        buff.append(CALLING).append(method.getName()).append('(');
         if (args.length > 1) {
             buff.append(args.length).append(" arguments: ");
         }
@@ -64,25 +74,29 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, int argCount, Object result) {
+    public Object toMessage(Method method,String beanName, int argCount, Object result) {
 //        if (argCount == 0) {
 //            return RETURNING + method.getName() + "():" + asString(result);
 //        }
-        return RETURNING + method.getName() + /*'(' + argCount + " arguments):"*/ " { " + asString(result) + " } ";
+        StringBuilder buff = new StringBuilder();
+//        if (beanName!=null){
+//            buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
+//        }
+        buff.append(RETURNING).append(method.getName()).append(" { ").append(asString(result)).append(" } ");
+        return buff.toString();
     }
 
     @Override
-    public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
-        String message;
-//        if (argCount == 0) {
-//            message = THROWING + method.getName() + "():" + e.getClass();
-//        } else {
-        message = THROWING + method.getName() + /*'(' + argCount + " arguments):"*/" { " + e.getClass() + " } ";
+    public Object toMessage(Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
+        StringBuilder buff = new StringBuilder();
+//        if (beanName!=null){
+//            buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
 //        }
+        buff.append(THROWING).append(method.getName()).append(" { ").append(e.getClass()).append(" } ");
         if (e.getMessage() != null) {
-            message += '=' + e.getMessage();
+            buff.append("=").append(e.getMessage());
         }
-        return message;
+        return buff.toString();
     }
 
     protected abstract String asString(Object value);

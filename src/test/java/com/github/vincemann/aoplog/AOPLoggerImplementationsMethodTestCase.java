@@ -84,9 +84,9 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
         ArgumentCaptor<Method> outputMethod = ArgumentCaptor.forClass(Method.class);
-        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), refEq(new Object[]{"@1", new String[]{"@2-1", "@2-2"}}), captured.capture()))
+        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), any(),refEq(new Object[]{"@1", new String[]{"@2-1", "@2-2"}}), captured.capture()))
                 .thenReturn(">");
-        Mockito.when(getLogAdapter().toMessage(outputMethod.capture(), eq(2), eq("stringMethodTwoVarargs:@1:" + Arrays.toString(secondArgValue))))
+        Mockito.when(getLogAdapter().toMessage(outputMethod.capture(),any(), eq(2), eq("stringMethodTwoVarargs:@1:" + Arrays.toString(secondArgValue))))
                 .thenReturn("<");
         enableLogSeverity(Severity.TRACE);
         InOrder inOrder =inOrder(getLogger());
@@ -104,9 +104,9 @@ public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTes
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
         ArgumentCaptor<Method> outputMethod = ArgumentCaptor.forClass(Method.class);
-        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), aryEq(new Object[]{}), captured.capture()))
+        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), any(),aryEq(new Object[]{}), captured.capture()))
                 .thenReturn(">");
-        Mockito.when(getLogAdapter().toMessage(outputMethod.capture(), eq(0), any(IOException.class), eq(false)))
+        Mockito.when(getLogAdapter().toMessage(outputMethod.capture(),any(), eq(0), any(IOException.class), eq(false)))
                 .thenReturn(exceptionMsg);
 
         Mockito.when(getLogger().isDebugEnabled()).thenReturn(true);

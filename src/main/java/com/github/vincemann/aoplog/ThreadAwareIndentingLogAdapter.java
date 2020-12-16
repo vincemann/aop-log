@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Setter
 @Slf4j
 public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
-    private static final String EMPTY_LINE = " "+System.lineSeparator();
+    private static final String EMPTY_LINE = " " + System.lineSeparator();
     private final ConcurrentHashMap<Thread, Stack<Method>> thread_callStack = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Thread,Boolean> thread_openException = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Thread, Boolean> thread_openException = new ConcurrentHashMap<>();
     private String HARD_START_PADDING_CHAR = "+";
     private String HARD_END_PADDING_CHAR = "=";
     private String SOFT_PADDING_CHAR = "_";
@@ -46,84 +46,91 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
         super(skipNullFields, excludeFieldNames, forceReflection);
     }
 
+    protected static String getThreadInfoSuffix() {
+        return "  ,Thread: " + Thread.currentThread().getId() + "  ";
+    }
+
     @Override
-    public Object toMessage(Method method, Object[] args, ArgumentDescriptor argumentDescriptor) {
-        String msg = (String) super.toMessage(method,args,argumentDescriptor);
+    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+        String msg = (String) super.toMessage(method, beanName, args, argumentDescriptor);
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
-        if (openException){
-            thread_openException.put(Thread.currentThread(),Boolean.FALSE);
+        if (openException) {
+            thread_openException.put(Thread.currentThread(), Boolean.FALSE);
             log.trace("open exception found while opening method: " + method);
             log.trace("clearing stack ");
             //exception was never catched by logged method -> clear call stack
             getStack().clear();
         }
         int openMethodCalls = getStack().size();
-        String formattedMsg = formatCall(msg, openMethodCalls);
+        String formattedMsg = formatCall(msg, beanName, openMethodCalls);
         addToCallStack(method);
         log.trace("call stack after input logging: " + getStack());
         return formattedMsg;
     }
 
     @Override
-    public Object toMessage(Method method, int argCount, Object result) {
+    public Object toMessage(Method method, String beanName, int argCount, Object result) {
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
-        if (openException){
-            log.trace("Found open exception, but logging result so it was catched by: " + method );
+        if (openException) {
+            log.trace("Found open exception, but logging result so it was catched by: " + method);
         }
-        thread_openException.put(Thread.currentThread(),Boolean.FALSE);
-        String msg = (String) super.toMessage(method, argCount, result);
+        thread_openException.put(Thread.currentThread(), Boolean.FALSE);
+        String msg = (String) super.toMessage(method, beanName, argCount, result);
         removeFromCallStack(method);
         int openMethodCalls = getStack().size();
-        String formattedMsg = formatResult(msg, openMethodCalls);
+        String formattedMsg = formatResult(msg, beanName, openMethodCalls);
         log.trace("call stack after output logging: " + getStack());
         return formattedMsg;
     }
 
     @Override
-    public Object toMessage(Method method, int argCount, Exception e, boolean stackTrace) {
-        String msg = (String) super.toMessage(method, argCount, e, stackTrace);
+    public Object toMessage(Method method, String beanName, int argCount, Exception e, boolean stackTrace) {
+        String msg = (String) super.toMessage(method, beanName, argCount, e, stackTrace);
         boolean removed = removeFromCallStack(method);
         int openMethodCalls = getStack().size();
-        if (!removed){
+        if (!removed) {
             log.trace("Found LogException only method: " + method + ", was not removed from stack bc was not on top");
             openMethodCalls++;
-        }else {
-            thread_openException.put(Thread.currentThread(),Boolean.TRUE);
+        } else {
+            thread_openException.put(Thread.currentThread(), Boolean.TRUE);
         }
-        String formattedMsg = formatResult(msg, openMethodCalls);
+        String formattedMsg = formatResult(msg, beanName, openMethodCalls);
         log.trace("call stack after exception logging: " + getStack());
         return formattedMsg;
     }
 
-    protected String formatResult(String msg, int openMethodCalls){
+    protected String formatResult(String msg, String beanName, int openMethodCalls) {
         //open method calls is already updated -> using predecessor
         String indentation = createIdentation(openMethodCalls);
         String softPadding = createPadding(SOFT_PADDING_CHAR);
         String endPadding = createPadding(HARD_END_PADDING_CHAR);
-        return new StringBuilder()
-                .append(EMPTY_LINE)
-                .append(indentation).append(softPadding).append(System.lineSeparator())
+        StringBuilder sb = new StringBuilder();
+        if (beanName != null) {
+            sb.append(beanName).append(System.lineSeparator());
+        } else {
+            sb.append(EMPTY_LINE);
+        }
+        return sb.append(indentation).append(softPadding).append(System.lineSeparator())
                 .append(indentation).append(msg).append(getThreadInfoSuffix()).append(System.lineSeparator())
                 .append(indentation).append(endPadding).append(System.lineSeparator())
                 .toString();
     }
 
-    protected String formatCall(String msg, int openMethodCalls){
+    protected String formatCall(String msg, String beanName, int openMethodCalls) {
         String indentation = createIdentation(openMethodCalls);
         String softPadding = createPadding(SOFT_PADDING_CHAR);
         String startPadding = createPadding(HARD_START_PADDING_CHAR);
 
-        return new StringBuilder()
-                .append(EMPTY_LINE)
-                .append(indentation).append(startPadding).append(System.lineSeparator())
+        StringBuilder sb = new StringBuilder();
+        if (beanName != null) {
+            sb.append(beanName).append(System.lineSeparator());
+        } else {
+            sb.append(EMPTY_LINE);
+        }
+        return sb.append(indentation).append(startPadding).append(System.lineSeparator())
                 .append(indentation).append(msg).append(getThreadInfoSuffix()).append(System.lineSeparator())
                 .append(indentation).append(softPadding).append(System.lineSeparator())
                 .toString();
-    }
-
-
-    protected static String getThreadInfoSuffix() {
-        return "  ,Thread: " + Thread.currentThread().getId() + "  ";
     }
 
     protected String createPadding(String paddingChar) {
@@ -131,7 +138,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
 
-    protected String createIdentation(int openMethodCalls){
+    protected String createIdentation(int openMethodCalls) {
         return INDENTATION_CHAR.repeat((openMethodCalls) * INDENTATION_LENGTH);
     }
 
@@ -142,23 +149,22 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 
     private boolean removeFromCallStack(Method method) {
         Stack<Method> stack = getStack();
-        if (stack.isEmpty()){
+        if (stack.isEmpty()) {
             return false;
         }
-        if (stack.peek().equals(method)){
+        if (stack.peek().equals(method)) {
             stack.pop();
             return true;
-        }else {
+        } else {
             log.trace("Method Descriptor was not on top of stack but shall be popped -> do nothing: " + method);
             return false;
         }
     }
 
-    private Stack<Method> getStack(){
-        thread_callStack.putIfAbsent(Thread.currentThread(),new Stack<>());
+    private Stack<Method> getStack() {
+        thread_callStack.putIfAbsent(Thread.currentThread(), new Stack<>());
         return thread_callStack.get(Thread.currentThread());
     }
-
 
 
 }
