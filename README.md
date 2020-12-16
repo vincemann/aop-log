@@ -12,7 +12,7 @@ public interface AuthorizationTokenService {
     public P parseToken(String token) throws BadTokenException, BadCredentialsException;  
 }  
 ```  
-  
+```
 ### log output  
 2020-12-16 13:03:00.340 DEBUG 5691 --- [           main] .a.s.t.RapidJwtAuthorizationTokenService :   
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++   
@@ -29,7 +29,8 @@ ________________________________________________________________________________
 __________________________________________________________________________________________________________________________  
      <-  RETURNING: parseToken { RapidAuthenticatedPrincipal(super=RapidAuthenticatedPrincipal(name=admin@example.com, roles=[ROLE_ADMIN] ...) , Thread 1  
 ==========================================================================================================================  
-  
+```
+
 ## Additional features  
 * works on abstract classes and interfaces and with any type of spring proxy  
 * config annotation to configure class level logging  
