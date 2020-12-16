@@ -1,14 +1,15 @@
-# aop-log  
+# Aop-log  
 modified version of [this](https://github.com/nickvl/aop-logging).  
 
-## additional features  
+## Additional features  
 * works on abstract classes and interfaces and with any type of spring proxy  
-* Config annotation to configure class level logging  
+* config annotation to configure class level logging  
 * automatic identation of log statements to show call hierachry  
 * add padding and thread-info  
+* possible to log bean-name    
 * finegrained control over logging on each level of the class- (and interface-)hierarchy   
 
-## removed features  
+## Removed features  
 * repeatable log annotations 
 * toggling of args/result logging -> it will always log args and result  
   
@@ -42,7 +43,7 @@ dependencies {
 ```
  
 
-## config  
+## Config  
 ```java  
 @Configuration  
 @EnableAspectJAutoProxy(proxyTargetClass = true)  
