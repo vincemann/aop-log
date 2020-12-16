@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -38,35 +39,28 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ProxyAwareAopLogger implements InitializingBean {
 
-    // private static final Log LOGGER = LogFactory.getLog(AOPLogger.class);
-    private LogAdapter logAdapter;
-    private Map<Severity, LogStrategy> logStrategies;
     private final LocalVariableTableParameterNameDiscoverer localVariableNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
     private final ExceptionResolver exceptionResolver = new ExceptionResolver();
     private final ConcurrentMap<LoggedMethodIdentifier, MethodDescriptor> cache = new ConcurrentHashMap<>();
-    private AnnotationParser annotationParser;
     //I add this impl bc otherwise the ignoreGetters and ignoreSetters in @LogConfig, that is handled by this component, would be ignored,
     // which would be unexpected behavior
     private final List<MethodFilter> methodFilters = Lists.newArrayList(new LogConfigMethodFilter());
+    // private static final Log LOGGER = LogFactory.getLog(AOPLogger.class);
+    private LogAdapter logAdapter;
+    private Map<Severity, LogStrategy> logStrategies;
+    private AnnotationParser annotationParser;
     private InvocationDescriptorFactory invocationDescriptorFactory;
-    private ConcurrentHashMap<Thread,LoggedMethodCall> thread_lastLoggedCall_map = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Thread, LoggedMethodCall> thread_lastLoggedCall_map = new ConcurrentHashMap<>();
 
-    @EqualsAndHashCode
-    @Getter
-    @ToString
-    private static class LoggedMethodIdentifier {
-        private String name;
-        private Class<?>[] argTypes;
-        private Class<?> targetClass;
-        LoggedMethodIdentifier(Method method,Class<?> targetClass){
-            this.name=method.getName();
-            this.argTypes=method.getParameterTypes();
-            this.targetClass = targetClass;
-        }
+    @Autowired
+    public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, MethodFilter... methodFilters) {
+        this.annotationParser = annotationParser;
+        this.invocationDescriptorFactory = invocationDescriptorFactory;
+        this.methodFilters.addAll(Lists.newArrayList(methodFilters));
     }
 
     @Override
-    public void afterPropertiesSet(){
+    public void afterPropertiesSet() {
         logStrategies = new EnumMap<Severity, LogStrategy>(Severity.class);
         logStrategies.put(Severity.FATAL, new LogStrategy.FatalLogStrategy(logAdapter));
         logStrategies.put(Severity.ERROR, new LogStrategy.ErrorLogStrategy(logAdapter));
@@ -80,15 +74,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
         this.logAdapter = log;
     }
 
-    @Autowired
-    public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, MethodFilter... methodFilters) {
-        this.annotationParser = annotationParser;
-        this.invocationDescriptorFactory = invocationDescriptorFactory;
-        this.methodFilters.addAll(Lists.newArrayList(methodFilters));
-    }
-
-
-
     @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
 
@@ -96,7 +81,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
 //        log.trace("joinPoint matched: " + targetClass.getSimpleName()+" "+joinPoint.getSignature().getName());
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint);
         log.trace("LoggedMethodCall:  " + loggedCall);
-
 
 
 //        Class<?> unmodifiedTargetClass = AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass();
@@ -107,15 +91,14 @@ public class ProxyAwareAopLogger implements InitializingBean {
         if (isDuplicateProxyLogging(loggedCall)) {
             log.debug("Skipping duplicate logging of proxy call");
             return loggedCall.proceed();
-        }else {
-            thread_lastLoggedCall_map.put(Thread.currentThread(),loggedCall);
+        } else {
+            thread_lastLoggedCall_map.put(Thread.currentThread(), loggedCall);
         }
-
 
 
         //method filter only restricts interaction logging, logException is independent subsystem
         for (MethodFilter methodFilter : methodFilters) {
-            if (!methodFilter.wanted(loggedCall.methodDescriptor)){
+            if (!methodFilter.wanted(loggedCall.methodDescriptor)) {
                 return proceedWithExceptionLogging(loggedCall);
             }
         }
@@ -133,10 +116,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
         return loggedCall.getResult();
     }
 
-    protected boolean isDuplicateProxyLogging(LoggedMethodCall loggedMethodCall){
-        LoggedMethodCall call = thread_lastLoggedCall_map.get(Thread.currentThread());
-        if (call!=null) {
-            if (loggedMethodCall.getMethodDescriptor().equals(call.getMethodDescriptor())) {
+    protected boolean isDuplicateProxyLogging(LoggedMethodCall call) {
+        LoggedMethodCall precedingCall = thread_lastLoggedCall_map.get(Thread.currentThread());
+        if (precedingCall != null) {
+            if (call.getMethodDescriptor().equals(precedingCall.getMethodDescriptor()) &&
+                    StringUtils.equals(call.getBeanName(), precedingCall.getBeanName())) {
                 return true;
             }
         }
@@ -150,7 +134,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
             //exception was not catched by logged Method
             if (loggedCall.isExceptionLoggingOn()) {
                 loggedCall.logException(e);
-            }else {
+            } else {
                 if (loggedCall.isInteractionLoggingOn()) {
                     loggedCall.logInteractionException(e);
                 }
@@ -160,11 +144,39 @@ public class ProxyAwareAopLogger implements InitializingBean {
         return loggedCall.getResult();
     }
 
+    //todo maybe need to be changed
+    private Method extractMethod(/*Class<?> targetClass, */ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Class<?> targetClass = joinPoint.getTarget().getClass();
+        // signature.getMethod() points to method declared in interface. it is not suit to discover arg names and arg annotations
+        // see AopProxyUtils: org.springframework.cache.interceptor.CacheAspectSupport#execute(CacheAspectSupport.Invoker, Object, Method, Object[])
+//        Class<?> targetClass = joinPoint.getTarget().getClass();
+        if (Modifier.isPublic(signature.getMethod().getModifiers())) {
+            return targetClass.getMethod(signature.getName(), signature.getParameterTypes());
+        } else {
+            return ReflectionUtils.findMethod(targetClass, signature.getName(), signature.getParameterTypes());
+        }
+    }
+
+    @EqualsAndHashCode
+    @Getter
+    @ToString
+    private static class LoggedMethodIdentifier {
+        private String name;
+        private Class<?>[] argTypes;
+        private Class<?> targetClass;
+
+        LoggedMethodIdentifier(Method method, Class<?> targetClass) {
+            this.name = method.getName();
+            this.argTypes = method.getParameterTypes();
+            this.targetClass = targetClass;
+        }
+    }
 
     @Getter
     @AllArgsConstructor
     @ToString
-    public class LoggedMethodCall{
+    public class LoggedMethodCall {
         Method method;
         Class<?> targetClass;
         String beanName;
@@ -186,7 +198,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.args = joinPoint.getArgs();
             this.targetClass = AopUtils.getTargetClass(joinPoint.getTarget());
             this.method = extractMethod(/*targetClass,*/joinPoint);
-            this.beanName =findBeanName(joinPoint);
+            this.beanName = findBeanName(joinPoint);
             this.methodDescriptor = createMethodDescriptor();
             this.exceptionDescriptor = methodDescriptor.getExceptionDescriptor();
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
@@ -194,18 +206,18 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.logger = logAdapter.getLog(targetClass);
         }
 
-        protected String findBeanName(JoinPoint joinPoint){
-            if (joinPoint.getTarget() instanceof BeanNameAware){
-                return  ((BeanNameAware) joinPoint.getTarget()).getBeanName();
+        protected String findBeanName(JoinPoint joinPoint) {
+            if (joinPoint.getTarget() instanceof BeanNameAware) {
+                return ((BeanNameAware) joinPoint.getTarget()).getBeanName();
             }
             return null;
         }
 
-        private MethodDescriptor createMethodDescriptor(){
-            log.trace("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method,targetClass));
+        private MethodDescriptor createMethodDescriptor() {
+            log.trace("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method, targetClass));
             log.trace("cache:: " + cache);
             synchronized (cache) {
-                MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method,targetClass));
+                MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method, targetClass));
                 if (cached != null) {
                     //log.trace("key: " + new LoggedMethodIdentifier(method,targetClass));
                     log.trace("Returning method Descriptor from cache: " + cached);
@@ -218,7 +230,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
                     ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(logExceptionInfo).build();
                     InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo);
                     cached = new MethodDescriptor(invocationDescriptor, argumentDescriptor, exceptionDescriptor, method);
-                    cache.put(new LoggedMethodIdentifier(method,targetClass), cached);
+                    cache.put(new LoggedMethodIdentifier(method, targetClass), cached);
                     return cached;
                 }
             }
@@ -235,70 +247,56 @@ public class ProxyAwareAopLogger implements InitializingBean {
             return result;
         }
 
-        void logException(Exception e){
+        void logException(Exception e) {
             Class<? extends Exception> resolved = exceptionResolver.resolve(exceptionDescriptor, e);
             if (resolved != null) {
                 ExceptionSeverity excSeverity = exceptionDescriptor.getExceptionSeverity(resolved);
                 if (isLoggingOn(excSeverity.getSeverity())) {
                     logStrategies.get(excSeverity.getSeverity())
-                            .logException(logger, method,beanName, args.length, e, excSeverity.getStackTrace());
+                            .logException(logger, method, beanName, args.length, e, excSeverity.getStackTrace());
                 }
             }
         }
 
-        void logInteractionException(Exception e){
+        void logInteractionException(Exception e) {
             Severity severity = invocationDescriptor.getSeverity();
-            if (isLoggingOn(severity)){
+            if (isLoggingOn(severity)) {
                 logStrategies.get(severity)
-                        .logException(logger, method,beanName, args.length, e,false);
+                        .logException(logger, method, beanName, args.length, e, false);
             }
         }
 
 
-        void logInvocation(){
+        void logInvocation() {
             logStrategies.get(invocationDescriptor.getSeverity())
-                    .logBefore(logger, method,beanName, args, argumentDescriptor);
+                    .logBefore(logger, method, beanName, args, argumentDescriptor);
         }
 
-        void logResult(){
+        void logResult() {
             Object loggedResult = (method.getReturnType() == Void.TYPE) ? Void.TYPE : result;
             logStrategies.get(invocationDescriptor.getSeverity())
-                    .logAfter(logger, method,beanName, args.length, loggedResult);
+                    .logAfter(logger, method, beanName, args.length, loggedResult);
         }
 
-        boolean isExceptionLoggingOn(){
+        boolean isExceptionLoggingOn() {
             SourceAwareAnnotationInfo<LogException> logExceptionInfo = exceptionDescriptor.getExceptionAnnotationInfo();
-            if (logExceptionInfo==null){
+            if (logExceptionInfo == null) {
                 return false;
             }
-            return (logExceptionInfo.getAnnotation().value().length>0 && isLoggingOn(Severity.ERROR))||
-                    (logExceptionInfo.getAnnotation().fatal().length>0 && isLoggingOn(Severity.FATAL)) ||
-                    (logExceptionInfo.getAnnotation().trace().length>0 && isLoggingOn(Severity.TRACE))||
-                    (logExceptionInfo.getAnnotation().debug().length>0 && isLoggingOn(Severity.DEBUG))||
-                    (logExceptionInfo.getAnnotation().info().length>0 && isLoggingOn(Severity.INFO))||
-                    (logExceptionInfo.getAnnotation().warn().length>0 && isLoggingOn(Severity.WARN));
+            return (logExceptionInfo.getAnnotation().value().length > 0 && isLoggingOn(Severity.ERROR)) ||
+                    (logExceptionInfo.getAnnotation().fatal().length > 0 && isLoggingOn(Severity.FATAL)) ||
+                    (logExceptionInfo.getAnnotation().trace().length > 0 && isLoggingOn(Severity.TRACE)) ||
+                    (logExceptionInfo.getAnnotation().debug().length > 0 && isLoggingOn(Severity.DEBUG)) ||
+                    (logExceptionInfo.getAnnotation().info().length > 0 && isLoggingOn(Severity.INFO)) ||
+                    (logExceptionInfo.getAnnotation().warn().length > 0 && isLoggingOn(Severity.WARN));
         }
 
-        boolean isInteractionLoggingOn(){
+        boolean isInteractionLoggingOn() {
             return isLoggingOn(invocationDescriptor.getSeverity());
         }
 
         private boolean isLoggingOn(Severity severity) {
             return severity != null && logStrategies.get(severity).isLogEnabled(logger);
-        }
-    }
-
-    //todo maybe need to be changed
-    private Method extractMethod(/*Class<?> targetClass, */ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Class<?> targetClass = joinPoint.getTarget().getClass();
-        // signature.getMethod() points to method declared in interface. it is not suit to discover arg names and arg annotations
-        // see AopProxyUtils: org.springframework.cache.interceptor.CacheAspectSupport#execute(CacheAspectSupport.Invoker, Object, Method, Object[])
-//        Class<?> targetClass = joinPoint.getTarget().getClass();
-        if (Modifier.isPublic(signature.getMethod().getModifiers())) {
-            return targetClass.getMethod(signature.getName(), signature.getParameterTypes());
-        } else {
-            return ReflectionUtils.findMethod(targetClass, signature.getName(), signature.getParameterTypes());
         }
     }
 
