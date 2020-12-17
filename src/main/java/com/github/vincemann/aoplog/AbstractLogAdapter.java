@@ -35,18 +35,12 @@ abstract class AbstractLogAdapter implements LogAdapter {
     public Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
         if (args.length == 0) {
             StringBuilder buff = new StringBuilder();
-//            if (beanName!=null){
-//                buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
-//            }
             buff.append(CALLING).append(method.getName()).append("()");
             return buff.toString();
         }
 
         String[] names = argumentDescriptor.getNames();
         StringBuilder buff = new StringBuilder();
-//        if (beanName!=null){
-//            buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
-//        }
         buff.append(CALLING).append(method.getName()).append('(');
         if (args.length > 1) {
             buff.append(args.length).append(" arguments: ");
@@ -66,22 +60,22 @@ abstract class AbstractLogAdapter implements LogAdapter {
                 buff.append(ARG_DELIMITER);
             }
         }
-        if (argumentDescriptor.nextLoggedArgumentIndex(0) != -1) {
-            buff.setLength(buff.length() - 2);
-        }
+        // dont know what that is good for
+//        if (argumentDescriptor.nextLoggedArgumentIndex(0) != -1) {
+//            buff.setLength(buff.length() - 2);
+//        }
+        // remove trailing arg delimiter
+        buff.setLength(buff.length()-ARG_DELIMITER.length());
         buff.append(')');
         return buff.toString();
     }
 
     @Override
     public Object toMessage(Method method,String beanName, int argCount, Object result) {
-//        if (argCount == 0) {
+//        if (result == null) {
 //            return RETURNING + method.getName() + "():" + asString(result);
 //        }
         StringBuilder buff = new StringBuilder();
-//        if (beanName!=null){
-//            buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
-//        }
         buff.append(RETURNING).append(method.getName()).append(" { ").append(asString(result)).append(" } ");
         return buff.toString();
     }
@@ -89,9 +83,6 @@ abstract class AbstractLogAdapter implements LogAdapter {
     @Override
     public Object toMessage(Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
         StringBuilder buff = new StringBuilder();
-//        if (beanName!=null){
-//            buff.append(BEAN_NAME).append(beanName).append(System.lineSeparator());
-//        }
         buff.append(THROWING).append(method.getName()).append(" { ").append(e.getClass()).append(" } ");
         if (e.getMessage() != null) {
             buff.append("=").append(e.getMessage());

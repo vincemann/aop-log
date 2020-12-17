@@ -59,12 +59,12 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
             log.trace("open exception found while opening method: " + method);
             log.trace("clearing stack ");
             //exception was never catched by logged method -> clear call stack
-            getStack().clear();
+            getCallStack().clear();
         }
-        int openMethodCalls = getStack().size();
+        int openMethodCalls = getCallStack().size();
         String formattedMsg = formatCall(msg, beanName, openMethodCalls);
         addToCallStack(method);
-        log.trace("call stack after input logging: " + getStack());
+        log.trace("call stack after input logging: " + getCallStack());
         return formattedMsg;
     }
 
@@ -77,9 +77,9 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
         thread_openException.put(Thread.currentThread(), Boolean.FALSE);
         String msg = (String) super.toMessage(method, beanName, argCount, result);
         removeFromCallStack(method);
-        int openMethodCalls = getStack().size();
+        int openMethodCalls = getCallStack().size();
         String formattedMsg = formatResult(msg, beanName, openMethodCalls);
-        log.trace("call stack after output logging: " + getStack());
+        log.trace("call stack after output logging: " + getCallStack());
         return formattedMsg;
     }
 
@@ -87,7 +87,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     public Object toMessage(Method method, String beanName, int argCount, Exception e, boolean stackTrace) {
         String msg = (String) super.toMessage(method, beanName, argCount, e, stackTrace);
         boolean removed = removeFromCallStack(method);
-        int openMethodCalls = getStack().size();
+        int openMethodCalls = getCallStack().size();
         if (!removed) {
             log.trace("Found LogException only method: " + method + ", was not removed from stack bc was not on top");
             openMethodCalls++;
@@ -95,7 +95,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
             thread_openException.put(Thread.currentThread(), Boolean.TRUE);
         }
         String formattedMsg = formatResult(msg, beanName, openMethodCalls);
-        log.trace("call stack after exception logging: " + getStack());
+        log.trace("call stack after exception logging: " + getCallStack());
         return formattedMsg;
     }
 
@@ -143,12 +143,12 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     private void addToCallStack(Method method) {
-        Stack<Method> stack = getStack();
+        Stack<Method> stack = getCallStack();
         stack.push(method);
     }
 
     private boolean removeFromCallStack(Method method) {
-        Stack<Method> stack = getStack();
+        Stack<Method> stack = getCallStack();
         if (stack.isEmpty()) {
             return false;
         }
@@ -161,7 +161,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
         }
     }
 
-    private Stack<Method> getStack() {
+    private Stack<Method> getCallStack() {
         thread_callStack.putIfAbsent(Thread.currentThread(), new Stack<>());
         return thread_callStack.get(Thread.currentThread());
     }
