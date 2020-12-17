@@ -7,8 +7,9 @@ import com.google.common.collect.Sets;
 
 import java.lang.reflect.Method;
 
-import static com.github.vincemann.aoplog.GlobalRegExMethodFilter.GETTER_REGEX;
-import static com.github.vincemann.aoplog.GlobalRegExMethodFilter.SETTER_REGEX;
+import static com.github.vincemann.aoplog.Patterns.GETTER_REGEX;
+import static com.github.vincemann.aoplog.Patterns.SETTER_REGEX;
+
 
 public class LogConfigMethodFilter implements MethodFilter {
 

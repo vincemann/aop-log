@@ -14,9 +14,6 @@ import java.util.Set;
  */
 public class GlobalRegExMethodFilter implements MethodFilter {
 
-    public static final String GETTER_REGEX = "^(get|is)[A-Z][A-Za-z0-9]*";
-    public static final String SETTER_REGEX = "^set[A-Z][A-Za-z0-9]*";
-
     private Set<String> ignoreRegEx = new HashSet<>();
 
     public GlobalRegExMethodFilter(String... regEx) {
