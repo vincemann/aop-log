@@ -3,10 +3,12 @@ package com.github.vincemann.aoplog;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogConfig;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.lang.reflect.Method;
+
+import static com.github.vincemann.aoplog.GlobalRegExMethodFilter.GETTER_REGEX;
+import static com.github.vincemann.aoplog.GlobalRegExMethodFilter.SETTER_REGEX;
 
 public class LogConfigMethodFilter implements MethodFilter {
 
@@ -18,20 +20,21 @@ public class LogConfigMethodFilter implements MethodFilter {
         if (logInfo == null) {
             return false;
         }
+        // Next rules only apply if logInfo ist not explicitly present on method!
         if (logInfo.isClassLevel()) {
             boolean methodDefinedInAnnotationClass = isMethodDefinedInAnnotationClass(methodDescriptor.getMethod(), logInfo);
             if (classLogConfig != null) {
                 if (!methodDefinedInAnnotationClass && !classLogConfig.logAllChildrenMethods()) {
                     return false;
                 }
-                if (classLogConfig.ignoreGetters() && (methodName.startsWith("get") || methodName.startsWith("is"))) {
+                if (classLogConfig.ignoreGetters() && (methodName.matches(GETTER_REGEX))) {
                     return false;
                 }
-                if (classLogConfig.ignoreSetters() && (methodName.startsWith("set"))) {
+                if (classLogConfig.ignoreSetters() && (methodName.matches(SETTER_REGEX))) {
                     return false;
                 }
-                if (Sets.newHashSet(classLogConfig.ignoredMethods()).parallelStream().filter(e -> e.equals(methodName)).count()!=0){
-                    //method is ignored by name
+                if (Sets.newHashSet(classLogConfig.ignoredRegEx()).parallelStream().anyMatch(methodName::matches)){
+                    //method is matched regEx -> ignored
                     return false;
                 }
             } else {
