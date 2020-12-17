@@ -1,14 +1,46 @@
-# aop-log  
+# Aop-log  
 modified version of [this](https://github.com/nickvl/aop-logging).  
 
-## additional features  
+## Example  
+### code  
+  
+```java
+@LogInteraction  
+public interface AuthorizationTokenService {  
+  
+    public String createToken(RapidAuthenticatedPrincipal principal);  
+    public P parseToken(String token) throws BadTokenException, BadCredentialsException;  
+}  
+```  
+  
+### log output  
+```
+2020-12-16 13:03:00.340 DEBUG 5691 --- [           main] .a.s.t.RapidJwtAuthorizationTokenService :   
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++   
+     ->  CALLING: parseToken(token=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhdXRoIiwic3ViIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJleHBpcmVkIjoxNjA4OTg...)  ,Thread: 1    
+__________________________________________________________________________________________________________________________   
+  
+2020-12-16 13:03:00.370 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Check if token is expired...  
+2020-12-16 13:03:00.371 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Expiration time = Sat Dec 26 13:02:59 UTC 2020. Current time = Wed Dec 16 13:03:00 UTC 2020  
+2020-12-16 13:03:00.379 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Token not expired.  
+2020-12-16 13:03:00.388 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Check if token is obsolete...  
+2020-12-16 13:03:00.388 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Token issued at: Wed Dec 16 13:02:59 UTC 2020, must be issued after: Wed Dec 16 13:02:56 UTC 2020  
+2020-12-16 13:03:00.389 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Token is not obsolete.  
+2020-12-16 13:03:00.389 DEBUG 5691 --- [           main] .a.s.t.RapidJwtAuthorizationTokenService :    
+__________________________________________________________________________________________________________________________  
+     <-  RETURNING: parseToken { RapidAuthenticatedPrincipal(super=RapidAuthenticatedPrincipal(name=admin@example.com, roles=[ROLE_ADMIN] ...) , Thread 1  
+==========================================================================================================================  
+```
+  
+## Additional features  
 * works on abstract classes and interfaces and with any type of spring proxy  
-* Config annotation to configure class level logging  
+* config annotation to configure class level logging  
 * automatic identation of log statements to show call hierachry  
 * add padding and thread-info  
+* possible to log bean-name    
 * finegrained control over logging on each level of the class- (and interface-)hierarchy   
 
-## removed features  
+## Removed features  
 * repeatable log annotations 
 * toggling of args/result logging -> it will always log args and result  
   
@@ -42,7 +74,7 @@ dependencies {
 ```
  
 
-## config  
+## Config  
 ```java  
 @Configuration  
 @EnableAspectJAutoProxy(proxyTargetClass = true)  
