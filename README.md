@@ -9,7 +9,18 @@ modified version of [this](https://github.com/nickvl/aop-logging).
 public interface AuthorizationTokenService {  
   
     public String createToken(RapidAuthenticatedPrincipal principal);  
-    public P parseToken(String token) throws BadTokenException, BadCredentialsException;  
+    public RapidAuthenticatedPrincipal parseToken(String token) throws BadTokenException, BadCredentialsException;  
+}  
+  
+public class Main{  
+  
+  @Autowired  
+  AuthorizationTokenService tokenService;  
+    
+  public static void main(String[] args){    
+      tokenService.parseToken("eyJhbGciOiJIUzI1...");  
+  }  
+  
 }  
 ```  
   
@@ -17,7 +28,7 @@ public interface AuthorizationTokenService {
 ```
 2020-12-16 13:03:00.340 DEBUG 5691 --- [           main] .a.s.t.RapidJwtAuthorizationTokenService :   
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++   
-     ->  CALLING: parseToken(token=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhdXRoIiwic3ViIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJleHBpcmVkIjoxNjA4OTg...)  ,Thread: 1    
+     ->  CALLING: parseToken(token=eyJhbGciOiJIUzI1...)  ,Thread: 1    
 __________________________________________________________________________________________________________________________   
   
 2020-12-16 13:03:00.370 DEBUG 5691 --- [           main] c.g.v.springrapid.auth.util.RapidJwt     : Check if token is expired...  
