@@ -1,6 +1,6 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.BeanNameAware;
+import com.github.vincemann.aoplog.api.IBeanNameAware;
 import com.github.vincemann.aoplog.api.LogInteraction;
 import com.github.vincemann.aoplog.api.LogException;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
@@ -207,8 +207,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         protected String findBeanName(JoinPoint joinPoint) {
-            if (joinPoint.getTarget() instanceof BeanNameAware) {
-                return ((BeanNameAware) joinPoint.getTarget()).getBeanName();
+            if (joinPoint.getTarget() instanceof IBeanNameAware) {
+                return ((IBeanNameAware) joinPoint.getTarget()).getBeanName();
             }
             return null;
         }
