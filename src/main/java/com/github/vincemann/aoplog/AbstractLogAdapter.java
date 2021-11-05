@@ -32,7 +32,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
+    public Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor,boolean ignoreLazy) {
         if (args.length == 0) {
             StringBuilder buff = new StringBuilder();
             buff.append(CALLING).append(method.getName()).append("()");

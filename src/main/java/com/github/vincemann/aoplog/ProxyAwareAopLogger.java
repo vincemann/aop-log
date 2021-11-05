@@ -175,7 +175,6 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
     @Getter
     @AllArgsConstructor
-    @ToString
     public class LoggedMethodCall {
         Method method;
         Class<?> targetClass;
@@ -297,6 +296,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
         private boolean isLoggingOn(Severity severity) {
             return severity != null && logStrategies.get(severity).isLogEnabled(logger);
+        }
+
+        @Override
+        public String toString() {
+            return LazyInitLogUtils.toString(this);
         }
     }
 

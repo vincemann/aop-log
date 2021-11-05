@@ -207,6 +207,7 @@ abstract class LogStrategy {
      */
     static final class DebugLogStrategy extends LogStrategy {
 
+
         DebugLogStrategy(LogAdapter logAdapter) {
             super(logAdapter);
         }
