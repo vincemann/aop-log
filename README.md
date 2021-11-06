@@ -93,6 +93,7 @@ public class AopLogConfiguration {
     
     private static final boolean SKIP_NULL_FIELDS = true;  
     private static final boolean FORCE_REFLECTION = false;  
+    private static final boolean IGNORE_LAZY_INIT = false;  
     private static final int CROP_THRESHOLD = 7;  
     private static final Set<String> EXCLUDE_SECURE_FIELD_NAMES = Sets.newHashSet("password");  
   
@@ -100,7 +101,7 @@ public class AopLogConfiguration {
     @Bean  
     public ProxyAwareAopLogger aopLogger() {  
         ProxyAwareAopLogger aopLogger = new ProxyAwareAopLogger(new TypeHierarchyAnnotationParser(),new InvocationDescriptorFactoryImpl());  
-        aopLogger.setLogAdapter(new ThreadAwareIndentingLogAdapter(SKIP_NULL_FIELDS, CROP_THRESHOLD, EXCLUDE_SECURE_FIELD_NAMES,FORCE_REFLECTION));  
+        aopLogger.setLogAdapter(new ThreadAwareIndentingLogAdapter(SKIP_NULL_FIELDS, CROP_THRESHOLD, EXCLUDE_SECURE_FIELD_NAMES,FORCE_REFLECTION,IGNORE_LAZY_INIT));  
         return aopLogger;  
     }  
   
