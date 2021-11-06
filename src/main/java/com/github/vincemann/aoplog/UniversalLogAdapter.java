@@ -23,7 +23,6 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
     private final int cropThreshold;
     private final boolean skipNullFields;
     private final boolean forceReflection;
-    private final boolean ignoreLazyInit;
 
     /**
      * Constructor.
@@ -32,13 +31,11 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
      * @param cropThreshold threshold value of processed elements count to stop building the string, applied only for multi-element structures
      * @param excludeFieldNames field names to exclude from building the string
      * @param forceReflection always use reflections to build string, even if toString is available
-     * @param ignoreLazyInit Makes sure args and ret value is attached to EntityManager Session, to avoid {@link org.hibernate.LazyInitializationException}
      * @throws IllegalArgumentException if <code>cropThreshold </code> is negative
      */
-    public UniversalLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection, boolean ignoreLazyInit) {
+    public UniversalLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
         this.skipNullFields = skipNullFields;
         this.forceReflection = forceReflection;
-        this.ignoreLazyInit = ignoreLazyInit;
         if (cropThreshold < 0) {
             throw new IllegalArgumentException("cropThreshold is negative: " + cropThreshold);
         }
@@ -51,12 +48,10 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
      * @param skipNullFields use {@code true} to exclude fields which value is {@code null} from building the string
      * @param excludeFieldNames field names to exclude from building the string
      * @param forceReflection always use reflections to build string, even if toString is available
-     * @param ignoreLazyInit Makes sure args and ret value is attached to EntityManager Session, to avoid {@link org.hibernate.LazyInitializationException}
      */
-    public UniversalLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection, boolean ignoreLazyInit) {
+    public UniversalLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection) {
         this.skipNullFields = skipNullFields;
         this.forceReflection = forceReflection;
-        this.ignoreLazyInit = ignoreLazyInit;
         this.cropThreshold = -1;
         this.excludeFieldNames = excludeFieldNames == null ? null : new HashSet<String>(excludeFieldNames);
     }
@@ -64,7 +59,6 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
 
     @Override
     protected String asString(Object value) {
-
         if (value == null) {
             return ToString.getNull();
         }
@@ -74,7 +68,7 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
                 && !forceReflection) {
             return value.toString();
         }
-        ToString builder = cropThreshold == -1 ? ToString.createDefault(ignoreLazyInit) : ToString.createCropInstance(cropThreshold,ignoreLazyInit);
+        ToString builder = cropThreshold == -1 ? ToString.createDefault() : ToString.createCropInstance(cropThreshold);
         builder.addStart(value);
 
         if (value instanceof Collection<?>) {

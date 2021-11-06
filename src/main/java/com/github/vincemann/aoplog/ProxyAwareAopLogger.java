@@ -298,10 +298,10 @@ public class ProxyAwareAopLogger implements InitializingBean {
             return severity != null && logStrategies.get(severity).isLogEnabled(logger);
         }
 
-        @Override
-        public String toString() {
-            return LazyInitLogUtils.toString(this);
-        }
+//        @Override
+//        public String toString() {
+//            return LazyInitLogUtils.toString(this);
+//        }
     }
 
 
