@@ -5,6 +5,8 @@
 
 package com.github.vincemann.aoplog;
 
+import org.hibernate.LazyInitializationException;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -25,20 +27,22 @@ final class ToString {
     private static final String SIZE_END = ">..";
 
     private final int cropThreshold;
+    private final boolean ignoreLazyInit;
 
     private final StringBuilder buffer = new StringBuilder(512);
     private final Set<Object> valuesInProgress = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
 
-    private ToString(int cropThreshold) {
+    private ToString(int cropThreshold, boolean ignoreLazyInit) {
         this.cropThreshold = cropThreshold;
+        this.ignoreLazyInit = ignoreLazyInit;
     }
 
-    public static ToString createDefault() {
-        return new ToString(-1);
+    public static ToString createDefault(boolean ignoreLazyInit) {
+        return new ToString(-1, ignoreLazyInit);
     }
 
-    public static ToString createCropInstance(int cropThreshold) {
-        return new ToString(cropThreshold);
+    public static ToString createCropInstance(int cropThreshold,boolean ignoreLazyInit) {
+        return new ToString(cropThreshold, ignoreLazyInit);
     }
 
     /**
@@ -140,27 +144,38 @@ final class ToString {
      * @param coll the collection to build a <code>toString</code>
      */
     public void addCollection(Collection<?> coll) {
-        buffer.append(ENUMERATION_START);
-        if (!coll.isEmpty()) {
-            Iterator<?> iterator = coll.iterator();
-            for (int i = 0;; i++) {
-                if (i == cropThreshold) {
-                    buffer.append(SIZE_START).append(coll.size()).append(SIZE_END);
-                    break;
+        try {
+            buffer.append(ENUMERATION_START);
+            if (!coll.isEmpty()) {
+                Iterator<?> iterator = coll.iterator();
+                for (int i = 0;; i++) {
+                    if (i == cropThreshold) {
+                        buffer.append(SIZE_START).append(coll.size()).append(SIZE_END);
+                        break;
+                    }
+                    Object item = iterator.next();
+                    if (item == null) {
+                        addNullValue();
+                    } else {
+                        parse(item);
+                    }
+                    if (!iterator.hasNext()) {
+                        break;
+                    }
+                    buffer.append(ENUMERATION_SEPARATOR);
                 }
-                Object item = iterator.next();
-                if (item == null) {
-                    addNullValue();
-                } else {
-                    parse(item);
-                }
-                if (!iterator.hasNext()) {
-                    break;
-                }
-                buffer.append(ENUMERATION_SEPARATOR);
+            }
+            buffer.append(ENUMERATION_END);
+        }catch (LazyInitializationException e){
+            if (ignoreLazyInit){
+                buffer.append(ENUMERATION_START);
+                buffer.append("LazyInitException");
+                buffer.append(ENUMERATION_END);
+            }else {
+                throw e;
             }
         }
-        buffer.append(ENUMERATION_END);
+
     }
 
     /**

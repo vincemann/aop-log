@@ -22,10 +22,6 @@ public @interface LogInteraction {
     Severity value() default Severity.DEBUG;
     boolean disabled() default false;
 
-    /**
-     * Makes sure args and ret value is attached to EntityManager Session
-     */
-    boolean transactional() default false;
 
 
 }

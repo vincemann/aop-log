@@ -38,12 +38,12 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 //        }
 //    }
 
-    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
-        super(skipNullFields, cropThreshold, excludeFieldNames, forceReflection);
+    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection, boolean ignoreLazyInit) {
+        super(skipNullFields, cropThreshold, excludeFieldNames, forceReflection, ignoreLazyInit);
     }
 
-    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection) {
-        super(skipNullFields, excludeFieldNames, forceReflection);
+    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection,boolean ignoreLazyInit) {
+        super(skipNullFields, excludeFieldNames, forceReflection, ignoreLazyInit);
     }
 
     protected static String getThreadInfoSuffix() {
