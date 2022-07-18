@@ -167,4 +167,8 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
 
+    @Override
+    protected String asString(Object value) {
+        return super.asString(value);
+    }
 }

@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import org.junit.After;
 import org.junit.Rule;
@@ -33,7 +33,7 @@ public class InvocationDescriptorFactoryMixedTestCase {
             LogInteraction methodLogAnnotation = method.getMethod().getDeclaredAnnotation(LogInteraction.class);
             AnnotationInfo<LogInteraction> methodLog = methodLogAnnotation==null? null : new AnnotationInfo<>(methodLogAnnotation,InvocationDescriptorFactoryMixedTestCase.class);
             AnnotationInfo<LogInteraction> classLog = classLogAnnotation==null? null : new AnnotationInfo<>(classLogAnnotation,InvocationDescriptorFactoryMixedTestCase.class);
-            currDescriptor = factory.create(methodLog,classLog);
+            currDescriptor = factory.create(methodLog,classLog, configureUserLoggersInfo);
         }
     };
 

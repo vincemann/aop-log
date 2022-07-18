@@ -3,7 +3,7 @@
  *   Some Rights Reserved.
  ************************************************************************************/
 
-package com.github.vincemann.aoplog.api;
+package com.github.vincemann.aoplog.api.annotation;
 
 import com.github.vincemann.aoplog.Severity;
 
@@ -11,6 +11,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Set;
 
 /**
  * Meta annotation that indicates a log method annotation.

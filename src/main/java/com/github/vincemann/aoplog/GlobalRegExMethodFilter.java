@@ -1,7 +1,6 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.MethodFilter;
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 import com.google.common.collect.Sets;
 

@@ -19,7 +19,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 
 @Getter
-public abstract class AbstractAopLoggerTestCase {
+public abstract class AbstractAopCustomLoggerTestCase {
 
     private static final Object[] PARAM_VALUE = new Object[]{"@1", "@2"};
 

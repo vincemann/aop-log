@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog.config;
 
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import org.springframework.stereotype.Component;
 
 /**

@@ -34,7 +34,7 @@ import static org.mockito.Mockito.inOrder;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/com/github/vincemann/aoplog/AOPLoggerTestCase-context.xml")
 @DirtiesContext
-public class AOPLoggerImplementationsMethodTestCase extends AbstractAopLoggerTestCase{
+public class AOPCustomLoggerImplementationsMethodTestCase extends AbstractAopCustomLoggerTestCase {
 
     @Autowired
     private FooService fooService;

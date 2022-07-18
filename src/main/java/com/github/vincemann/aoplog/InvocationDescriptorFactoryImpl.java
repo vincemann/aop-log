@@ -1,8 +1,8 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogConfig;
-import com.github.vincemann.aoplog.api.LogException;
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
+import com.github.vincemann.aoplog.api.annotation.LogConfig;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 
@@ -23,7 +23,7 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
 
 
     @Override
-    public InvocationDescriptor create(AnnotationInfo<LogInteraction> methodLog, AnnotationInfo<LogInteraction> classLog) {
+    public InvocationDescriptor create(AnnotationInfo<LogInteraction> methodLog, AnnotationInfo<LogInteraction> classLog, ConfigureCustomLoggers configureCustomLoggersInfo) {
         LogConfig logConfig = null;
         Severity severity = null;
         SourceAwareAnnotationInfo<LogInteraction> logInfo = evalEffectiveLogInfo(methodLog, classLog);
@@ -37,7 +37,7 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
         return new InvocationDescriptor(
                 severity,
                 logInfo,
-                logConfig);
+                logConfig, configureCustomLoggersInfo);
     }
 
     //finds non disabled @Log if any

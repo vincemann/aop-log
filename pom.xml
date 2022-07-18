@@ -23,10 +23,18 @@
         <guava.version>29.0-jre</guava.version>
         <lombok.version>1.18.12</lombok.version>
         <version.aspectj>1.6.8</version.aspectj>
+        <smart-logger.version>1.0.0-SNAPSHOT.1</smart-logger.version>
         <ng-xSpring.build.directory>target</ng-xSpring.build.directory>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.github.vincemann</groupId>
+            <artifactId>smart-logger</artifactId>
+            <version>${smart-logger.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>

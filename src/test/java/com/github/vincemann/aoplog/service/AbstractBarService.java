@@ -6,8 +6,8 @@
 package com.github.vincemann.aoplog.service;
 
 
-import com.github.vincemann.aoplog.api.LogConfig;
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.LogConfig;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 
 /**
  * Base implementation of {@link BarService}.

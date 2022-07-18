@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog.benchmark;
 
 import com.github.vincemann.aoplog.Severity;
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.api.LogParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

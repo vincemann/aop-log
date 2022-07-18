@@ -1,8 +1,9 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.IBeanNameAware;
-import com.github.vincemann.aoplog.api.LogInteraction;
-import com.github.vincemann.aoplog.api.LogException;
+import com.github.vincemann.aoplog.api.*;
+import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
+import com.github.vincemann.aoplog.api.annotation.LogException;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -224,10 +225,15 @@ public class ProxyAwareAopLogger implements InitializingBean {
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
                     AnnotationInfo<LogInteraction> classLogInfo = annotationParser.fromClass(targetClass, LogInteraction.class);
+                    AnnotationInfo<ConfigureCustomLoggers> configureUserLoggersInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), ConfigureCustomLoggers.class);
+                    ConfigureCustomLoggers configureCustomLoggersAnnotation = null;
+                    if (configureUserLoggersInfo!=null)
+                        configureCustomLoggersAnnotation =configureUserLoggersInfo.getAnnotation();
+
                     SourceAwareAnnotationInfo<LogException> logExceptionInfo = annotationParser.fromMethodOrClass(method, LogException.class);
                     ArgumentDescriptor argumentDescriptor = new ArgumentDescriptor.Builder(method, args.length, localVariableNameDiscoverer).build();
                     ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(logExceptionInfo).build();
-                    InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo);
+                    InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo, configureCustomLoggersAnnotation);
                     cached = new MethodDescriptor(invocationDescriptor, argumentDescriptor, exceptionDescriptor, method);
                     cache.put(new LoggedMethodIdentifier(method, targetClass), cached);
                     return cached;

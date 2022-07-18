@@ -5,8 +5,9 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogConfig;
-import com.github.vincemann.aoplog.api.LogInteraction;
+import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
+import com.github.vincemann.aoplog.api.annotation.LogConfig;
+import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 import lombok.Getter;
 import lombok.ToString;
@@ -24,10 +25,13 @@ final class InvocationDescriptor {
     @Nullable
     private final LogConfig classLogConfig;
 
+    private final ConfigureCustomLoggers configureCustomLoggersAnnotation;
 
-    InvocationDescriptor(Severity severity, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig) {
+
+    InvocationDescriptor(Severity severity, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig, ConfigureCustomLoggers configureCustomLoggersAnnotation) {
         this.severity = severity;
         this.logInfo = logInfo;
         this.classLogConfig = classLogConfig;
+        this.configureCustomLoggersAnnotation = configureCustomLoggersAnnotation;
     }
 }

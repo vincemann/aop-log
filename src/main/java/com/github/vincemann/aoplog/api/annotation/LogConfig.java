@@ -1,4 +1,4 @@
-package com.github.vincemann.aoplog.api;
+package com.github.vincemann.aoplog.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

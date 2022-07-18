@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/com/github/vincemann/aoplog/AOPLoggerInheritanceAnnotatedClassTestCase-context.xml")
 @DirtiesContext
-public class AOPLoggerInheritanceTestCase extends AbstractAopLoggerTestCase{
+public class AOPCustomLoggerInheritanceTestCase extends AbstractAopCustomLoggerTestCase {
 
     //extended bar service impl
     private static final String[] E_PARAM_NAMES = new String[]{"eFirst", "eSecond"};

@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogException;
+import com.github.vincemann.aoplog.api.annotation.LogException;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 import lombok.ToString;
 
