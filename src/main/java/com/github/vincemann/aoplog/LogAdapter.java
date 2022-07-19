@@ -17,9 +17,9 @@ interface LogAdapter {
 
     Log getLog(String name);
 
-    Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor);
+    Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, CustomLoggerInfo customLoggerInfo);
 
-    Object toMessage(Method method,String beanName, int argCount, Object result);
+    Object toMessage(Method method,String beanName, int argCount, Object result, CustomLoggerInfo customLoggerInfo);
 
     Object toMessage(Method method,String beanName, int argCount, Exception e, boolean stackTrace);
 }

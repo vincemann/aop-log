@@ -52,11 +52,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
     private AnnotationParser annotationParser;
     private InvocationDescriptorFactory invocationDescriptorFactory;
     private ConcurrentHashMap<Thread, LoggedMethodCall> thread_lastLoggedCall_map = new ConcurrentHashMap<>();
+    private CustomLoggerInfoFactory customLoggerInfoFactory;
 
     @Autowired
-    public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, MethodFilter... methodFilters) {
+    public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, CustomLoggerInfoFactory customLoggerInfoFactory, MethodFilter... methodFilters) {
         this.annotationParser = annotationParser;
         this.invocationDescriptorFactory = invocationDescriptorFactory;
+        this.customLoggerInfoFactory = customLoggerInfoFactory;
         this.methodFilters.addAll(Lists.newArrayList(methodFilters));
     }
 
@@ -213,6 +215,18 @@ public class ProxyAwareAopLogger implements InitializingBean {
             return null;
         }
 
+        protected Set<CustomLoggerInfo> parseCustomLoggerInfos(){
+            AnnotationInfo<ConfigureCustomLoggers> configureUserLoggersInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), ConfigureCustomLoggers.class);
+            ConfigureCustomLoggers configureCustomLoggersAnnotation = null;
+            Set<CustomLoggerInfo> customLoggerInfos = new HashSet<>();
+            if (configureUserLoggersInfo!=null){
+                configureCustomLoggersAnnotation =configureUserLoggersInfo.getAnnotation();
+                customLoggerInfos = customLoggerInfoFactory.createCustomLoggerInfo(configureCustomLoggersAnnotation);
+
+            }
+            return customLoggerInfos;
+        }
+
         private MethodDescriptor createMethodDescriptor() {
             log.trace("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method, targetClass));
             log.trace("cache:: " + cache);
@@ -225,15 +239,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
                     AnnotationInfo<LogInteraction> classLogInfo = annotationParser.fromClass(targetClass, LogInteraction.class);
-                    AnnotationInfo<ConfigureCustomLoggers> configureUserLoggersInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), ConfigureCustomLoggers.class);
-                    ConfigureCustomLoggers configureCustomLoggersAnnotation = null;
-                    if (configureUserLoggersInfo!=null)
-                        configureCustomLoggersAnnotation =configureUserLoggersInfo.getAnnotation();
+                    Set<CustomLoggerInfo> customLoggerInfos = parseCustomLoggerInfos();
 
                     SourceAwareAnnotationInfo<LogException> logExceptionInfo = annotationParser.fromMethodOrClass(method, LogException.class);
                     ArgumentDescriptor argumentDescriptor = new ArgumentDescriptor.Builder(method, args.length, localVariableNameDiscoverer).build();
                     ExceptionDescriptor exceptionDescriptor = new ExceptionDescriptor.Builder(logExceptionInfo).build();
-                    InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo, configureCustomLoggersAnnotation);
+                    InvocationDescriptor invocationDescriptor = invocationDescriptorFactory.create(methodLogInfo, classLogInfo, customLoggerInfos);
                     cached = new MethodDescriptor(invocationDescriptor, argumentDescriptor, exceptionDescriptor, method);
                     cache.put(new LoggedMethodIdentifier(method, targetClass), cached);
                     return cached;
@@ -274,13 +285,13 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
         void logInvocation() {
             logStrategies.get(invocationDescriptor.getSeverity())
-                    .logBefore(logger, method, beanName, args, argumentDescriptor);
+                    .logBefore(logger, method, beanName, args, argumentDescriptor,invocationDescriptor.getCustomLoggerInfos());
         }
 
         void logResult() {
             Object loggedResult = (method.getReturnType() == Void.TYPE) ? Void.TYPE : result;
             logStrategies.get(invocationDescriptor.getSeverity())
-                    .logAfter(logger, method, beanName, args.length, loggedResult);
+                    .logAfter(logger, method, beanName, args.length, loggedResult,invocationDescriptor.getCustomLoggerInfos());
         }
 
         boolean isExceptionLoggingOn() {

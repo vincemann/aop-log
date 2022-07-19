@@ -5,13 +5,14 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
 import com.github.vincemann.aoplog.api.annotation.LogConfig;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
+
+import java.util.Set;
 
 /**
  * Method descriptor. With effective Severity and LogInfos.
@@ -25,13 +26,13 @@ final class InvocationDescriptor {
     @Nullable
     private final LogConfig classLogConfig;
 
-    private final ConfigureCustomLoggers configureCustomLoggersAnnotation;
+    private final Set<CustomLoggerInfo> customLoggerInfos;
 
 
-    InvocationDescriptor(Severity severity, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig, ConfigureCustomLoggers configureCustomLoggersAnnotation) {
+    InvocationDescriptor(Severity severity, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig, Set<CustomLoggerInfo> customLoggerInfos) {
         this.severity = severity;
         this.logInfo = logInfo;
         this.classLogConfig = classLogConfig;
-        this.configureCustomLoggersAnnotation = configureCustomLoggersAnnotation;
+        this.customLoggerInfos = customLoggerInfos;
     }
 }

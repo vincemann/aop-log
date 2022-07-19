@@ -6,6 +6,8 @@ import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
 
+import java.util.Set;
+
 
 /**
  *  Create InvocationDescriptor with respect to {@link LogInteraction#disabled()} and precedence of method level annotations over class level annotations.
@@ -22,8 +24,9 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
 
 
 
+
     @Override
-    public InvocationDescriptor create(AnnotationInfo<LogInteraction> methodLog, AnnotationInfo<LogInteraction> classLog, ConfigureCustomLoggers configureCustomLoggersInfo) {
+    public InvocationDescriptor create(AnnotationInfo<LogInteraction> methodLog, AnnotationInfo<LogInteraction> classLog, Set<CustomLoggerInfo> configureCustomLoggersInfo) {
         LogConfig logConfig = null;
         Severity severity = null;
         SourceAwareAnnotationInfo<LogInteraction> logInfo = evalEffectiveLogInfo(methodLog, classLog);
@@ -38,6 +41,10 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
                 severity,
                 logInfo,
                 logConfig, configureCustomLoggersInfo);
+    }
+
+    private Set<CustomLoggerInfo> createCustomLoggerInfo(ConfigureCustomLoggers configureCustomLoggersAnnotation){
+
     }
 
     //finds non disabled @Log if any

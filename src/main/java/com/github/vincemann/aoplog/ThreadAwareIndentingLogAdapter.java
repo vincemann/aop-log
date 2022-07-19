@@ -51,8 +51,8 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
-        String msg = (String) super.toMessage(method, beanName, args, argumentDescriptor);
+    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, CustomLoggerInfo customLoggerInfo) {
+        String msg = (String) super.toMessage(method, beanName, args, argumentDescriptor, customLoggerInfo);
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException) {
             thread_openException.put(Thread.currentThread(), Boolean.FALSE);
@@ -69,13 +69,13 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, int argCount, Object result) {
+    public Object toMessage(Method method, String beanName, int argCount, Object result, CustomLoggerInfo customLoggerInfo) {
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException) {
             log.trace("Found open exception, but logging result so it was catched by: " + method);
         }
         thread_openException.put(Thread.currentThread(), Boolean.FALSE);
-        String msg = (String) super.toMessage(method, beanName, argCount, result);
+        String msg = (String) super.toMessage(method, beanName, argCount, result,customLoggerInfo);
         removeFromCallStack(method);
         int openMethodCalls = getCallStack().size();
         String formattedMsg = formatResult(msg, beanName, openMethodCalls);
