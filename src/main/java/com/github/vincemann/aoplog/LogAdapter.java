@@ -8,6 +8,7 @@ package com.github.vincemann.aoplog;
 import org.apache.commons.logging.Log;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * Declares access to the logger and log message creation.
@@ -17,7 +18,7 @@ interface LogAdapter {
 
     Log getLog(String name);
 
-    Object toMessage(Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, CustomLoggerInfo customLoggerInfo);
+    Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo);
 
     Object toMessage(Method method,String beanName, int argCount, Object result, CustomLoggerInfo customLoggerInfo);
 

@@ -217,7 +217,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
         protected Set<CustomLoggerInfo> parseCustomLoggerInfos(){
             AnnotationInfo<ConfigureCustomLoggers> configureUserLoggersInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), ConfigureCustomLoggers.class);
-            ConfigureCustomLoggers configureCustomLoggersAnnotation = null;
+            ConfigureCustomLoggers configureCustomLoggersAnnotation;
             Set<CustomLoggerInfo> customLoggerInfos = new HashSet<>();
             if (configureUserLoggersInfo!=null){
                 configureCustomLoggersAnnotation =configureUserLoggersInfo.getAnnotation();

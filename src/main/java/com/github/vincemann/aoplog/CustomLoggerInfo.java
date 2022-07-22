@@ -1,11 +1,17 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.CustomLogger;
+import lombok.*;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class CustomLoggerInfo {
 
 
-    static enum Type{
+    enum Type{
         ARG,
         RET
     }

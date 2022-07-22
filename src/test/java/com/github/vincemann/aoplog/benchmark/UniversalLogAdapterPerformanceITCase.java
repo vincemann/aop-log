@@ -5,7 +5,9 @@
 
 package com.github.vincemann.aoplog.benchmark;
 
+import com.github.vincemann.aoplog.CustomLoggerInfo;
 import com.github.vincemann.aoplog.UniversalLogAdapter;
+import com.github.vincemann.aoplog.api.CustomLogger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,10 +40,10 @@ public class UniversalLogAdapterPerformanceITCase {
             private int i = 1;
         }
 
-        logAdapter.asString(new Int()); //warming up
+        logAdapter.asString(new Int(), null); //warming up
         long start = System.nanoTime();
         for (int i = 0; i < REPS; i++) {
-            assertEquals("Int[i=1]", logAdapter.asString(new Int()));
+            assertEquals("Int[i=1]", logAdapter.asString(new Int(), null));
             // ToStringBuilder.reflectionToString(new Int());
         }
         long end = System.nanoTime();
@@ -58,10 +60,10 @@ public class UniversalLogAdapterPerformanceITCase {
             }
         }
 
-        logAdapter.asString(new Int()); //warming up
+        logAdapter.asString(new Int(), null); //warming up
         long start = System.nanoTime();
         for (int i = 0; i < REPS; i++) {
-            assertEquals("Int[i=1]", logAdapter.asString(new Int()));
+            assertEquals("Int[i=1]", logAdapter.asString(new Int(), null));
         }
         long end = System.nanoTime();
 
@@ -79,8 +81,8 @@ public class UniversalLogAdapterPerformanceITCase {
         }
 
         @Override
-        public String asString(Object value) {
-            return super.asString(value);
+        public String asString(Object value, CustomLogger customLogger) {
+            return super.asString(value, customLogger);
         }
     }
 }

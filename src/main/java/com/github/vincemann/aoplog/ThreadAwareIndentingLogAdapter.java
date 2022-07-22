@@ -1,5 +1,6 @@
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.api.CustomLogger;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +20,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     private static final String EMPTY_LINE = " " + System.lineSeparator();
     private final ConcurrentHashMap<Thread, Stack<Method>> thread_callStack = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Thread, Boolean> thread_openException = new ConcurrentHashMap<>();
+
     private String HARD_START_PADDING_CHAR = "+";
     private String HARD_END_PADDING_CHAR = "=";
     private String SOFT_PADDING_CHAR = "_";
@@ -51,7 +53,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, CustomLoggerInfo customLoggerInfo) {
+    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
         String msg = (String) super.toMessage(method, beanName, args, argumentDescriptor, customLoggerInfo);
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException) {
@@ -101,7 +103,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 
     protected String formatResult(String msg, String beanName, int openMethodCalls) {
         //open method calls is already updated -> using predecessor
-        String indentation = createIdentation(openMethodCalls);
+        String indentation = createIndentation(openMethodCalls);
         String softPadding = createPadding(SOFT_PADDING_CHAR);
         String endPadding = createPadding(HARD_END_PADDING_CHAR);
         StringBuilder sb = new StringBuilder();
@@ -117,7 +119,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     protected String formatCall(String msg, String beanName, int openMethodCalls) {
-        String indentation = createIdentation(openMethodCalls);
+        String indentation = createIndentation(openMethodCalls);
         String softPadding = createPadding(SOFT_PADDING_CHAR);
         String startPadding = createPadding(HARD_START_PADDING_CHAR);
 
@@ -138,7 +140,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
 
-    protected String createIdentation(int openMethodCalls) {
+    protected String createIndentation(int openMethodCalls) {
         return INDENTATION_CHAR.repeat((openMethodCalls) * INDENTATION_LENGTH);
     }
 
@@ -168,7 +170,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 
 
     @Override
-    protected String asString(Object value) {
-        return super.asString(value);
+    protected String asString(Object value, CustomLogger customLogger) {
+        return super.asString(value, customLogger);
     }
 }

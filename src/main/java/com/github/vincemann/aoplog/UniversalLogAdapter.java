@@ -5,11 +5,10 @@
 
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.api.CustomLogger;
 import org.springframework.util.ReflectionUtils;
 
-import javax.persistence.EntityManager;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,7 +18,7 @@ import java.util.Set;
 /**
  * Universal log adapter, capable to out parameter values by reflection.
  */
-public abstract class UniversalLogAdapter extends AbstractLogAdapter {
+public class UniversalLogAdapter extends AbstractLogAdapter {
     private final Set<String> excludeFieldNames;
     private final int cropThreshold;
     private final boolean skipNullFields;
@@ -59,7 +58,7 @@ public abstract class UniversalLogAdapter extends AbstractLogAdapter {
 
 
     @Override
-    protected String asString(Object value) {
+    protected String asString(Object value, CustomLogger customLogger) {
         if (value == null) {
             return ToString.getNull();
         }

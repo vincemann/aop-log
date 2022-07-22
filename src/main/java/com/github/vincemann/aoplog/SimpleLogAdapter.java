@@ -5,13 +5,15 @@
 
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.api.CustomLogger;
+
 /**
  * Simple log adapter.
  */
 public class SimpleLogAdapter extends AbstractLogAdapter {
 
     @Override
-    protected String asString(Object value) {
+    protected String asString(Object value, CustomLogger customLogger) {
         return String.valueOf(value);
     }
 

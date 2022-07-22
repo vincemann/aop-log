@@ -31,7 +31,7 @@ public class InvocationDescriptorFactoryMethodOnlyTestCase {
             LogInteraction methodLogAnnotation = method.getMethod().getDeclaredAnnotation(LogInteraction.class);
             AnnotationInfo<LogInteraction> methodLog = methodLogAnnotation==null? null : new AnnotationInfo<>(methodLogAnnotation,InvocationDescriptorFactoryMethodOnlyTestCase.class);
             AnnotationInfo<LogInteraction> classLog = classLogAnnotation==null? null : new AnnotationInfo<>(classLogAnnotation,InvocationDescriptorFactoryMethodOnlyTestCase.class);
-            currDescriptor = factory.create(methodLog,classLog, configureUserLoggersInfo);
+            currDescriptor = factory.create(methodLog,classLog, null);
         }
     };
 
