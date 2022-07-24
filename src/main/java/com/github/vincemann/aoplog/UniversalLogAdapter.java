@@ -59,9 +59,14 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
 
     @Override
     protected String asString(Object value, CustomLogger customLogger) {
+        if(customLogger != null){
+            return customLogger.toString(value);
+        }
+
         if (value == null) {
             return ToString.getNull();
         }
+
         Class<?> clazz = value.getClass();
         if (!(value instanceof Collection<?> || value instanceof Map<?, ?>)
                 && ToStringDetector.INSTANCE.hasToString(clazz)

@@ -148,13 +148,13 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.warn(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.warn(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor, customLoggerInfo));
         }
 
         @Override
-        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
-            logger.warn(getLogAdapter().toMessage(method,beanName, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.warn(getLogAdapter().toMessage(method,beanName, argCount, result, customLoggerInfo));
         }
 
         @Override
@@ -183,13 +183,13 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.info(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.info(getLogAdapter().toMessage(method,beanName, args, argumentDescriptor,customLoggerInfo));
         }
 
         @Override
-        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
-            logger.info(getLogAdapter().toMessage(method,beanName, argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.info(getLogAdapter().toMessage(method,beanName, argCount, result, customLoggerInfo));
         }
 
         @Override
@@ -219,13 +219,13 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.debug(getLogAdapter().toMessage(method,beanName,  args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.debug(getLogAdapter().toMessage(method,beanName,  args, argumentDescriptor,customLoggerInfo));
         }
 
         @Override
-        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
-            logger.debug(getLogAdapter().toMessage(method,beanName,  argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.debug(getLogAdapter().toMessage(method,beanName,  argCount, result,customLoggerInfo));
         }
 
         @Override
@@ -254,13 +254,13 @@ abstract class LogStrategy {
         }
 
         @Override
-        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor) {
-            logger.trace(getLogAdapter().toMessage(method,beanName,  args, argumentDescriptor));
+        public void logBefore(Log logger, Method method,String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.trace(getLogAdapter().toMessage(method,beanName,  args, argumentDescriptor,customLoggerInfo));
         }
 
         @Override
-        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result) {
-            logger.trace(getLogAdapter().toMessage(method,beanName,  argCount, result));
+        public void logAfter(Log logger, Method method,String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
+            logger.trace(getLogAdapter().toMessage(method,beanName,  argCount, result,customLoggerInfo));
         }
 
         @Override

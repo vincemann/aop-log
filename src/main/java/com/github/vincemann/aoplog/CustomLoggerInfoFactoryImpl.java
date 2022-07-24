@@ -37,7 +37,7 @@ public class CustomLoggerInfoFactoryImpl implements CustomLoggerInfoFactory, App
             } else if (key.equals("ret")) {
                 type = CustomLoggerInfo.Type.RET;
             } else {
-                throw new IllegalArgumentException("invalid key. No Type found. Available type: arg | ret")
+                throw new IllegalArgumentException("invalid key. No Type found. Available type: arg | ret");
             }
             customLoggerInfo.setType(type);
             com.github.vincemann.aoplog.api.CustomLogger loggerBean = (com.github.vincemann.aoplog.api.CustomLogger) applicationContext.getAutowireCapableBeanFactory().getBean(logger.beanname());

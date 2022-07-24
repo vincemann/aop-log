@@ -20,7 +20,7 @@ interface LogAdapter {
 
     Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo);
 
-    Object toMessage(Method method,String beanName, int argCount, Object result, CustomLoggerInfo customLoggerInfo);
+    Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo);
 
     Object toMessage(Method method,String beanName, int argCount, Exception e, boolean stackTrace);
 }

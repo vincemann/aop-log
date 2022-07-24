@@ -71,7 +71,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, int argCount, Object result, CustomLoggerInfo customLoggerInfo) {
+    public Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException) {
             log.trace("Found open exception, but logging result so it was catched by: " + method);

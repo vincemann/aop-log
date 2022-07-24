@@ -43,9 +43,6 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
                 logConfig, configureCustomLoggersInfo);
     }
 
-    private Set<CustomLoggerInfo> createCustomLoggerInfo(ConfigureCustomLoggers configureCustomLoggersAnnotation){
-
-    }
 
     //finds non disabled @Log if any
     //first search for method, if method not found : fall back on class level

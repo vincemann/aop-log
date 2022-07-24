@@ -110,12 +110,12 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method,String beanName, int argCount, Object result, CustomLoggerInfo customLoggerInfo) {
+    public Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
 //        if (result == null) {
 //            return RETURNING + method.getName() + "():" + asString(result);
 //        }
         StringBuilder buff = new StringBuilder();
-        buff.append(RETURNING).append(method.getName()).append(" { ").append(asString(result, selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.ARG, i + 1))).append(" } ");
+        buff.append(RETURNING).append(method.getName()).append(" { ").append(asString(result, selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.RET))).append(" } ");
         return buff.toString();
     }
 
