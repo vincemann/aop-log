@@ -16,6 +16,7 @@
     <bean id="auxBaz" class="com.github.vincemann.aoplog.service.ClassAndMethodBazServiceImpl"/>
     <bean id="disabledBaz" class="com.github.vincemann.aoplog.service.DisabledBazService"/>
     <bean id="barService" class="com.github.vincemann.aoplog.service.ExtendedBarService"/>
+    <bean id="customLoggerInfoFactory" class="com.github.vincemann.aoplog.CustomLoggerInfoFactoryImpl"/>
 
 
 
