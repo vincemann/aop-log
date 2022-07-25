@@ -2,6 +2,7 @@ package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
 import com.github.vincemann.aoplog.api.annotation.CustomLogger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -9,6 +10,7 @@ import org.springframework.context.ApplicationContextAware;
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 public class CustomLoggerInfoFactoryImpl implements CustomLoggerInfoFactory, ApplicationContextAware {
 
 
@@ -40,7 +42,11 @@ public class CustomLoggerInfoFactoryImpl implements CustomLoggerInfoFactory, App
                 throw new IllegalArgumentException("invalid key. No Type found. Available type: arg | ret");
             }
             customLoggerInfo.setType(type);
-            com.github.vincemann.aoplog.api.CustomLogger loggerBean = (com.github.vincemann.aoplog.api.CustomLogger) applicationContext.getAutowireCapableBeanFactory().getBean(logger.beanname());
+            String beanname = logger.beanname();
+            if (beanname ==null || beanname.isBlank()){
+                throw new IllegalArgumentException("no beanname specified");
+            }
+            com.github.vincemann.aoplog.api.CustomLogger loggerBean = (com.github.vincemann.aoplog.api.CustomLogger) this.applicationContext.getAutowireCapableBeanFactory().getBean(beanname);
             customLoggerInfo.setLogger(loggerBean);
         }
         return result;
