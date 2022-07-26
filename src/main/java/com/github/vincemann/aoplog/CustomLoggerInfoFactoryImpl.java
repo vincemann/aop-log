@@ -48,6 +48,7 @@ public class CustomLoggerInfoFactoryImpl implements CustomLoggerInfoFactory, App
             }
             com.github.vincemann.aoplog.api.CustomLogger loggerBean = (com.github.vincemann.aoplog.api.CustomLogger) this.applicationContext.getAutowireCapableBeanFactory().getBean(beanname);
             customLoggerInfo.setLogger(loggerBean);
+            result.add(customLoggerInfo);
         }
         return result;
     }
