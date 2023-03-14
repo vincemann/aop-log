@@ -23,7 +23,6 @@
         <guava.version>29.0-jre</guava.version>
         <lombok.version>1.18.12</lombok.version>
         <version.aspectj>1.6.8</version.aspectj>
-        <smart-logger.version>1.0.0-SNAPSHOT.1</smart-logger.version>
         <ng-xSpring.build.directory>target</ng-xSpring.build.directory>
     </properties>
 
@@ -51,6 +50,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>

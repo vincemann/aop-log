@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface ConfigureCustomLoggers {
 
     /**
-     * define {@link com.github.vincemann.smartlogger.SmartLogger} autowired by beanname for arguments or return value.
+     * define {@link CustomLogger}Impl beans autowired by beanname for arguments or return value.
      * i.E.:
      * @LogInteraction(smartLoggers= {
      *        @SmartLogger(key=“arg1“,logger=“ownerLoggerShort“),
