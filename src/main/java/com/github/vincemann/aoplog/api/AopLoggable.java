@@ -4,7 +4,8 @@ import org.springframework.test.util.AopTestUtils;
 
 
 /**
- * To make it work with JDK Runtime Proxies implement {@link org.springframework.aop.TargetClassAware}.
+ * Implement this interface to activate proxy based logging of aoplog via its api annotations such as {@link com.github.vincemann.aoplog.api.annotation.LogInteraction}.
+ * If your bean is a JDK Runtime Proxy, implement: {@link org.springframework.aop.TargetClassAware} to make it work.
  */
 public interface AopLoggable {
 

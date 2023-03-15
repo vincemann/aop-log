@@ -83,7 +83,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
 
 //        log.trace("joinPoint matched: " + targetClass.getSimpleName()+" "+joinPoint.getSignature().getName());
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint);
-        log.trace("LoggedMethodCall:  " + loggedCall);
+        if (log.isDebugEnabled())
+            log.debug("LoggedMethodCall:  " + loggedCall);
 
 
 //        Class<?> unmodifiedTargetClass = AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass();
@@ -92,7 +93,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
 //        }
 
         if (isDuplicateProxyLogging(loggedCall)) {
-            log.debug("Skipping duplicate logging of proxy call");
+            if (log.isDebugEnabled())
+                log.debug("Skipping duplicate logging of proxy call");
             return loggedCall.proceed();
         } else {
             thread_lastLoggedCall_map.put(Thread.currentThread(), loggedCall);
@@ -228,13 +230,17 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         private MethodDescriptor createMethodDescriptor() {
-            log.trace("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method, targetClass));
-            log.trace("cache:: " + cache);
+            if (log.isTraceEnabled()){
+                log.trace("Searching for method Descriptor in cache with key: " + new LoggedMethodIdentifier(method, targetClass));
+                log.trace("cache:: " + cache);
+            }
+
             synchronized (cache) {
                 MethodDescriptor cached = cache.get(new LoggedMethodIdentifier(method, targetClass));
                 if (cached != null) {
                     //log.trace("key: " + new LoggedMethodIdentifier(method,targetClass));
-                    log.trace("Returning method Descriptor from cache: " + cached);
+                    if (log.isTraceEnabled())
+                        log.trace("Returning method Descriptor from cache: " + cached);
                     return cached;
                 } else {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
