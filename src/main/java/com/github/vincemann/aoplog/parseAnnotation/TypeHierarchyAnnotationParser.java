@@ -1,47 +1,94 @@
 package com.github.vincemann.aoplog.parseAnnotation;
 
 import com.github.vincemann.aoplog.MethodUtils;
-import com.google.common.collect.Iterables;
-import com.google.common.graph.SuccessorsFunction;
-import com.google.common.graph.Traverser;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.vincemann.aoplog.ClassUtils.getClassHierarchy;
+import static com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo.IS_NULL;
 
 //todo cache all
 public class TypeHierarchyAnnotationParser implements AnnotationParser {
 
 
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    private static class MethodCacheInfo {
+        private Method method;
+        private Class<? extends Annotation> wantedAnnotationType;
+    }
+
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    private static class ComplexMethodCacheInfo {
+        private Class<?> clazz;
+        private String methodName;
+        private Class<?>[] argTypes;
+        private Class<? extends Annotation> wantedAnnotationType;
+    }
+
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    private static class ClassCacheInfo{
+        private Class<?> clazz;
+        private Class<? extends Annotation> wantedAnnotationType;
+    }
+
+    private ConcurrentHashMap<MethodCacheInfo,AnnotationInfo<? extends Annotation>> methodCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<ComplexMethodCacheInfo,AnnotationInfo<? extends Annotation>> complexMethodCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<ClassCacheInfo,AnnotationInfo<? extends Annotation>> classCache = new ConcurrentHashMap<>();
+
+
     @Override
     public <A extends Annotation> AnnotationInfo<A> fromMethod(Method method, Class<A> annotationType) {
+        MethodCacheInfo cacheInfo = new MethodCacheInfo(method, annotationType);
+        AnnotationInfo<? extends Annotation> cached = methodCache.get(cacheInfo);
+        if (cached != null) {
+            return nullAwareCached(cached);
+        }
         A directlyPresentAnnotation = method.getDeclaredAnnotation(annotationType);
-        if (directlyPresentAnnotation!=null){
-            return new AnnotationInfo<>(directlyPresentAnnotation,method.getDeclaringClass());
+        if (directlyPresentAnnotation != null){
+            AnnotationInfo<A> result = new AnnotationInfo<>(directlyPresentAnnotation, method.getDeclaringClass());
+            methodCache.put(cacheInfo,result);
+            return result;
         }
         Class<?> startClassNode = method.getDeclaringClass().getSuperclass()==null? method.getDeclaringClass() : method.getDeclaringClass().getSuperclass();
-        return fromMethod(startClassNode,method.getName(),method.getParameterTypes(),annotationType);
-
+        AnnotationInfo<A> result = fromMethod(startClassNode, method.getName(), method.getParameterTypes(), annotationType);
+        if (result == null){
+            methodCache.put(cacheInfo,AnnotationInfo.NULL());
+        }else {
+            methodCache.put(cacheInfo,result);
+        }
+        return result;
     }
 
     @Override
     public <A extends Annotation> AnnotationInfo<A> fromMethod(Class<?> clazz, String methodName, Class<?>[] argTypes, Class<A> annotationType) {
+        ComplexMethodCacheInfo cacheInfo = new ComplexMethodCacheInfo(clazz, methodName,argTypes,annotationType);
+        AnnotationInfo<? extends Annotation> cached = complexMethodCache.get(cacheInfo);
+        if (cached != null) {
+            return nullAwareCached(cached);
+        }
+
         for (Class<?> type : getClassHierarchy(clazz)) {
             try {
                 Method methodInType = /*type.getDeclaredMethod(methodName,argTypes);*/
                         MethodUtils.findDeclaredMethod(type,methodName,argTypes);
                 A annotation = methodInType.getDeclaredAnnotation(annotationType);
                 if (annotation!=null){
-                    return new AnnotationInfo<>(annotation,type);
+                    AnnotationInfo<A> result = new AnnotationInfo<>(annotation, type);
+                    complexMethodCache.put(cacheInfo,result);
+                    return result;
                 }
             } catch (NoSuchMethodException e) {
                 //continue;
             }
         }
+        complexMethodCache.put(cacheInfo,AnnotationInfo.NULL());
         return null;
     }
 
@@ -50,12 +97,19 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
 
     @Override
     public <A extends Annotation> AnnotationInfo<A> fromClass(Class<?> clazz, Class<A> annotationType) {
+        ClassCacheInfo cacheInfo = new ClassCacheInfo(clazz,annotationType);
+        AnnotationInfo<? extends Annotation> cached = classCache.get(cacheInfo);
+        if (cached != null)
+            return nullAwareCached(cached);
         for (Class<?> type : getClassHierarchy(clazz)) {
             A annotation = type.getDeclaredAnnotation(annotationType);
             if (annotation!=null){
-                return new AnnotationInfo<>(annotation,type);
+                AnnotationInfo<A> result = new AnnotationInfo<>(annotation, type);
+                classCache.put(cacheInfo,result);
+                return result;
             }
         }
+        classCache.put(cacheInfo,AnnotationInfo.NULL());
         return null;
 //        return AnnotationUtils.findAnnotation(clazz, type);
 //        if (annotation==null){
@@ -92,6 +146,13 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
     }
 
 
+    private static <A extends Annotation> AnnotationInfo<A> nullAwareCached(AnnotationInfo cachedResult){
+        if (IS_NULL(cachedResult)){
+            return null;
+        }else {
+            return cachedResult;
+        }
+    }
 
     //    //dont cache this
 //    @Override
