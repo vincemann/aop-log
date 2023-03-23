@@ -59,6 +59,7 @@ public class MethodUtils {
                     }
                 }
             }
+            declaredNotFoundCache.put(methodIdentifier,e);
             throw e;
         }
     }
@@ -83,10 +84,13 @@ public class MethodUtils {
                 declaredCache.put(methodIdentifier,result);
                 return result;
             }catch (NoSuchMethodException e){
-
+                // keep it like that
             }
         }
-        throw new NoSuchMethodException("No Method found: " + methodName + ", " + Arrays.toString(argTypes) + " in hierarchy of: "  + clazz);
+        // normal, when method not found. Exception is handled like return value
+        NoSuchMethodException ex = new NoSuchMethodException("No Method found: " + methodName + ", " + Arrays.toString(argTypes) + " in hierarchy of: " + clazz);
+        notFoundCache.put(methodIdentifier,ex);
+        throw ex;
     }
 
     public static void clearCache(){
