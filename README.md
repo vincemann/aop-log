@@ -72,18 +72,6 @@ ________________________________________________________________________________
 </dependency>  
 ```  
  
-### Gradle  
-   
-```code
-repositories {  
-    jcenter()  
-    maven { url "https://jitpack.io" }  
-}  
-dependencies {  
-     implementation 'com.github.vincemann:aop-log:1.0.0-SNAPSHOT.3'  
-}  
-```
- 
 
 ## Config  
 ```java  
