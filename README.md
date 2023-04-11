@@ -68,7 +68,7 @@ ________________________________________________________________________________
 <dependency>  
     <groupId>com.github.vincemann</groupId>  
     <artifactId>aop-log</artifactId>  
-    <version>1.0.0-SNAPSHOT.3</version>  
+    <version>1.0.0-SNAPSHOT.7</version>  
 </dependency>  
 ```  
  
