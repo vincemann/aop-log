@@ -28,6 +28,8 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     private int INDENTATION_LENGTH = 15;
     private String INDENTATION_CHAR = " ";
 
+
+
 //    @EqualsAndHashCode
 //    @ToString
 //    private static class MethodDescriptor{

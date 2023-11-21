@@ -21,7 +21,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     protected static final String CALLING = "     ->  CALLING: ";
     protected static final String RETURNING = "     <-  RETURNING: ";
     protected static final String THROWING = "     <-  THROWING: ";
-    protected static final String ARG_DELIMITER = " |==| ";
+    protected String argDelimiter = System.lineSeparator() + " |==| " + System.lineSeparator();
 
 
     @Override
@@ -52,15 +52,15 @@ abstract class AbstractLogAdapter implements LogAdapter {
             for (int i = 0; i < args.length; i++) {
                 if (argumentDescriptor.isArgumentIndexLogged(i)) {
                     buff.append(asString(args[i], selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.ARG,i+1)));
-                    buff.append(ARG_DELIMITER);
+                    buff.append(argDelimiter);
                 } else {
-                    buff.append(ARG_DELIMITER + "?" + ARG_DELIMITER);
+                    buff.append(argDelimiter + "?" + argDelimiter);
                 }
             }
         } else {
             for (int i = argumentDescriptor.nextLoggedArgumentIndex(0); i >= 0; i = argumentDescriptor.nextLoggedArgumentIndex(i + 1)) {
                 buff.append(names[i]).append('=').append(asString(args[i], selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.ARG, i + 1)));
-                buff.append(ARG_DELIMITER);
+                buff.append(argDelimiter);
             }
         }
         // dont know what that is good for
@@ -68,7 +68,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
 //            buff.setLength(buff.length() - 2);
 //        }
         // remove trailing arg delimiter
-        buff.setLength(buff.length()-ARG_DELIMITER.length());
+        buff.setLength(buff.length()- argDelimiter.length());
         buff.append(')');
         return buff.toString();
     }
@@ -131,4 +131,8 @@ abstract class AbstractLogAdapter implements LogAdapter {
 
     protected abstract String asString(Object value, CustomLogger customLogger);
 
+
+    public void setArgDelimiter(String argDelimiter) {
+        this.argDelimiter = argDelimiter;
+    }
 }
