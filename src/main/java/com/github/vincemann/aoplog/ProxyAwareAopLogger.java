@@ -3,6 +3,7 @@ package com.github.vincemann.aoplog;
 import com.github.vincemann.aoplog.api.*;
 
 import com.github.vincemann.aoplog.api.annotation.CustomLogger;
+import com.github.vincemann.aoplog.api.annotation.CustomToString;
 import com.github.vincemann.aoplog.api.annotation.LogException;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
@@ -218,6 +219,16 @@ public class ProxyAwareAopLogger implements InitializingBean {
             return null;
         }
 
+        private Set<CustomToStringInfo> parseCustomToStringInfos() {
+            Set<CustomToStringInfo> infos = new HashSet<>();
+            Set<AnnotationInfo<CustomToString>> customToStringAnnotations = annotationParser.repeatableFromDeclaredMethod(targetClass, method.getName(), method.getParameterTypes(), CustomToString.class);
+            for (AnnotationInfo<CustomToString> customToStringAnnotation : customToStringAnnotations) {
+                CustomToString annotation =customToStringAnnotation.getAnnotation();
+                infos.add(new CustomToStringInfo(annotation));
+            }
+            return infos;
+        }
+
         protected Set<CustomLoggerInfo> parseCustomLoggerInfos(){
             Set<CustomLoggerInfo> infos = new HashSet<>();
             Set<AnnotationInfo<CustomLogger>> customLoggerAnnotations = annotationParser.repeatableFromDeclaredMethod(targetClass, method.getName(), method.getParameterTypes(), CustomLogger.class);
@@ -246,6 +257,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
                     AnnotationInfo<LogInteraction> methodLogInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), LogInteraction.class);
                     AnnotationInfo<LogInteraction> classLogInfo = annotationParser.fromClass(targetClass, LogInteraction.class);
                     Set<CustomLoggerInfo> customLoggerInfos = parseCustomLoggerInfos();
+                    Set<CustomToStringInfo> customToStringInfos = parseCustomToStringInfos();
 
                     SourceAwareAnnotationInfo<LogException> logExceptionInfo = annotationParser.fromMethodOrClass(method, LogException.class);
                     ArgumentDescriptor argumentDescriptor = new ArgumentDescriptor.Builder(method, args.length, localVariableNameDiscoverer).build();
@@ -326,6 +338,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
 //            return LazyInitLogUtils.toString(this);
 //        }
     }
+
+
 
 
 }

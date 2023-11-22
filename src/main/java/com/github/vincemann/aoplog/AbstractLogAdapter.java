@@ -6,10 +6,17 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.CustomLogger;
+import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +29,8 @@ abstract class AbstractLogAdapter implements LogAdapter {
     protected static final String RETURNING = "     <-  RETURNING: ";
     protected static final String THROWING = "     <-  THROWING: ";
     protected String argDelimiter = System.lineSeparator() + " |==| " + System.lineSeparator();
+
+    private static final Map<CustomLoggerCacheKey,CacheHit<CustomLogger>> CUSTOM_LOGGER_CACHE = new HashMap<>();
 
 
     @Override
@@ -51,7 +60,9 @@ abstract class AbstractLogAdapter implements LogAdapter {
         if (names == null) {
             for (int i = 0; i < args.length; i++) {
                 if (argumentDescriptor.isArgumentIndexLogged(i)) {
-                    buff.append(asString(args[i], selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.ARG,i+1)));
+                    buff.append(
+                            asString(args[i],
+                                    selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.ARG,i+1)));
                     buff.append(argDelimiter);
                 } else {
                     buff.append(argDelimiter + "?" + argDelimiter);
@@ -59,7 +70,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
             }
         } else {
             for (int i = argumentDescriptor.nextLoggedArgumentIndex(0); i >= 0; i = argumentDescriptor.nextLoggedArgumentIndex(i + 1)) {
-                buff.append(names[i]).append('=').append(asString(args[i], selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.ARG, i + 1)));
+                buff.append(names[i]).append('=').append(asString(args[i], selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.ARG, i + 1)));
                 buff.append(argDelimiter);
             }
         }
@@ -73,40 +84,70 @@ abstract class AbstractLogAdapter implements LogAdapter {
         return buff.toString();
     }
 
-    protected CustomLogger selectCustomLogger(Set<CustomLoggerInfo> customLoggerInfo, CustomLoggerInfo.Type type, Integer... argNum){
+
+    // use this class so I can express a cache hit, that represents null
+    // -> I want to also cache the result, that nothing was found
+    @AllArgsConstructor
+    @Getter
+    private static class CacheHit<T>{
+        private T element;
+    }
+
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    private static class CustomLoggerCacheKey{
+        Set<CustomLoggerInfo> customLoggerInfo;
+        LoggableMethodPart.Type type;
+        List<Integer> argNums;
+
+    }
+
+    // returns null if none found
+    protected CustomLogger selectCustomLogger(Set<CustomLoggerInfo> customLoggerInfo, LoggableMethodPart.Type type, Integer... argNum){
+        CustomLoggerCacheKey cacheKey = new CustomLoggerCacheKey(customLoggerInfo, type, List.of(argNum));
+        CacheHit<CustomLogger> cached = CUSTOM_LOGGER_CACHE.get(cacheKey);
+        if (cached != null)
+            return cached.getElement();
+
         Set<CustomLoggerInfo> loggers;
-        if (customLoggerInfo == null)
+        CustomLogger logger = null;
+        if (customLoggerInfo != null)
         {
-            return null;
+            if (!customLoggerInfo.isEmpty()){
+                switch (type){
+                    case ARG:
+                        loggers = customLoggerInfo.stream()
+                                .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.ARG)
+                                        && loggerInfo.getMethodPart().getArgNum().equals(argNum[0]))
+                                .collect(Collectors.toSet());
+                        if (loggers.isEmpty()){
+                            break;
+                        }
+                        else if (loggers.size() > 1){
+                            throw new IllegalArgumentException("found multiple ARG loggers");
+                        }
+                        else {
+                            logger =  loggers.stream().findFirst().get().getLogger();
+                        }
+                        break;
+                    case RET:
+                        loggers = customLoggerInfo.stream()
+                                .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.RET))
+                                .collect(Collectors.toSet());
+                        if (loggers.isEmpty()){
+                            break;
+                        }
+                        else if (loggers.size() > 1){
+                            throw new IllegalArgumentException("found multiple RET loggers");
+                        }else {
+                            logger = loggers.stream().findFirst().get().getLogger();
+                        }
+                        break;
+                }
+            }
         }
-        if (customLoggerInfo.isEmpty()){
-            return null;
-        }
-        switch (type){
-            case ARG:
-                loggers = customLoggerInfo.stream()
-                        .filter(loggerInfo -> loggerInfo.getType().equals(CustomLoggerInfo.Type.ARG) && loggerInfo.getArgNum().equals(argNum[0]))
-                        .collect(Collectors.toSet());
-                if (loggers.isEmpty()){
-                    return null;
-                }
-                else if (loggers.size() > 1){
-                    throw new IllegalArgumentException("found multiple ARG loggers");
-                }
-                return loggers.stream().findFirst().get().getLogger();
-            case RET:
-                loggers = customLoggerInfo.stream()
-                        .filter(loggerInfo -> loggerInfo.getType().equals(CustomLoggerInfo.Type.RET))
-                        .collect(Collectors.toSet());
-                if (loggers.isEmpty()){
-                    return null;
-                }
-                else if (loggers.size() > 1){
-                    throw new IllegalArgumentException("found multiple RET loggers");
-                }
-                return loggers.stream().findFirst().get().getLogger();
-        }
-        throw new IllegalArgumentException("Wrong arg type set");
+        CUSTOM_LOGGER_CACHE.put(cacheKey,new CacheHit<>(logger));
+        return logger;
     }
 
     @Override
@@ -115,14 +156,23 @@ abstract class AbstractLogAdapter implements LogAdapter {
 //            return RETURNING + method.getName() + "():" + asString(result);
 //        }
         StringBuilder buff = new StringBuilder();
-        buff.append(RETURNING).append(method.getName()).append(" { ").append(asString(result, selectCustomLogger(customLoggerInfo, CustomLoggerInfo.Type.RET))).append(" } ");
+        buff.append(RETURNING).append(method.getName())
+                .append(" { ")
+                .append(
+                        asString(result,
+                                selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.RET)))
+                .append(" } ");
         return buff.toString();
     }
 
     @Override
     public Object toMessage(Method method,String beanName, int argCount, Exception e, boolean stackTrace) {
         StringBuilder buff = new StringBuilder();
-        buff.append(THROWING).append(method.getName()).append(" { ").append(e.getClass()).append(" } ");
+        buff.append(THROWING)
+                .append(method.getName())
+                .append(" { ")
+                .append(e.getClass())
+                .append(" } ");
         if (e.getMessage() != null) {
             buff.append("=").append(e.getMessage());
         }

@@ -10,13 +10,6 @@ import lombok.*;
 @Setter
 public class CustomLoggerInfo {
 
-
-    enum Type{
-        ARG,
-        RET
-    }
-
     private CustomLogger logger;
-    private Type type;
-    private Integer argNum;
+    private LoggableMethodPart methodPart;
 }
