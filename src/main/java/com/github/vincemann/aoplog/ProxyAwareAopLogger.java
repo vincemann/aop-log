@@ -223,17 +223,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
             Set<CustomToStringInfo> infos = new HashSet<>();
             Set<AnnotationInfo<CustomToString>> customToStringAnnotations = annotationParser.repeatableFromDeclaredMethod(targetClass, method.getName(), method.getParameterTypes(), CustomToString.class);
             for (AnnotationInfo<CustomToString> customToStringAnnotation : customToStringAnnotations) {
-                infos.add(createCustomToStringInfo(customToStringAnnotation));
+                CustomToString annotation = customToStringAnnotation.getAnnotation();
+                infos.add(
+                        new CustomToStringInfo(annotation.toStringMethod(), LoggableMethodPart.from(annotation.key()))
+                );
             }
             return infos;
-        }
-
-        private CustomToStringInfo createCustomToStringInfo(AnnotationInfo<CustomToString> annotationInfo){
-            // find method
-            String methodName = annotationInfo.getAnnotation().toStringMethod();
-//            Class<?> declaringClass = annotationInfo.getDeclaringClass();
-            // custom toString method must have 0 args
-            return new CustomToStringInfo(methodName,LoggableMethodPart.from(annotationInfo.getAnnotation().key()));
         }
 
         protected Set<CustomLoggerInfo> parseCustomLoggerInfos(){

@@ -109,8 +109,8 @@ abstract class AbstractLogAdapter implements LogAdapter {
                 switch (type){
                     case ARG:
                         toStringInfos = customToStringInfos.stream()
-                                .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.ARG)
-                                        && loggerInfo.getMethodPart().getArgNum().equals(argNum[0]))
+                                .filter(customToStringInfo -> customToStringInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.ARG)
+                                        && customToStringInfo.getMethodPart().getArgNum().equals(argNum[0]))
                                 .collect(Collectors.toSet());
                         if (toStringInfos.isEmpty()){
                             break;
@@ -124,7 +124,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
                         break;
                     case RET:
                         toStringInfos = customToStringInfos.stream()
-                                .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.RET))
+                                .filter(customToStringInfo -> customToStringInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.RET))
                                 .collect(Collectors.toSet());
                         if (toStringInfos.isEmpty()){
                             break;
