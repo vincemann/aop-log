@@ -1,12 +1,17 @@
 package com.github.vincemann.aoplog.parseAnnotation;
 
 import com.github.vincemann.aoplog.MethodUtils;
+import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.github.vincemann.aoplog.ClassUtils.getClassHierarchy;
 import static com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo.IS_NULL;
@@ -40,6 +45,7 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
 
     private ConcurrentHashMap<MethodCacheInfo,AnnotationInfo<? extends Annotation>> methodCache = new ConcurrentHashMap<>();
     private ConcurrentHashMap<ComplexMethodCacheInfo,AnnotationInfo<? extends Annotation>> complexMethodCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<ComplexMethodCacheInfo,Set<AnnotationInfo>> repeatableAnnotationComplexMethodCache = new ConcurrentHashMap<>();
     private ConcurrentHashMap<ClassCacheInfo,AnnotationInfo<? extends Annotation>> classCache = new ConcurrentHashMap<>();
 
 
@@ -63,6 +69,29 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
         }else {
             methodCache.put(cacheInfo,result);
         }
+        return result;
+    }
+
+    @Override
+    public <A extends Annotation> Set<AnnotationInfo<A>> repeatableFromDeclaredMethod(Class<?> clazz, String methodName, Class<?>[] argTypes, Class<A> annotationType) {
+        ComplexMethodCacheInfo cacheInfo = new ComplexMethodCacheInfo(clazz, methodName,argTypes,annotationType);
+        Set<AnnotationInfo> cached = repeatableAnnotationComplexMethodCache.get(cacheInfo);
+        if (cached != null) {
+            return (Set<AnnotationInfo<A>>) (Object)cached;
+        }
+        Set<AnnotationInfo<A>> result = new HashSet<>();
+        try {
+            Method methodInType = /*type.getDeclaredMethod(methodName,argTypes);*/
+                    MethodUtils.findDeclaredMethod(clazz,methodName,argTypes);
+            Set<A> annotations = Sets.newHashSet(List.of(methodInType.getDeclaredAnnotationsByType(annotationType)));
+            if (!annotations.isEmpty()) {
+                result.addAll(annotations.stream().map(a -> new AnnotationInfo<>(a, clazz)).collect(Collectors.toSet()));
+            }
+        } catch (NoSuchMethodException e) {
+            // continue
+        }
+
+        repeatableAnnotationComplexMethodCache.put(cacheInfo,(HashSet<AnnotationInfo>)(Object) result);
         return result;
     }
 

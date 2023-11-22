@@ -1,9 +1,10 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
+
+import com.github.vincemann.aoplog.api.annotation.CustomLogger;
 
 import java.util.Set;
 
 public interface CustomLoggerInfoFactory {
-    Set<CustomLoggerInfo> createCustomLoggerInfo(ConfigureCustomLoggers configureCustomLoggersAnnotation);
+    CustomLoggerInfo createCustomLoggerInfo(CustomLogger customLogger);
 }

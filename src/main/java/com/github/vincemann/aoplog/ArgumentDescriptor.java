@@ -5,7 +5,7 @@
 
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.LogParam;
+import com.github.vincemann.aoplog.api.annotation.LogParam;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.core.ParameterNameDiscoverer;

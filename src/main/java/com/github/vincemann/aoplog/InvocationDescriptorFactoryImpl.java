@@ -1,6 +1,6 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
+
 import com.github.vincemann.aoplog.api.annotation.LogConfig;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;

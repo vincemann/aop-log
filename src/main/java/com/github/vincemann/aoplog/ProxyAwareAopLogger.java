@@ -1,7 +1,8 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.*;
-import com.github.vincemann.aoplog.api.annotation.ConfigureCustomLoggers;
+
+import com.github.vincemann.aoplog.api.annotation.CustomLogger;
 import com.github.vincemann.aoplog.api.annotation.LogException;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
@@ -218,15 +219,14 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
 
         protected Set<CustomLoggerInfo> parseCustomLoggerInfos(){
-            AnnotationInfo<ConfigureCustomLoggers> configureUserLoggersInfo = annotationParser.fromMethod(targetClass, method.getName(), method.getParameterTypes(), ConfigureCustomLoggers.class);
-            ConfigureCustomLoggers configureCustomLoggersAnnotation;
-            Set<CustomLoggerInfo> customLoggerInfos = new HashSet<>();
-            if (configureUserLoggersInfo!=null){
-                configureCustomLoggersAnnotation =configureUserLoggersInfo.getAnnotation();
-                customLoggerInfos = customLoggerInfoFactory.createCustomLoggerInfo(configureCustomLoggersAnnotation);
-
+            Set<CustomLoggerInfo> infos = new HashSet<>();
+            Set<AnnotationInfo<CustomLogger>> customLoggerAnnotations = annotationParser.repeatableFromDeclaredMethod(targetClass, method.getName(), method.getParameterTypes(), CustomLogger.class);
+            for (AnnotationInfo<CustomLogger> customLoggerAnnotation : customLoggerAnnotations) {
+                CustomLogger annotation =customLoggerAnnotation.getAnnotation();
+                CustomLoggerInfo info = customLoggerInfoFactory.createCustomLoggerInfo(annotation);
+                infos.add(info);
             }
-            return customLoggerInfos;
+            return infos;
         }
 
         private MethodDescriptor createMethodDescriptor() {

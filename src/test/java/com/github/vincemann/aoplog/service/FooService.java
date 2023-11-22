@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog.service;
 
 import com.github.vincemann.aoplog.api.AopLoggable;
-import com.github.vincemann.aoplog.api.LogParam;
+import com.github.vincemann.aoplog.api.annotation.LogParam;
 
 import java.io.IOException;
 

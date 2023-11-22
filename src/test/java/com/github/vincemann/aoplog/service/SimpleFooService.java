@@ -8,7 +8,7 @@ package com.github.vincemann.aoplog.service;
 import com.github.vincemann.aoplog.Severity;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.api.annotation.LogException;
-import com.github.vincemann.aoplog.api.LogParam;
+import com.github.vincemann.aoplog.api.annotation.LogParam;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
