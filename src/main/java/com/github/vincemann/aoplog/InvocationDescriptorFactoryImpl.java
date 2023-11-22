@@ -26,7 +26,7 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
 
 
     @Override
-    public InvocationDescriptor create(AnnotationInfo<LogInteraction> methodLog, AnnotationInfo<LogInteraction> classLog, Set<CustomLoggerInfo> configureCustomLoggersInfo) {
+    public InvocationDescriptor create(AnnotationInfo<LogInteraction> methodLog, AnnotationInfo<LogInteraction> classLog, Set<CustomLoggerInfo> customLoggerInfos, Set<CustomToStringInfo> customToStringInfos) {
         LogConfig logConfig = null;
         Severity severity = null;
         SourceAwareAnnotationInfo<LogInteraction> logInfo = evalEffectiveLogInfo(methodLog, classLog);
@@ -40,7 +40,10 @@ public class InvocationDescriptorFactoryImpl implements InvocationDescriptorFact
         return new InvocationDescriptor(
                 severity,
                 logInfo,
-                logConfig, configureCustomLoggersInfo);
+                logConfig,
+                customLoggerInfos,
+                customToStringInfos
+        );
     }
 
 

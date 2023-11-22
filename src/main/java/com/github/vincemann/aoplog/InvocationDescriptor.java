@@ -27,12 +27,14 @@ final class InvocationDescriptor {
     private final LogConfig classLogConfig;
 
     private final Set<CustomLoggerInfo> customLoggerInfos;
+    private final Set<CustomToStringInfo> customToStringInfos;
 
 
-    InvocationDescriptor(Severity severity, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig, Set<CustomLoggerInfo> customLoggerInfos) {
+    InvocationDescriptor(Severity severity, SourceAwareAnnotationInfo<LogInteraction> logInfo, LogConfig classLogConfig, Set<CustomLoggerInfo> customLoggerInfos, Set<CustomToStringInfo> customToStringInfos) {
         this.severity = severity;
         this.logInfo = logInfo;
         this.classLogConfig = classLogConfig;
         this.customLoggerInfos = customLoggerInfos;
+        this.customToStringInfos = customToStringInfos;
     }
 }

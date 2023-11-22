@@ -84,9 +84,9 @@ public class AOPCustomLoggerImplementationsMethodTestCase extends AbstractAopCus
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
         ArgumentCaptor<Method> outputMethod = ArgumentCaptor.forClass(Method.class);
-        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), any(),refEq(new Object[]{"@1", new String[]{"@2-1", "@2-2"}}), captured.capture(),any()))
+        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), any(),refEq(new Object[]{"@1", new String[]{"@2-1", "@2-2"}}), captured.capture(),any(), any()))
                 .thenReturn(">");
-        Mockito.when(getLogAdapter().toMessage(outputMethod.capture(),any(), eq(2), eq("stringMethodTwoVarargs:@1:" + Arrays.toString(secondArgValue)),any()))
+        Mockito.when(getLogAdapter().toMessage(outputMethod.capture(),any(), eq(2), eq("stringMethodTwoVarargs:@1:" + Arrays.toString(secondArgValue)),any(),any()))
                 .thenReturn("<");
         enableLogSeverity(Severity.TRACE);
         InOrder inOrder =inOrder(getLogger());
@@ -104,7 +104,7 @@ public class AOPCustomLoggerImplementationsMethodTestCase extends AbstractAopCus
         ArgumentCaptor<ArgumentDescriptor> captured = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
         ArgumentCaptor<Method> outputMethod = ArgumentCaptor.forClass(Method.class);
-        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), any(),aryEq(new Object[]{}), captured.capture(),any()))
+        Mockito.when(getLogAdapter().toMessage(inputMethod.capture(), any(),aryEq(new Object[]{}), captured.capture(),any(), any()))
                 .thenReturn(">");
         Mockito.when(getLogAdapter().toMessage(outputMethod.capture(),any(), eq(0), any(IOException.class), eq(false)))
                 .thenReturn(exceptionMsg);

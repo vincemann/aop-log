@@ -60,9 +60,9 @@ public abstract class AbstractAopCustomLoggerTestCase {
         ArgumentCaptor<ArgumentDescriptor> capturedArgDescriptor = ArgumentCaptor.forClass(ArgumentDescriptor.class);
         ArgumentCaptor<Method> inputMethod = ArgumentCaptor.forClass(Method.class);
         ArgumentCaptor<Method> outputMethod = ArgumentCaptor.forClass(Method.class);
-        Mockito.when(logAdapter.toMessage(inputMethod.capture(),any(),aryEq(args), capturedArgDescriptor.capture(),any()))
+        Mockito.when(logAdapter.toMessage(inputMethod.capture(),any(),aryEq(args), capturedArgDescriptor.capture(),any(), any()))
                 .thenReturn(">");
-        Mockito.when(logAdapter.toMessage(outputMethod.capture(),any(), eq(args.length), eq(result),any()))
+        Mockito.when(logAdapter.toMessage(outputMethod.capture(),any(), eq(args.length), eq(result),any(),any()))
                 .thenReturn("<");
         InOrder inOrder = inOrder(logger);
         test.run(new TestCase(inputMethod,outputMethod,capturedArgDescriptor));
@@ -80,9 +80,9 @@ public abstract class AbstractAopCustomLoggerTestCase {
     }
 
     protected void alwaysLog(){
-        Mockito.when(logAdapter.toMessage(any(Method.class),any(),anyObject(), any(ArgumentDescriptor.class),any()))
+        Mockito.when(logAdapter.toMessage(any(Method.class),any(),anyObject(), any(ArgumentDescriptor.class),any(), any()))
                 .thenReturn(">");
-        Mockito.when(logAdapter.toMessage(any(Method.class),any(), anyInt(), anyObject(),any()))
+        Mockito.when(logAdapter.toMessage(any(Method.class),any(), anyInt(), anyObject(),any(),any()))
                 .thenReturn("<");
     }
     protected void enableAllLogger() {

@@ -7,5 +7,5 @@ import org.springframework.lang.Nullable;
 import java.util.Set;
 
 interface InvocationDescriptorFactory {
-    public InvocationDescriptor create(@Nullable AnnotationInfo<LogInteraction> methodLog, @Nullable AnnotationInfo<LogInteraction> classLog, @Nullable Set<CustomLoggerInfo> configureCustomLoggers);
+    public InvocationDescriptor create(@Nullable AnnotationInfo<LogInteraction> methodLog, @Nullable AnnotationInfo<LogInteraction> classLog, @Nullable Set<CustomLoggerInfo> configureCustomLoggers, Set<CustomToStringInfo> customToStringInfos);
 }

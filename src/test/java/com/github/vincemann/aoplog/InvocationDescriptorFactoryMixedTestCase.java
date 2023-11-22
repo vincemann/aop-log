@@ -33,7 +33,7 @@ public class InvocationDescriptorFactoryMixedTestCase {
             LogInteraction methodLogAnnotation = method.getMethod().getDeclaredAnnotation(LogInteraction.class);
             AnnotationInfo<LogInteraction> methodLog = methodLogAnnotation==null? null : new AnnotationInfo<>(methodLogAnnotation,InvocationDescriptorFactoryMixedTestCase.class);
             AnnotationInfo<LogInteraction> classLog = classLogAnnotation==null? null : new AnnotationInfo<>(classLogAnnotation,InvocationDescriptorFactoryMixedTestCase.class);
-            currDescriptor = factory.create(methodLog,classLog, null);
+            currDescriptor = factory.create(methodLog,classLog, null, null);
         }
     };
 

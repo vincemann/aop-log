@@ -6,7 +6,6 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.CustomLogger;
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,6 +30,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     protected String argDelimiter = System.lineSeparator() + " |==| " + System.lineSeparator();
 
     private static final Map<CustomLoggerCacheKey,CacheHit<CustomLogger>> CUSTOM_LOGGER_CACHE = new HashMap<>();
+    private static final Map<CustomToStringCacheKey,CacheHit<String>> CUSTOM_TO_STRING_CACHE = new HashMap<>();
 
 
     @Override
@@ -44,7 +44,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
+    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfos, Set<CustomToStringInfo> customToStringInfos) {
         if (args.length == 0) {
             StringBuilder buff = new StringBuilder();
             buff.append(CALLING).append(method.getName()).append("()");
@@ -62,7 +62,10 @@ abstract class AbstractLogAdapter implements LogAdapter {
                 if (argumentDescriptor.isArgumentIndexLogged(i)) {
                     buff.append(
                             asString(args[i],
-                                    selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.ARG,i+1)));
+                                    selectCustomLogger(customLoggerInfos, LoggableMethodPart.Type.ARG,i+1),
+                                    selectCustomToStringMethod(customToStringInfos, LoggableMethodPart.Type.ARG, i + 1)
+                            )
+                    );
                     buff.append(argDelimiter);
                 } else {
                     buff.append(argDelimiter + "?" + argDelimiter);
@@ -70,7 +73,12 @@ abstract class AbstractLogAdapter implements LogAdapter {
             }
         } else {
             for (int i = argumentDescriptor.nextLoggedArgumentIndex(0); i >= 0; i = argumentDescriptor.nextLoggedArgumentIndex(i + 1)) {
-                buff.append(names[i]).append('=').append(asString(args[i], selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.ARG, i + 1)));
+                buff.append(names[i])
+                        .append('=')
+                        .append(asString(args[i],
+                                selectCustomLogger(customLoggerInfos, LoggableMethodPart.Type.ARG, i + 1),
+                                selectCustomToStringMethod(customToStringInfos,LoggableMethodPart.Type.ARG, i + 1))
+                        );
                 buff.append(argDelimiter);
             }
         }
@@ -85,6 +93,56 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
 
+    // returns method name of method to be called instead of toString()
+    // return null if none found
+    private String selectCustomToStringMethod(Set<CustomToStringInfo> customToStringInfos, LoggableMethodPart.Type type, Integer... argNum) {
+        CustomToStringCacheKey cacheKey = new CustomToStringCacheKey(customToStringInfos, type, List.of(argNum));
+        CacheHit<String> cached = CUSTOM_TO_STRING_CACHE.get(cacheKey);
+        if (cached != null)
+            return cached.getElement();
+
+        Set<CustomToStringInfo> toStringInfos;
+        String customToStringMethod = null;
+        if (customToStringInfos != null)
+        {
+            if (!customToStringInfos.isEmpty()){
+                switch (type){
+                    case ARG:
+                        toStringInfos = customToStringInfos.stream()
+                                .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.ARG)
+                                        && loggerInfo.getMethodPart().getArgNum().equals(argNum[0]))
+                                .collect(Collectors.toSet());
+                        if (toStringInfos.isEmpty()){
+                            break;
+                        }
+                        else if (toStringInfos.size() > 1){
+                            throw new IllegalArgumentException("found multiple ARG toStringInfos");
+                        }
+                        else {
+                            customToStringMethod =  toStringInfos.stream().findFirst().get().getMethodName();
+                        }
+                        break;
+                    case RET:
+                        toStringInfos = customToStringInfos.stream()
+                                .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.RET))
+                                .collect(Collectors.toSet());
+                        if (toStringInfos.isEmpty()){
+                            break;
+                        }
+                        else if (toStringInfos.size() > 1){
+                            throw new IllegalArgumentException("found multiple RET toStringInfos");
+                        }else {
+                            customToStringMethod = toStringInfos.stream().findFirst().get().getMethodName();
+                        }
+                        break;
+                }
+            }
+        }
+        CUSTOM_TO_STRING_CACHE.put(cacheKey,new CacheHit<>(customToStringMethod));
+        return customToStringMethod;
+    }
+
+
     // use this class so I can express a cache hit, that represents null
     // -> I want to also cache the result, that nothing was found
     @AllArgsConstructor
@@ -96,27 +154,35 @@ abstract class AbstractLogAdapter implements LogAdapter {
     @EqualsAndHashCode
     @AllArgsConstructor
     private static class CustomLoggerCacheKey{
-        Set<CustomLoggerInfo> customLoggerInfo;
+        Set<CustomLoggerInfo> customLoggerInfos;
+        LoggableMethodPart.Type type;
+        List<Integer> argNums;
+    }
+
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    private static class CustomToStringCacheKey{
+        Set<CustomToStringInfo> customToStringInfos;
         LoggableMethodPart.Type type;
         List<Integer> argNums;
 
     }
 
     // returns null if none found
-    protected CustomLogger selectCustomLogger(Set<CustomLoggerInfo> customLoggerInfo, LoggableMethodPart.Type type, Integer... argNum){
-        CustomLoggerCacheKey cacheKey = new CustomLoggerCacheKey(customLoggerInfo, type, List.of(argNum));
+    protected CustomLogger selectCustomLogger(Set<CustomLoggerInfo> customLoggerInfos, LoggableMethodPart.Type type, Integer... argNum){
+        CustomLoggerCacheKey cacheKey = new CustomLoggerCacheKey(customLoggerInfos, type, List.of(argNum));
         CacheHit<CustomLogger> cached = CUSTOM_LOGGER_CACHE.get(cacheKey);
         if (cached != null)
             return cached.getElement();
 
         Set<CustomLoggerInfo> loggers;
         CustomLogger logger = null;
-        if (customLoggerInfo != null)
+        if (customLoggerInfos != null)
         {
-            if (!customLoggerInfo.isEmpty()){
+            if (!customLoggerInfos.isEmpty()){
                 switch (type){
                     case ARG:
-                        loggers = customLoggerInfo.stream()
+                        loggers = customLoggerInfos.stream()
                                 .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.ARG)
                                         && loggerInfo.getMethodPart().getArgNum().equals(argNum[0]))
                                 .collect(Collectors.toSet());
@@ -131,7 +197,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
                         }
                         break;
                     case RET:
-                        loggers = customLoggerInfo.stream()
+                        loggers = customLoggerInfos.stream()
                                 .filter(loggerInfo -> loggerInfo.getMethodPart().getType().equals(LoggableMethodPart.Type.RET))
                                 .collect(Collectors.toSet());
                         if (loggers.isEmpty()){
@@ -151,7 +217,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
+    public Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo, Set<CustomToStringInfo> customToStringInfos) {
 //        if (result == null) {
 //            return RETURNING + method.getName() + "():" + asString(result);
 //        }
@@ -160,7 +226,8 @@ abstract class AbstractLogAdapter implements LogAdapter {
                 .append(" { ")
                 .append(
                         asString(result,
-                                selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.RET)))
+                                selectCustomLogger(customLoggerInfo, LoggableMethodPart.Type.RET),
+                                selectCustomToStringMethod(customToStringInfos, LoggableMethodPart.Type.RET)))
                 .append(" } ");
         return buff.toString();
     }
@@ -179,7 +246,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
         return buff.toString();
     }
 
-    protected abstract String asString(Object value, CustomLogger customLogger);
+    protected abstract String asString(Object value, CustomLogger customLogger, String customToString);
 
 
     public void setArgDelimiter(String argDelimiter) {

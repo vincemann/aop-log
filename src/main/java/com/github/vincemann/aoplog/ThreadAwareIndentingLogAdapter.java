@@ -55,8 +55,8 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfo) {
-        String msg = (String) super.toMessage(method, beanName, args, argumentDescriptor, customLoggerInfo);
+    public Object toMessage(Method method, String beanName, Object[] args, ArgumentDescriptor argumentDescriptor, Set<CustomLoggerInfo> customLoggerInfos, Set<CustomToStringInfo> customToStringInfos) {
+        String msg = (String) super.toMessage(method, beanName, args, argumentDescriptor, customLoggerInfos, customToStringInfos);
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException) {
             thread_openException.put(Thread.currentThread(), Boolean.FALSE);
@@ -73,13 +73,13 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
     }
 
     @Override
-    public Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo) {
+    public Object toMessage(Method method, String beanName, int argCount, Object result, Set<CustomLoggerInfo> customLoggerInfo,Set<CustomToStringInfo> customToStringInfos) {
         Boolean openException = thread_openException.getOrDefault(Thread.currentThread(), Boolean.FALSE);
         if (openException) {
             log.trace("Found open exception, but logging result so it was catched by: " + method);
         }
         thread_openException.put(Thread.currentThread(), Boolean.FALSE);
-        String msg = (String) super.toMessage(method, beanName, argCount, result,customLoggerInfo);
+        String msg = (String) super.toMessage(method, beanName, argCount, result,customLoggerInfo,customToStringInfos);
         removeFromCallStack(method);
         int openMethodCalls = getCallStack().size();
         String formattedMsg = formatResult(msg, beanName, openMethodCalls);
@@ -172,7 +172,7 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 
 
     @Override
-    protected String asString(Object value, CustomLogger customLogger) {
-        return super.asString(value, customLogger);
+    protected String asString(Object value, CustomLogger customLogger, String customToString) {
+        return super.asString(value, customLogger, customToString);
     }
 }

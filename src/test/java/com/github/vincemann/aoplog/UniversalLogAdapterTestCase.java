@@ -30,12 +30,12 @@ public class UniversalLogAdapterTestCase {
 
     @Test
     public void testAsStringNull() throws Exception {
-        assertEquals("NIL", logAdapter.asString(null, null));
+        assertEquals("NIL", logAdapter.asString(null, null, null));
     }
 
     @Test
     public void testAsStringObject() throws Exception {
-        assertEquals("Object[]", logAdapter.asString(new Object(), null));
+        assertEquals("Object[]", logAdapter.asString(new Object(), null, null));
     }
 
     @Test
@@ -44,10 +44,10 @@ public class UniversalLogAdapterTestCase {
             private String s;
             private String[] arr = new String[]{null};
         }
-        assertEquals("NullRef[s=NIL;arr={NIL}]", logAdapter.asString(new NullRef(), null));
+        assertEquals("NullRef[s=NIL;arr={NIL}]", logAdapter.asString(new NullRef(), null, null));
 
         logAdapter = new UniversalLogAdapter(true, null, false);
-        assertEquals("NullRef[arr={NIL}]", logAdapter.asString(new NullRef(), null));
+        assertEquals("NullRef[arr={NIL}]", logAdapter.asString(new NullRef(), null, null));
     }
 
     @Test
@@ -55,24 +55,24 @@ public class UniversalLogAdapterTestCase {
         class Int {
             private int i = 1;
         }
-        assertEquals("Int[i=1]", logAdapter.asString(new Int(), null));
+        assertEquals("Int[i=1]", logAdapter.asString(new Int(), null, null));
 
         class NamedInt extends Int {
             private String name = "s";
         }
-        assertEquals("NamedInt[name=s;i=1]", logAdapter.asString(new NamedInt(), null));
+        assertEquals("NamedInt[name=s;i=1]", logAdapter.asString(new NamedInt(), null, null));
     }
 
     @Test
     public void testAsStringArray() throws Exception {
-        assertEquals("int[][{1,2}]", logAdapter.asString(new int[]{1, 2}, null));
-        assertEquals("int[][][{{1},{2}}]", logAdapter.asString(new int[][]{{1}, {2}}, null));
+        assertEquals("int[][{1,2}]", logAdapter.asString(new int[]{1, 2}, null, null));
+        assertEquals("int[][][{{1},{2}}]", logAdapter.asString(new int[][]{{1}, {2}}, null, null));
     }
 
     @Test
     public void testAsStringCollection() throws Exception {
         List<Integer> collection = new ArrayList<Integer>(Arrays.asList(1, 2));
-        assertEquals("ArrayList[{1,2}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{1,2}]", logAdapter.asString(collection, null, null));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class UniversalLogAdapterTestCase {
         Map<String, Integer> map = new LinkedHashMap<String, Integer>();
         map.put("s1", 1);
         map.put("s2", 2);
-        assertEquals("LinkedHashMap[{s1=1,s2=2}]", logAdapter.asString(map, null));
+        assertEquals("LinkedHashMap[{s1=1,s2=2}]", logAdapter.asString(map, null, null));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class UniversalLogAdapterTestCase {
             private CycleItself c = this;
         }
         CycleItself value = new CycleItself();
-        assertEquals("CycleItself[c=CycleItself@" + identityHashCode(value) + "]", logAdapter.asString(value, null));
+        assertEquals("CycleItself[c=CycleItself@" + identityHashCode(value) + "]", logAdapter.asString(value, null, null));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class UniversalLogAdapterTestCase {
         }
         CycleItselfInArr value = new CycleItselfInArr();
         String hash = Integer.toHexString(System.identityHashCode(value));
-        assertEquals("CycleItselfInArr[c={CycleItselfInArr@" + hash + "}]", logAdapter.asString(value, null));
+        assertEquals("CycleItselfInArr[c={CycleItselfInArr@" + hash + "}]", logAdapter.asString(value, null, null));
     }
 
 
@@ -115,7 +115,7 @@ public class UniversalLogAdapterTestCase {
             }
         }
         CycleInArr value = new CycleInArr();
-        assertEquals("CycleInArr[c={Object[]@" + identityHashCode(value.c) + "}]", logAdapter.asString(value, null));
+        assertEquals("CycleInArr[c={Object[]@" + identityHashCode(value.c) + "}]", logAdapter.asString(value, null, null));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class UniversalLogAdapterTestCase {
         arr[0] = arr;
         // correct Object[][{Object[]@17182c1}]
         // wrong   Object[][{{Object[]@601bb1}}]
-        assertEquals("Object[][{Object[]@" + identityHashCode(arr) + "}]", logAdapter.asString(arr, null));
+        assertEquals("Object[][{Object[]@" + identityHashCode(arr) + "}]", logAdapter.asString(arr, null, null));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class UniversalLogAdapterTestCase {
         CrossReference b = new CrossReference();
         a.c[0] = b;
         b.c[0] = a;
-        assertEquals("CrossReference[c={CrossReference@" + identityHashCode(b) + "}]", logAdapter.asString(a, null));
+        assertEquals("CrossReference[c={CrossReference@" + identityHashCode(b) + "}]", logAdapter.asString(a, null, null));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class UniversalLogAdapterTestCase {
                 c[1] = new Object[]{Boolean.TRUE};
             }
         }
-        assertEquals("SamePrimitive[c={true,{true}}]", logAdapter.asString(new SamePrimitive(), null));
+        assertEquals("SamePrimitive[c={true,{true}}]", logAdapter.asString(new SamePrimitive(), null, null));
     }
 
     @Test
@@ -178,7 +178,7 @@ public class UniversalLogAdapterTestCase {
             }
         };
         // memo: general equals in ToString.valuesInProgress leads to detect [a.c] as repeated [a] and incorrect out IdentityEquals[c=@126b249]
-        assertEquals("IdentityEquals[c=extended-IdentityEquals]", logAdapter.asString(a, null));
+        assertEquals("IdentityEquals[c=extended-IdentityEquals]", logAdapter.asString(a, null, null));
     }
 
     @Test
@@ -190,7 +190,7 @@ public class UniversalLogAdapterTestCase {
                 this.thing = thing;
             }
         }
-        assertEquals("Generic[thing=str]", logAdapter.asString(new Generic<String>("str"), null));
+        assertEquals("Generic[thing=str]", logAdapter.asString(new Generic<String>("str"), null, null));
     }
 
     @Test
@@ -201,33 +201,33 @@ public class UniversalLogAdapterTestCase {
                 return "abracadabra";
             }
         }
-        assertEquals("abracadabra", logAdapter.asString(new Foo(), null));
+        assertEquals("abracadabra", logAdapter.asString(new Foo(), null, null));
 
         class Bar {
             private Foo name = new Foo();
         }
-        assertEquals("Bar[name=abracadabra]", logAdapter.asString(new Bar(), null));
+        assertEquals("Bar[name=abracadabra]", logAdapter.asString(new Bar(), null, null));
     }
 
     @Test
     public void testAsStringArrayCropping() throws Exception {
         int[][] array = {{1, 2, 3}, {4, 5, 6}};
-        assertEquals("int[][][{{1,2,3},{4,5,6}}]", logAdapter.asString(array, null));
+        assertEquals("int[][][{{1,2,3},{4,5,6}}]", logAdapter.asString(array, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 4, null, false);
-        assertEquals("int[][][{{1,2,3},{4,5,6}}]", logAdapter.asString(array, null));
+        assertEquals("int[][][{{1,2,3},{4,5,6}}]", logAdapter.asString(array, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 3, null, false);
-        assertEquals("int[][][{{1,2,3},{4,5,6}}]", logAdapter.asString(array, null));
+        assertEquals("int[][][{{1,2,3},{4,5,6}}]", logAdapter.asString(array, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 2, null, false);
-        assertEquals("int[][][{{1,2,..<size=3>..},{4,5,..<size=3>..}}]", logAdapter.asString(array, null));
+        assertEquals("int[][][{{1,2,..<size=3>..},{4,5,..<size=3>..}}]", logAdapter.asString(array, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 1, null, false);
-        assertEquals("int[][][{{1,..<size=3>..},..<size=2>..}]", logAdapter.asString(array, null));
+        assertEquals("int[][][{{1,..<size=3>..},..<size=2>..}]", logAdapter.asString(array, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 0, null, false);
-        assertEquals("int[][][{..<size=2>..}]", logAdapter.asString(array, null));
+        assertEquals("int[][][{..<size=2>..}]", logAdapter.asString(array, null, null));
     }
 
     @Test
@@ -237,22 +237,22 @@ public class UniversalLogAdapterTestCase {
         List<List<Integer>> collection = new ArrayList<List<Integer>>();
         collection.add(listA);
         collection.add(listB);
-        assertEquals("ArrayList[{{1,2,3},{4,5,6}}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{{1,2,3},{4,5,6}}]", logAdapter.asString(collection, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 4, null, false);
-        assertEquals("ArrayList[{{1,2,3},{4,5,6}}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{{1,2,3},{4,5,6}}]", logAdapter.asString(collection, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 3, null, false);
-        assertEquals("ArrayList[{{1,2,3},{4,5,6}}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{{1,2,3},{4,5,6}}]", logAdapter.asString(collection, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 2, null, false);
-        assertEquals("ArrayList[{{1,2,..<size=3>..},{4,5,..<size=3>..}}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{{1,2,..<size=3>..},{4,5,..<size=3>..}}]", logAdapter.asString(collection, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 1, null, false);
-        assertEquals("ArrayList[{{1,..<size=3>..},..<size=2>..}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{{1,..<size=3>..},..<size=2>..}]", logAdapter.asString(collection, null, null));
 
         logAdapter = new UniversalLogAdapter(false, 0, null, false);
-        assertEquals("ArrayList[{..<size=2>..}]", logAdapter.asString(collection, null));
+        assertEquals("ArrayList[{..<size=2>..}]", logAdapter.asString(collection, null, null));
     }
 
 }

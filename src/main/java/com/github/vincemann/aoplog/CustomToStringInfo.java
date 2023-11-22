@@ -1,7 +1,5 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.CustomLogger;
-import com.github.vincemann.aoplog.api.annotation.CustomToString;
 import lombok.*;
 
 @Builder
@@ -15,8 +13,4 @@ public class CustomToStringInfo {
     private String methodName;
     private LoggableMethodPart methodPart;
 
-    public CustomToStringInfo(CustomToString toString) {
-        this.methodName = toString.toStringMethod();
-        this.methodPart = LoggableMethodPart.from(toString.key());
-    }
 }
