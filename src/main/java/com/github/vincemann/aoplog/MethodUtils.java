@@ -2,6 +2,7 @@ package com.github.vincemann.aoplog;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public class MethodUtils {
             return cached;
         }
 
-        for (Class<?> classInHierarchy : ClassUtils.getClassHierarchy(clazz)) {
+        for (Class<?> classInHierarchy : ClassUtils.hierarchy(clazz, ClassUtils.Interfaces.INCLUDE)) {
             try {
                 Method result = findDeclaredMethod(classInHierarchy, methodName, argTypes);
                 declaredCache.put(methodIdentifier,result);

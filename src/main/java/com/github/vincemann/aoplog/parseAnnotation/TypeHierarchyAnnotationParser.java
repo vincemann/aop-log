@@ -4,6 +4,7 @@ import com.github.vincemann.aoplog.MethodUtils;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -13,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.github.vincemann.aoplog.ClassUtils.getClassHierarchy;
 import static com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo.IS_NULL;
 
 //todo cache all
@@ -103,7 +103,7 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
             return nullAwareCached(cached);
         }
 
-        for (Class<?> type : getClassHierarchy(clazz)) {
+        for (Class<?> type : ClassUtils.hierarchy(clazz, ClassUtils.Interfaces.INCLUDE)) {
             try {
                 Method methodInType = /*type.getDeclaredMethod(methodName,argTypes);*/
                         MethodUtils.findDeclaredMethod(type,methodName,argTypes);
@@ -130,7 +130,7 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
         AnnotationInfo<? extends Annotation> cached = classCache.get(cacheInfo);
         if (cached != null)
             return nullAwareCached(cached);
-        for (Class<?> type : getClassHierarchy(clazz)) {
+        for (Class<?> type : ClassUtils.hierarchy(clazz, ClassUtils.Interfaces.INCLUDE)) {
             A annotation = type.getDeclaredAnnotation(annotationType);
             if (annotation!=null){
                 AnnotationInfo<A> result = new AnnotationInfo<>(annotation, type);
