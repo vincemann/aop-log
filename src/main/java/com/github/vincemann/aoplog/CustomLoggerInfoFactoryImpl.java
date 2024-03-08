@@ -1,7 +1,6 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.CustomLogger;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -9,7 +8,6 @@ import org.springframework.context.ApplicationContextAware;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
 public class CustomLoggerInfoFactoryImpl implements CustomLoggerInfoFactory, ApplicationContextAware {
 
 

@@ -1,7 +1,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
 import com.google.common.collect.Sets;
 
 import java.util.HashSet;

@@ -6,9 +6,9 @@
 package com.github.vincemann.aoplog.config;
 
 import com.github.vincemann.aoplog.SimpleLogAdapter;
-import com.github.vincemann.aoplog.StubAppender;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
+//import com.github.vincemann.aoplog.StubAppender;
+//import org.apache.log4j.LogManager;
+//import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -5,16 +5,11 @@
 
 package com.github.vincemann.aoplog;
 
-import lombok.Getter;
-import lombok.ToString;
-
 import java.lang.reflect.Method;
 
 /**
  * Method descriptor.
  */
-@Getter
-@ToString
 final class MethodDescriptor {
     private final InvocationDescriptor invocationDescriptor;
     private final ArgumentDescriptor argumentDescriptor;
@@ -28,4 +23,29 @@ final class MethodDescriptor {
         this.method = method;
     }
 
+    @Override
+    public String toString() {
+        return "MethodDescriptor{" +
+                "invocationDescriptor=" + invocationDescriptor +
+                ", argumentDescriptor=" + argumentDescriptor +
+                ", exceptionDescriptor=" + exceptionDescriptor +
+                ", method=" + method +
+                '}';
+    }
+
+    public InvocationDescriptor getInvocationDescriptor() {
+        return invocationDescriptor;
+    }
+
+    public ArgumentDescriptor getArgumentDescriptor() {
+        return argumentDescriptor;
+    }
+
+    public ExceptionDescriptor getExceptionDescriptor() {
+        return exceptionDescriptor;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
 }

@@ -1,21 +1,20 @@
 package com.github.vincemann.aoplog;
 
-import com.github.vincemann.aoplog.api.*;
-
+import com.github.vincemann.aoplog.annotation.AnnotationInfo;
+import com.github.vincemann.aoplog.annotation.AnnotationParser;
+import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.api.IBeanNameAware;
 import com.github.vincemann.aoplog.api.annotation.CustomLogger;
 import com.github.vincemann.aoplog.api.annotation.CustomToString;
 import com.github.vincemann.aoplog.api.annotation.LogException;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
-import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -25,22 +24,19 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
-import com.github.vincemann.aoplog.parseAnnotation.AnnotationParser;
 import org.springframework.util.ReflectionUtils;
-
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 @Aspect
-@NoArgsConstructor
-@Slf4j
 public class ProxyAwareAopLogger implements InitializingBean {
+
+    private final Log log = LogFactory.getLog(ProxyAwareAopLogger.class);
 
     private final LocalVariableTableParameterNameDiscoverer localVariableNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
     private final ExceptionResolver exceptionResolver = new ExceptionResolver();
@@ -62,6 +58,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
         this.invocationDescriptorFactory = invocationDescriptorFactory;
         this.customLoggerInfoFactory = customLoggerInfoFactory;
         this.methodFilters.addAll(Lists.newArrayList(methodFilters));
+    }
+
+    public ProxyAwareAopLogger() {
     }
 
     @Override
@@ -165,9 +164,7 @@ public class ProxyAwareAopLogger implements InitializingBean {
         }
     }
 
-    @EqualsAndHashCode
-    @Getter
-    @ToString
+
     private static class LoggedMethodIdentifier {
         private String name;
         private Class<?>[] argTypes;
@@ -178,10 +175,45 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.argTypes = method.getParameterTypes();
             this.targetClass = targetClass;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+
+            if (!(o instanceof LoggedMethodIdentifier)) return false;
+
+            LoggedMethodIdentifier that = (LoggedMethodIdentifier) o;
+
+            return new EqualsBuilder().append(getName(), that.getName()).append(getArgTypes(), that.getArgTypes()).append(getTargetClass(), that.getTargetClass()).isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(17, 37).append(getName()).append(getArgTypes()).append(getTargetClass()).toHashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "LoggedMethodIdentifier{" +
+                    "name='" + name + '\'' +
+                    ", argTypes=" + Arrays.toString(argTypes) +
+                    ", targetClass=" + targetClass +
+                    '}';
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Class<?>[] getArgTypes() {
+            return argTypes;
+        }
+
+        public Class<?> getTargetClass() {
+            return targetClass;
+        }
     }
 
-    @Getter
-    @AllArgsConstructor
     public class LoggedMethodCall {
         Method method;
         Class<?> targetClass;
@@ -210,6 +242,21 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
             this.argumentDescriptor = methodDescriptor.getArgumentDescriptor();
             this.logger = logAdapter.getLog(targetClass);
+        }
+
+        public LoggedMethodCall(Method method, Class<?> targetClass, String beanName, Class<?> logClass, Object[] args, MethodDescriptor methodDescriptor, ArgumentDescriptor argumentDescriptor, ExceptionDescriptor exceptionDescriptor, InvocationDescriptor invocationDescriptor, ProceedingJoinPoint joinPoint, Log logger, Object result) {
+            this.method = method;
+            this.targetClass = targetClass;
+            this.beanName = beanName;
+            this.logClass = logClass;
+            this.args = args;
+            this.methodDescriptor = methodDescriptor;
+            this.argumentDescriptor = argumentDescriptor;
+            this.exceptionDescriptor = exceptionDescriptor;
+            this.invocationDescriptor = invocationDescriptor;
+            this.joinPoint = joinPoint;
+            this.logger = logger;
+            this.result = result;
         }
 
         protected String findBeanName(JoinPoint joinPoint) {
@@ -339,9 +386,85 @@ public class ProxyAwareAopLogger implements InitializingBean {
 //        public String toString() {
 //            return LazyInitLogUtils.toString(this);
 //        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public Class<?> getTargetClass() {
+            return targetClass;
+        }
+
+        public String getBeanName() {
+            return beanName;
+        }
+
+        public Class<?> getLogClass() {
+            return logClass;
+        }
+
+        public Object[] getArgs() {
+            return args;
+        }
+
+        public MethodDescriptor getMethodDescriptor() {
+            return methodDescriptor;
+        }
+
+        public ArgumentDescriptor getArgumentDescriptor() {
+            return argumentDescriptor;
+        }
+
+        public ExceptionDescriptor getExceptionDescriptor() {
+            return exceptionDescriptor;
+        }
+
+        public InvocationDescriptor getInvocationDescriptor() {
+            return invocationDescriptor;
+        }
+
+        public ProceedingJoinPoint getJoinPoint() {
+            return joinPoint;
+        }
+
+        public Log getLogger() {
+            return logger;
+        }
+
+        public Object getResult() {
+            return result;
+        }
     }
 
+    public LocalVariableTableParameterNameDiscoverer getLocalVariableNameDiscoverer() {
+        return localVariableNameDiscoverer;
+    }
 
+    public ExceptionResolver getExceptionResolver() {
+        return exceptionResolver;
+    }
 
+    public List<MethodFilter> getMethodFilters() {
+        return methodFilters;
+    }
 
+    public LogAdapter getLogAdapter() {
+        return logAdapter;
+    }
+
+    public Map<Severity, LogStrategy> getLogStrategies() {
+        return logStrategies;
+    }
+
+    public AnnotationParser getAnnotationParser() {
+        return annotationParser;
+    }
+
+    public InvocationDescriptorFactory getInvocationDescriptorFactory() {
+        return invocationDescriptorFactory;
+    }
+
+    public CustomLoggerInfoFactory getCustomLoggerInfoFactory() {
+        return customLoggerInfoFactory;
+    }
 }

@@ -6,8 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.LogException;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
-import lombok.ToString;
+import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +15,6 @@ import java.util.Map;
 /**
  * Method exceptions descriptor.
  */
-@ToString
 final class ExceptionDescriptor {
 
     private final Map<Class<? extends Exception>, ExceptionSeverity> exceptionSeverity;
@@ -73,8 +71,14 @@ final class ExceptionDescriptor {
             }
 
         }
-
     }
 
-
+    @Override
+    public String toString() {
+        return "ExceptionDescriptor{" +
+                "exceptionSeverity=" + exceptionSeverity +
+                ", exceptionAnnotationInfo=" + exceptionAnnotationInfo +
+                ", definedExceptions=" + getDefinedExceptions() +
+                '}';
+    }
 }

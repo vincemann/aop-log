@@ -1,4 +1,4 @@
-package com.github.vincemann.aoplog.parseAnnotation;
+package com.github.vincemann.aoplog.annotation;
 
 import org.springframework.lang.Nullable;
 

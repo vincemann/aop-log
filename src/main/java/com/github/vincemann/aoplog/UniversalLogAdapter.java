@@ -70,7 +70,7 @@ public class UniversalLogAdapter extends AbstractLogAdapter {
         if (customToString != null){
             try {
                 // custom toString must not have args
-                Method method = MethodUtils.findMethod(value.getClass(), customToString, new Class[]{});
+                Method method = GenericMatchMethodUtils.findMethod(value.getClass(), customToString, new Class[]{});
                 return (String) method.invoke(value);
             } catch (NoSuchMethodException e) {
                 throw new IllegalArgumentException("no method found with name: " + customToString + " on class: " + value.getClass());

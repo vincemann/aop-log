@@ -13,7 +13,7 @@
 
     <aop:aspectj-autoproxy/>
 
-    <bean class="com.github.vincemann.aoplog.parseAnnotation.TypeHierarchyAnnotationParser"/>
+    <bean class="com.github.vincemann.aoplog.annotation.TypeHierarchyAnnotationParser"/>
     <bean class="com.github.vincemann.aoplog.ProxyAwareAopLogger"/>
     <bean class="com.github.vincemann.aoplog.InvocationDescriptorFactoryImpl"/>
 

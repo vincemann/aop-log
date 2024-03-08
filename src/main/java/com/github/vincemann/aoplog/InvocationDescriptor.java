@@ -5,11 +5,9 @@
 
 package com.github.vincemann.aoplog;
 
+import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
 import com.github.vincemann.aoplog.api.annotation.LogConfig;
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
-import lombok.Getter;
-import lombok.ToString;
 import org.springframework.lang.Nullable;
 
 import java.util.Set;
@@ -17,8 +15,6 @@ import java.util.Set;
 /**
  * Method descriptor. With effective Severity and LogInfos.
  */
-@Getter
-@ToString
 final class InvocationDescriptor {
     private final Severity severity;
     @Nullable
@@ -36,5 +32,38 @@ final class InvocationDescriptor {
         this.classLogConfig = classLogConfig;
         this.customLoggerInfos = customLoggerInfos;
         this.customToStringInfos = customToStringInfos;
+    }
+
+    @Override
+    public String toString() {
+        return "InvocationDescriptor{" +
+                "severity=" + severity +
+                ", logInfo=" + logInfo +
+                ", classLogConfig=" + classLogConfig +
+                ", customLoggerInfos=" + customLoggerInfos +
+                ", customToStringInfos=" + customToStringInfos +
+                '}';
+    }
+
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    @Nullable
+    public SourceAwareAnnotationInfo<LogInteraction> getLogInfo() {
+        return logInfo;
+    }
+
+    @Nullable
+    public LogConfig getClassLogConfig() {
+        return classLogConfig;
+    }
+
+    public Set<CustomLoggerInfo> getCustomLoggerInfos() {
+        return customLoggerInfos;
+    }
+
+    public Set<CustomToStringInfo> getCustomToStringInfos() {
+        return customToStringInfos;
     }
 }

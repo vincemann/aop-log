@@ -1,11 +1,7 @@
-package com.github.vincemann.aoplog.parseAnnotation;
+package com.github.vincemann.aoplog.annotation;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 import org.springframework.util.Assert;
 
-import javax.swing.plaf.PanelUI;
 import java.lang.annotation.Annotation;
 
 
@@ -13,8 +9,6 @@ import java.lang.annotation.Annotation;
  * Wrapper for Annotations including information about
  * where and in which context annotations were placed.
  */
-@Getter
-@ToString
 // dont use otherwise NULL will be equal all the time, when really the reference should be compared
 //@EqualsAndHashCode
 public class AnnotationInfo<A extends Annotation> {
@@ -44,6 +38,22 @@ public class AnnotationInfo<A extends Annotation> {
 
     public static boolean IS_NULL(AnnotationInfo instance){
         return instance.getAnnotation() == null && instance.getDeclaringClass() == null;
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotationInfo{" +
+                "annotation=" + annotation +
+                ", declaringClass=" + declaringClass +
+                '}';
+    }
+
+    public A getAnnotation() {
+        return annotation;
+    }
+
+    public Class<?> getDeclaringClass() {
+        return declaringClass;
     }
 }
 

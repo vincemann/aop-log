@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.LogException;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -35,7 +35,7 @@ public class ExceptionDescriptorTestCase {
             Method currMethod = method.getMethod();
             LogException logException = currMethod.getDeclaredAnnotation(LogException.class);
             methodExceptionDescriptor = logException==null? null : new ExceptionDescriptor.Builder(
-                    SourceAwareAnnotationInfo.<LogException>builder()
+                    SourceAwareAnnotationInfo.Builder.<LogException>builder()
                             .annotation(logException)
                             .classLevel(false)
                             .declaringClass(ExceptionDescriptorTestCase.class)
@@ -44,7 +44,7 @@ public class ExceptionDescriptorTestCase {
 
             LogException classLogException = ExceptionDescriptorTestCase.class.getDeclaredAnnotation(LogException.class);
             classExceptionDescriptor = classLogException==null? null : new ExceptionDescriptor.Builder(
-                    SourceAwareAnnotationInfo.<LogException>builder()
+                    SourceAwareAnnotationInfo.Builder.<LogException>builder()
                             .annotation(classLogException)
                             .classLevel(true)
                             .declaringClass(ExceptionDescriptorTestCase.class)

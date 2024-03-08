@@ -2,7 +2,7 @@ package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
 import com.github.vincemann.aoplog.api.annotation.LogConfig;
-import com.github.vincemann.aoplog.parseAnnotation.SourceAwareAnnotationInfo;
+import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
 import com.google.common.collect.Sets;
 
 import java.lang.reflect.Method;
@@ -50,7 +50,7 @@ public class LogConfigMethodFilter implements MethodFilter {
     // checks whether the annotated class or super classes of it, declared the called method
     private boolean isMethodDefinedInAnnotationClass(Method targetMethod, SourceAwareAnnotationInfo<LogInteraction> classLogInfo) {
         try {
-            MethodUtils.findMethod(classLogInfo.getDeclaringClass(),targetMethod.getName(),targetMethod.getParameterTypes());
+            GenericMatchMethodUtils.findMethod(classLogInfo.getDeclaringClass(),targetMethod.getName(),targetMethod.getParameterTypes());
             return true;
         } catch (NoSuchMethodException e) {
             return false;

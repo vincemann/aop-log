@@ -7,9 +7,6 @@ package com.github.vincemann.aoplog;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.easymock.EasyMock;
-import org.easymock.LogicalOperator;
-import org.easymock.internal.matchers.Compare;
 import org.junit.Assert;
 import org.mockito.ArgumentMatcher;
 
@@ -80,10 +77,6 @@ public final class TestSupportUtility {
 //        };
 ////        return EasyMock.cmp(expectedArray, ARRAY_EQUAL_COMPARATOR, LogicalOperator.EQUAL);
 //    }
-
-    public static Object reflectionEquals(Object expected) {
-        return EasyMock.cmp(expected, REFLECTION_COMPARATOR, LogicalOperator.EQUAL);
-    }
 
     public static ArgumentDescriptor createArgumentDescriptor(String[] argumentNames, boolean... indexes) throws NoSuchMethodException,
             IllegalAccessException, InvocationTargetException, InstantiationException {

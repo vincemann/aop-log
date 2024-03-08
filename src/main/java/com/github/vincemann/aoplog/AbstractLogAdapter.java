@@ -6,9 +6,8 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.CustomLogger;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -142,32 +141,6 @@ abstract class AbstractLogAdapter implements LogAdapter {
         return customToStringMethod;
     }
 
-
-    // use this class so I can express a cache hit, that represents null
-    // -> I want to also cache the result, that nothing was found
-    @AllArgsConstructor
-    @Getter
-    private static class CacheHit<T>{
-        private T element;
-    }
-
-    @EqualsAndHashCode
-    @AllArgsConstructor
-    private static class CustomLoggerCacheKey{
-        Set<CustomLoggerInfo> customLoggerInfos;
-        LoggableMethodPart.Type type;
-        List<Integer> argNums;
-    }
-
-    @EqualsAndHashCode
-    @AllArgsConstructor
-    private static class CustomToStringCacheKey{
-        Set<CustomToStringInfo> customToStringInfos;
-        LoggableMethodPart.Type type;
-        List<Integer> argNums;
-
-    }
-
     // returns null if none found
     protected CustomLogger selectCustomLogger(Set<CustomLoggerInfo> customLoggerInfos, LoggableMethodPart.Type type, Integer... argNum){
         CustomLoggerCacheKey cacheKey = new CustomLoggerCacheKey(customLoggerInfos, type, List.of(argNum));
@@ -251,5 +224,75 @@ abstract class AbstractLogAdapter implements LogAdapter {
 
     public void setArgDelimiter(String argDelimiter) {
         this.argDelimiter = argDelimiter;
+    }
+
+    // use this class so I can express a cache hit, that represents null
+    // -> I want to also cache the result, that nothing was found
+    private static class CacheHit<T>{
+        private T element;
+
+        public CacheHit(T element) {
+            this.element = element;
+        }
+
+        public T getElement() {
+            return element;
+        }
+    }
+
+    private static class CustomLoggerCacheKey{
+        Set<CustomLoggerInfo> customLoggerInfos;
+        LoggableMethodPart.Type type;
+        List<Integer> argNums;
+
+        public CustomLoggerCacheKey(Set<CustomLoggerInfo> customLoggerInfos, LoggableMethodPart.Type type, List<Integer> argNums) {
+            this.customLoggerInfos = customLoggerInfos;
+            this.type = type;
+            this.argNums = argNums;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+
+            if (!(o instanceof CustomLoggerCacheKey)) return false;
+
+            CustomLoggerCacheKey cacheKey = (CustomLoggerCacheKey) o;
+
+            return new EqualsBuilder().append(customLoggerInfos, cacheKey.customLoggerInfos).append(type, cacheKey.type).append(argNums, cacheKey.argNums).isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(17, 37).append(customLoggerInfos).append(type).append(argNums).toHashCode();
+        }
+    }
+
+    private static class CustomToStringCacheKey{
+        Set<CustomToStringInfo> customToStringInfos;
+        LoggableMethodPart.Type type;
+        List<Integer> argNums;
+
+        public CustomToStringCacheKey(Set<CustomToStringInfo> customToStringInfos, LoggableMethodPart.Type type, List<Integer> argNums) {
+            this.customToStringInfos = customToStringInfos;
+            this.type = type;
+            this.argNums = argNums;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+
+            if (!(o instanceof CustomToStringCacheKey)) return false;
+
+            CustomToStringCacheKey that = (CustomToStringCacheKey) o;
+
+            return new EqualsBuilder().append(customToStringInfos, that.customToStringInfos).append(type, that.type).append(argNums, that.argNums).isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(17, 37).append(customToStringInfos).append(type).append(argNums).toHashCode();
+        }
     }
 }

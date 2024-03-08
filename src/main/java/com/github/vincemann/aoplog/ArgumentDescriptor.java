@@ -6,19 +6,19 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.LogParam;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.core.ParameterNameDiscoverer;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
  * Method arguments descriptor.
  */
-@ToString
-@EqualsAndHashCode
+
 final class ArgumentDescriptor {
     private final BitSet loggedValueIndexes;
     private final String[] names;
@@ -44,6 +44,30 @@ final class ArgumentDescriptor {
      */
     public String[] getNames() {
         return names;
+    }
+
+    @Override
+    public String toString() {
+        return "ArgumentDescriptor{" +
+                "loggedValueIndexes=" + loggedValueIndexes +
+                ", names=" + Arrays.toString(names) +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof ArgumentDescriptor)) return false;
+
+        ArgumentDescriptor that = (ArgumentDescriptor) o;
+
+        return new EqualsBuilder().append(loggedValueIndexes, that.loggedValueIndexes).append(getNames(), that.getNames()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(loggedValueIndexes).append(getNames()).toHashCode();
     }
 
     /**

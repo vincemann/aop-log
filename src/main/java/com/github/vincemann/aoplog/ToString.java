@@ -5,7 +5,6 @@
 
 package com.github.vincemann.aoplog;
 
-import org.hibernate.LazyInitializationException;
 
 import java.lang.reflect.Array;
 import java.util.*;

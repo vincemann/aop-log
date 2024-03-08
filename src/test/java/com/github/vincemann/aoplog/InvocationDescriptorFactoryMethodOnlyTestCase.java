@@ -6,7 +6,7 @@
 package com.github.vincemann.aoplog;
 
 import com.github.vincemann.aoplog.api.annotation.LogInteraction;
-import com.github.vincemann.aoplog.parseAnnotation.AnnotationInfo;
+import com.github.vincemann.aoplog.annotation.AnnotationInfo;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;

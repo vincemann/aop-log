@@ -1,9 +1,5 @@
 package com.github.vincemann.aoplog;
 
-import lombok.Getter;
-import org.aspectj.apache.bcel.generic.RET;
-
-@Getter
 public class LoggableMethodPart {
 
     enum Type {
@@ -32,4 +28,11 @@ public class LoggableMethodPart {
         return result;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public Integer getArgNum() {
+        return argNum;
+    }
 }

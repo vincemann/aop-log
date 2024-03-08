@@ -1,6 +1,5 @@
 package com.github.vincemann.aoplog.api;
 
-import org.springframework.test.util.AopTestUtils;
 
 
 /**
