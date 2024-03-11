@@ -3,7 +3,6 @@ package com.github.vincemann.aoplog;
 import com.github.vincemann.aoplog.annotation.AnnotationInfo;
 import com.github.vincemann.aoplog.annotation.AnnotationParser;
 import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
-import com.github.vincemann.aoplog.api.IBeanNameAware;
 import com.github.vincemann.aoplog.api.annotation.CustomLogger;
 import com.github.vincemann.aoplog.api.annotation.CustomToString;
 import com.github.vincemann.aoplog.api.annotation.LogException;
@@ -20,9 +19,13 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.util.ReflectionUtils;
 
@@ -34,7 +37,7 @@ import java.util.concurrent.ConcurrentMap;
 
 
 @Aspect
-public class ProxyAwareAopLogger implements InitializingBean {
+public class ProxyAwareAopLogger implements InitializingBean, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(ProxyAwareAopLogger.class);
 
@@ -52,6 +55,8 @@ public class ProxyAwareAopLogger implements InitializingBean {
     private ConcurrentHashMap<Thread, LoggedMethodCall> thread_lastLoggedCall_map = new ConcurrentHashMap<>();
     private CustomLoggerInfoFactory customLoggerInfoFactory;
 
+    private ApplicationContext applicationContext;
+
     @Autowired
     public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, CustomLoggerInfoFactory customLoggerInfoFactory, MethodFilter... methodFilters) {
         this.annotationParser = annotationParser;
@@ -61,6 +66,11 @@ public class ProxyAwareAopLogger implements InitializingBean {
     }
 
     public ProxyAwareAopLogger() {
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -78,20 +88,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
         this.logAdapter = log;
     }
 
-    @Around("this(com.github.vincemann.aoplog.api.AopLoggable)")
+    @Around("target(com.github.vincemann.aoplog.api.AopLoggable)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
-
-
-//        log.trace("joinPoint matched: " + targetClass.getSimpleName()+" "+joinPoint.getSignature().getName());
         LoggedMethodCall loggedCall = new LoggedMethodCall(joinPoint);
         if (log.isDebugEnabled())
             log.debug("LoggedMethodCall:  " + loggedCall);
 
-
-//        Class<?> unmodifiedTargetClass = AopTestUtils.getUltimateTargetObject(joinPoint.getTarget()).getClass();
-//        if (!targetClass.equals(unmodifiedTargetClass)){
-//            log.info("Target class modified: " + unmodifiedTargetClass.getSimpleName() + " -> " + targetClass.getSimpleName());
-//        }
 
         if (isDuplicateProxyLogging(loggedCall)) {
             if (log.isDebugEnabled())
@@ -151,9 +153,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
     }
 
     //todo maybe need to be changed
-    private Method extractMethod(/*Class<?> targetClass, */ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
+    private Method extractMethod(Class<?> targetClass, ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Class<?> targetClass = joinPoint.getTarget().getClass();
+//        Class<?> targetClass = joinPoint.getTarget().getClass();
         // signature.getMethod() points to method declared in interface. it is not suit to discover arg names and arg annotations
         // see AopProxyUtils: org.springframework.cache.interceptor.CacheAspectSupport#execute(CacheAspectSupport.Invoker, Object, Method, Object[])
 //        Class<?> targetClass = joinPoint.getTarget().getClass();
@@ -234,9 +236,9 @@ public class ProxyAwareAopLogger implements InitializingBean {
         LoggedMethodCall(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
             this.joinPoint = joinPoint;
             this.args = joinPoint.getArgs();
-            this.targetClass = AopUtils.getTargetClass(joinPoint.getTarget());
-            this.method = extractMethod(/*targetClass,*/joinPoint);
-            this.beanName = findBeanName(joinPoint);
+            this.targetClass = AopProxyUtils.ultimateTargetClass(joinPoint.getTarget());
+            this.method = extractMethod(targetClass,joinPoint);
+            this.beanName = findBeanName(targetClass);
             this.methodDescriptor = createMethodDescriptor();
             this.exceptionDescriptor = methodDescriptor.getExceptionDescriptor();
             this.invocationDescriptor = methodDescriptor.getInvocationDescriptor();
@@ -259,11 +261,12 @@ public class ProxyAwareAopLogger implements InitializingBean {
             this.result = result;
         }
 
-        protected String findBeanName(JoinPoint joinPoint) {
-            if (joinPoint.getTarget() instanceof IBeanNameAware) {
-                return ((IBeanNameAware) joinPoint.getTarget()).getBeanName();
-            }
-            return null;
+        protected String findBeanName(Class<?> targetClass) {
+            String[] allBeanNames = applicationContext.getBeanNamesForType(targetClass, true, false);
+            if (allBeanNames.length == 1)
+                return allBeanNames[0];
+            else
+                return "";
         }
 
         private Set<CustomToStringInfo> parseCustomToStringInfos() {
