@@ -16,7 +16,7 @@ public class GlobalRegExMethodFilter implements MethodFilter {
     private Set<String> ignoreRegEx = new HashSet<>();
 
     public GlobalRegExMethodFilter(String... regEx) {
-        ignoreRegEx.addAll(Sets.newHashSet(regEx));
+        ignoreRegEx.addAll(Set.of(regEx));
     }
 
     @Override

@@ -58,7 +58,7 @@ public class TypeHierarchyAnnotationParser implements AnnotationParser {
         try {
             Method methodInType = /*type.getDeclaredMethod(methodName,argTypes);*/
                     GenericMatchMethodUtils.findDeclaredMethod(clazz,methodName,argTypes);
-            Set<A> annotations = Sets.newHashSet(List.of(methodInType.getDeclaredAnnotationsByType(annotationType)));
+            Set<A> annotations = Set.of(methodInType.getDeclaredAnnotationsByType(annotationType));
             if (!annotations.isEmpty()) {
                 result.addAll(annotations.stream().map(a -> new AnnotationInfo<>(a, clazz)).collect(Collectors.toSet()));
             }

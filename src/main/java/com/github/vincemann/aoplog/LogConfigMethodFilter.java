@@ -6,6 +6,7 @@ import com.github.vincemann.aoplog.annotation.SourceAwareAnnotationInfo;
 import com.google.common.collect.Sets;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import static com.github.vincemann.aoplog.Patterns.GETTER_REGEX;
 import static com.github.vincemann.aoplog.Patterns.SETTER_REGEX;
@@ -34,7 +35,7 @@ public class LogConfigMethodFilter implements MethodFilter {
                 if (classLogConfig.ignoreSetters() && (methodName.matches(SETTER_REGEX))) {
                     return false;
                 }
-                if (Sets.newHashSet(classLogConfig.ignoredRegEx()).parallelStream().anyMatch(methodName::matches)){
+                if (Set.of(classLogConfig.ignoredRegEx()).parallelStream().anyMatch(methodName::matches)){
                     //method is matched regEx -> ignored
                     return false;
                 }
