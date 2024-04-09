@@ -57,7 +57,6 @@ public class ProxyAwareAopLogger implements InitializingBean, ApplicationContext
 
     private ApplicationContext applicationContext;
 
-    @Autowired
     public ProxyAwareAopLogger(AnnotationParser annotationParser, InvocationDescriptorFactory invocationDescriptorFactory, CustomLoggerInfoFactory customLoggerInfoFactory, MethodFilter... methodFilters) {
         this.annotationParser = annotationParser;
         this.invocationDescriptorFactory = invocationDescriptorFactory;

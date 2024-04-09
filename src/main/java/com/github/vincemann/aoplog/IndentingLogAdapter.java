@@ -14,9 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * adds indentation depending on prior logged msg calls on same thread.
  * -> makes call stack of logged methods visible
  */
-public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
+public class IndentingLogAdapter extends UniversalLogAdapter {
 
-    private final Log log = LogFactory.getLog(ThreadAwareIndentingLogAdapter.class);
+    private final Log log = LogFactory.getLog(IndentingLogAdapter.class);
     private static final String EMPTY_LINE = " " + System.lineSeparator();
     private final ConcurrentHashMap<Thread, Stack<Method>> thread_callStack = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Thread, Boolean> thread_openException = new ConcurrentHashMap<>();
@@ -42,11 +42,11 @@ public class ThreadAwareIndentingLogAdapter extends UniversalLogAdapter {
 //        }
 //    }
 
-    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
+    public IndentingLogAdapter(boolean skipNullFields, int cropThreshold, Set<String> excludeFieldNames, boolean forceReflection) {
         super(skipNullFields, cropThreshold, excludeFieldNames, forceReflection);
     }
 
-    public ThreadAwareIndentingLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection) {
+    public IndentingLogAdapter(boolean skipNullFields, Set<String> excludeFieldNames, boolean forceReflection) {
         super(skipNullFields, excludeFieldNames, forceReflection);
     }
 

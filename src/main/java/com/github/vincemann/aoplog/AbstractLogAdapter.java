@@ -26,7 +26,7 @@ abstract class AbstractLogAdapter implements LogAdapter {
     protected static final String CALLING = "     ->  CALLING: ";
     protected static final String RETURNING = "     <-  RETURNING: ";
     protected static final String THROWING = "     <-  THROWING: ";
-    protected String argDelimiter = System.lineSeparator() + " |==| " + System.lineSeparator();
+    protected String argDelimiter = " |==| ";
 
     private static final Map<CustomLoggerCacheKey,CacheHit<CustomLogger>> CUSTOM_LOGGER_CACHE = new HashMap<>();
     private static final Map<CustomToStringCacheKey,CacheHit<String>> CUSTOM_TO_STRING_CACHE = new HashMap<>();
